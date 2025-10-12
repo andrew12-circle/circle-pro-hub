@@ -1,0 +1,56 @@
+{
+  "balances": [
+    {
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "points": 2500,
+      "currency": "CIRCLE_POINTS"
+    },
+    {
+      "userId": "123e4567-e89b-12d3-a456-426614174001",
+      "points": 5000,
+      "currency": "CIRCLE_POINTS"
+    }
+  ],
+  "transactions": [
+    {
+      "id": "txn-001",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "amount": 500,
+      "type": "earn",
+      "description": "Welcome bonus",
+      "createdAt": "2025-01-15T10:00:00Z"
+    },
+    {
+      "id": "txn-002",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "amount": 1000,
+      "type": "earn",
+      "description": "Referral reward",
+      "createdAt": "2025-02-01T14:30:00Z"
+    },
+    {
+      "id": "txn-003",
+      "userId": "123e4567-e89b-12d3-a456-426614174000",
+      "amount": 1000,
+      "type": "earn",
+      "description": "Service completion bonus",
+      "createdAt": "2025-03-10T09:15:00Z"
+    },
+    {
+      "id": "txn-004",
+      "userId": "123e4567-e89b-12d3-a456-426614174001",
+      "amount": 2000,
+      "type": "earn",
+      "description": "Welcome bonus",
+      "createdAt": "2025-01-20T11:00:00Z"
+    },
+    {
+      "id": "txn-005",
+      "userId": "123e4567-e89b-12d3-a456-426614174001",
+      "amount": 3000,
+      "type": "earn",
+      "description": "Quarterly bonus",
+      "createdAt": "2025-04-01T08:00:00Z"
+    }
+  ]
+}

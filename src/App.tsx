@@ -9,6 +9,7 @@ import Marketplace from "./pages/Marketplace";
 import Services from "./pages/Services";
 import ServiceDetail from "./pages/ServiceDetail";
 import Cart from "./pages/Cart";
+import Wallet from "./pages/Wallet";
 import Saved from "./pages/Saved";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
@@ -30,6 +31,7 @@ const App = () => {
             <Route path="/services" element={<Services />} />
             <Route path="/services/:id" element={<ServiceDetail />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/account/wallet" element={<Wallet />} />
             <Route path="/saved" element={<Saved />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin" element={<Admin />} />

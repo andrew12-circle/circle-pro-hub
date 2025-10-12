@@ -354,6 +354,14 @@ const Profile = () => {
                   <div className="flex items-center gap-2 text-sm">
                     <Crown className="h-4 w-4 text-yellow-600" />
                     <span className="font-medium">{profile.points} Points</span>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="h-auto p-0 text-xs"
+                      onClick={() => navigate("/account/wallet")}
+                    >
+                      View Wallet →
+                    </Button>
                   </div>
                 </div>
               </div>

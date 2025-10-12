@@ -14,11 +14,23 @@ export interface PointsTransaction {
 }
 
 export async function getBalance(userId: string): Promise<PointsBalance | null> {
-  // TODO: Implement
-  throw new Error("Not implemented");
+  const response = await fetch('/fixtures/wallet.json');
+  const data = await response.json();
+  
+  const balance = data.balances.find((b: PointsBalance) => b.userId === userId);
+  return balance || null;
 }
 
 export async function getTransactions(userId: string): Promise<PointsTransaction[]> {
-  // TODO: Implement
-  throw new Error("Not implemented");
+  const response = await fetch('/fixtures/wallet.json');
+  const data = await response.json();
+  
+  const transactions = data.transactions
+    .filter((t: any) => t.userId === userId)
+    .map((t: any) => ({
+      ...t,
+      createdAt: new Date(t.createdAt)
+    }));
+  
+  return transactions;
 }

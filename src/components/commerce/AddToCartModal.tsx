@@ -23,6 +23,8 @@ import { useCart } from "@/lib/cartStore";
 import { useProMember } from "@/hooks/use-pro-member";
 import { featureFlags } from "@/lib/featureFlags";
 import { useToast } from "@/hooks/use-toast";
+import { getBalance, PointsBalance } from "@/data/wallet";
+import { supabase } from "@/integrations/supabase/client";
 import { getEligiblePartners } from "@/data/vendors";
 import { useLocation } from "@/hooks/use-location";
 import { PartnerPreviewSheet } from "./PartnerPreviewSheet";
@@ -60,16 +62,44 @@ export function AddToCartModal({
   const [loadingPartners, setLoadingPartners] = useState(false);
   const [previewPartner, setPreviewPartner] = useState<VendorPartner | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [walletBalance, setWalletBalance] = useState<PointsBalance | null>(null);
+  const [loadingWallet, setLoadingWallet] = useState(true);
 
+  // Load wallet balance
   useEffect(() => {
-    if (proLoading) return;
+    const loadWallet = async () => {
+      setLoadingWallet(true);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const balance = await getBalance(session.user.id);
+          setWalletBalance(balance);
+        }
+      } catch (error) {
+        console.error("Error loading wallet:", error);
+      } finally {
+        setLoadingWallet(false);
+      }
+    };
+
+    if (open) {
+      loadWallet();
+    }
+  }, [open]);
+
+  // Auto-select best available pricing mode
+  useEffect(() => {
+    if (proLoading || loadingWallet) return;
     
+    // Priority: Pro > Points > Retail
     if (isPro && pricing.pro) {
       setSelectedMode("pro");
+    } else if (walletBalance && walletBalance.points > 0 && featureFlags.wallet) {
+      setSelectedMode("points");
     } else {
       setSelectedMode("retail");
     }
-  }, [isPro, proLoading, pricing.pro]);
+  }, [isPro, proLoading, pricing.pro, walletBalance, loadingWallet]);
 
   // Fetch eligible partners when Co-Pay mode is selected
   useEffect(() => {
@@ -125,10 +155,25 @@ export function AddToCartModal({
         return pricing.pro || pricing.retail;
       case "copay":
         return pricing.copay || pricing.retail;
+      case "points":
+        // For points, use retail as base but will be reduced by points
+        return pricing.retail;
       case "retail":
       default:
         return pricing.retail;
     }
+  };
+
+  // Calculate points cost (simple 1:1 ratio with cents, max available points)
+  const calculatePointsCost = () => {
+    if (!walletBalance) return 0;
+    const priceInCents = pricing.retail.amount * 100;
+    return Math.min(walletBalance.points, priceInCents);
+  };
+
+  const getPointsReduction = () => {
+    const pointsCost = calculatePointsCost();
+    return pointsCost / 100; // Convert points back to dollars
   };
 
   const handleAddToCart = () => {
@@ -144,12 +189,17 @@ export function AddToCartModal({
       return;
     }
 
+    const pointsCost = selectedMode === "points" ? calculatePointsCost() : undefined;
+    const reducedPrice = selectedMode === "points" 
+      ? { amount: selectedPrice.amount - getPointsReduction(), currency: selectedPrice.currency }
+      : selectedPrice;
+
     const pricingSelection: Omit<PricingSelection, never> = {
       serviceId,
       packageId,
       mode: selectedMode,
-      price: selectedPrice,
-      pointsCost: selectedMode === "points" ? undefined : undefined,
+      price: reducedPrice,
+      pointsCost,
       copayPartnerShare: selectedMode === "copay" ? pricing.copayWithVendor : undefined,
       userShare: selectedMode === "copay" ? pricing.copay : undefined,
       vendorPartnerId: selectedMode === "copay" ? selectedPartnerId || undefined : undefined,
@@ -396,29 +446,62 @@ export function AddToCartModal({
               </div>
             )}
 
+            {/* Points */}
             {featureFlags.wallet && (
-              <div className="flex items-start space-x-3 rounded-lg border p-4 opacity-50 cursor-not-allowed">
-                <RadioGroupItem value="points" id="points" disabled className="mt-1" />
-                <Label htmlFor="points" className="flex-1 cursor-not-allowed">
+              <div
+                className={`flex items-start space-x-3 rounded-lg border p-4 ${
+                  walletBalance && walletBalance.points > 0
+                    ? "cursor-pointer hover:bg-accent/50 transition-colors"
+                    : "opacity-50 cursor-not-allowed"
+                }`}
+              >
+                <RadioGroupItem
+                  value="points"
+                  id="points"
+                  disabled={!walletBalance || walletBalance.points === 0}
+                  className="mt-1"
+                />
+                <Label
+                  htmlFor="points"
+                  className={`flex-1 ${
+                    walletBalance && walletBalance.points > 0
+                      ? "cursor-pointer"
+                      : "cursor-not-allowed"
+                  }`}
+                >
                   <div className="flex items-center justify-between mb-1">
                     <div className="flex items-center gap-2">
                       <span className="font-semibold">Pay with Points</span>
                       <Coins className="h-4 w-4 text-yellow-600" />
-                      <Badge variant="secondary" className="text-xs">Coming Soon</Badge>
+                      {walletBalance && walletBalance.points > 0 && (
+                        <Badge variant="default" className="text-xs">
+                          {walletBalance.points.toLocaleString()} pts
+                        </Badge>
+                      )}
                     </div>
+                    {walletBalance && walletBalance.points > 0 && (
+                      <span className="text-xl font-bold text-yellow-600">
+                        {formatPrice(pricing.retail.amount - getPointsReduction())}
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Redeem your Circle Points for this service
+                    {walletBalance && walletBalance.points > 0
+                      ? "Redeem your Circle Points to reduce the cost"
+                      : "Earn points by completing services"}
                   </p>
-                  <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                    <Lock className="h-3 w-3" />
-                    <span>Insufficient points balance</span>
-                  </div>
+                  {(!walletBalance || walletBalance.points === 0) && (
+                    <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
+                      <Lock className="h-3 w-3" />
+                      <span>No points available</span>
+                    </div>
+                  )}
                 </Label>
               </div>
             )}
           </RadioGroup>
 
+          {/* Savings Display */}
           {selectedMode === "pro" && pricing.pro && pricing.proPctSavings && (
             <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-900">
               <TrendingDown className="h-5 w-5 text-green-600" />
@@ -428,6 +511,21 @@ export function AddToCartModal({
                 </p>
                 <p className="text-xs text-green-600 dark:text-green-500">
                   That's {pricing.proPctSavings}% off retail pricing
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Points Redemption Display */}
+          {selectedMode === "points" && walletBalance && walletBalance.points > 0 && (
+            <div className="flex items-center gap-2 p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-900">
+              <Coins className="h-5 w-5 text-yellow-600" />
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-yellow-700 dark:text-yellow-400">
+                  Redeeming {calculatePointsCost().toLocaleString()} points
+                </p>
+                <p className="text-xs text-yellow-600 dark:text-yellow-500">
+                  Final amount: {formatPrice(pricing.retail.amount - getPointsReduction())}
                 </p>
               </div>
             </div>
