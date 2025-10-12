@@ -269,16 +269,107 @@ const Marketplace = () => {
     <div className="min-h-screen">
       <Navbar />
       
-      {/* Hero Section */}
-      <section className="w-full py-16 md:py-24 bg-background border-b">
+      {/* Advice Engine Hero */}
+      <section className="w-full py-16 md:py-20 bg-gradient-to-b from-primary/5 to-background border-b">
         <div className="container px-4">
-          <div className="max-w-4xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
-              Find proven services. Buy outcomes, not tools.
-            </h1>
-            <p className="text-xl text-muted-foreground">
-              Pro members save 10–40% on select listings
-            </p>
+          <div className="max-w-5xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <h1 className="text-4xl md:text-5xl font-bold text-primary">
+                  Need Advice?
+                </h1>
+                <Badge className="bg-yellow-400 text-black hover:bg-yellow-500 font-semibold">
+                  BETA
+                </Badge>
+              </div>
+              <p className="text-base md:text-lg text-muted-foreground max-w-3xl mx-auto">
+                Built on real purchase data from top agents. Buy most everything at member pricing and choose what actually works. No cold calls. No spam. Clear choices you can trust. Advice you can lean on.
+              </p>
+            </div>
+
+            {/* Search Input */}
+            <div className="mb-6">
+              <div className="relative max-w-3xl mx-auto">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search or ask us anything..."
+                  className="w-full pl-12 pr-24 py-4 text-base rounded-full border-2 border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent shadow-sm"
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2">
+                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                    </svg>
+                  </Button>
+                  <Button size="icon" className="h-10 w-10 rounded-full">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </Button>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground text-center mt-3">
+                Try: <span className="text-primary font-medium italic">best CRM for 20 deals a year</span>
+              </p>
+            </div>
+
+            {/* Category Icons */}
+            <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
+              {[
+                { icon: "🏠", label: "CRM", color: "bg-blue-100" },
+                { icon: "📊", label: "Marketing Tools", color: "bg-cyan-100" },
+                { icon: "✨", label: "Lead Generation", color: "bg-pink-100" },
+                { icon: "🎓", label: "Real Estate Schools", color: "bg-green-100" },
+                { icon: "⚡", label: "Licensing", color: "bg-orange-100" },
+                { icon: "👥", label: "Coaching", color: "bg-purple-100" },
+                { icon: "💛", label: "Marketplace", color: "bg-yellow-100" },
+              ].map((cat) => (
+                <button
+                  key={cat.label}
+                  className="flex flex-col items-center gap-2 p-2 hover:scale-105 transition-transform"
+                >
+                  <div className={`h-16 w-16 rounded-full ${cat.color} flex items-center justify-center text-2xl`}>
+                    {cat.icon}
+                  </div>
+                  <span className="text-xs font-medium text-center max-w-[80px]">{cat.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Book Agent Concierge */}
+            <div className="text-center mb-8">
+              <Button variant="outline" size="lg" className="rounded-full">
+                <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Book with an Agent Concierge
+              </Button>
+            </div>
+
+            {/* Helper Text */}
+            <div className="text-center mb-6">
+              <p className="text-sm text-muted-foreground">
+                Not sure where to start? Ask something specific like{" "}
+                <span className="text-foreground font-medium">"How do I get to 100 deals a year from 20 in Nashville TN"</span>{" "}
+                and we will map the proven path based on real agent data
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+                Advice powered by curated data and Live Agent Interviews
+              </p>
+            </div>
           </div>
         </div>
       </section>
