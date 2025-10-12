@@ -34,6 +34,7 @@
     },
     "featured": true,
     "badges": ["Same-Day", "Verified", "Top Rated"],
+    "serviceAreas": ["San Francisco", "Oakland", "San Jose", "Berkeley", "Palo Alto"],
     "packages": [
       {
         "id": "pkg-basic",
@@ -150,6 +151,7 @@
     },
     "featured": true,
     "badges": ["Fast Processing", "Digital Closing", "Nationwide"],
+    "serviceAreas": ["San Francisco", "Los Angeles", "San Diego", "Sacramento", "San Jose"],
     "packages": [
       {
         "id": "pkg-owner",

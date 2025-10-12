@@ -27,6 +27,7 @@ export const ServiceCardSchema = z.object({
   pricing: PricePlanSchema,
   featured: z.boolean().default(false),
   badges: z.array(z.string()).default([]),
+  serviceAreas: z.array(z.string()).default([]),
 });
 
 export const ServiceFunnelSchema = ServiceCardSchema.extend({

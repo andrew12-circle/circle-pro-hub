@@ -7,6 +7,7 @@ export interface ServiceFilters {
   maxPrice?: number;
   verified?: boolean;
   search?: string;
+  location?: string;
 }
 
 export interface GetServicesParams {
@@ -41,6 +42,17 @@ function matchesFilters(service: ServiceFunnel, filters?: ServiceFilters): boole
     if (!searchableText.includes(searchLower)) {
       return false;
     }
+  }
+
+  if (filters.location) {
+    const locationLower = filters.location.toLowerCase();
+    const serviceAreasLower = service.serviceAreas.map((a) => a.toLowerCase());
+
+    const matches = serviceAreasLower.some(
+      (area) => area.includes(locationLower) || locationLower.includes(area)
+    );
+
+    if (!matches) return false;
   }
 
   return true;
@@ -99,6 +111,7 @@ export async function getServices(params: GetServicesParams = {}): Promise<Servi
     pricing: service.pricing,
     featured: service.featured,
     badges: service.badges,
+    serviceAreas: service.serviceAreas,
   }));
 }
 

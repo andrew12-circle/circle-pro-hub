@@ -2,10 +2,11 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShoppingCart, User, Heart, MapPin, Crown, Home, Menu } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, Crown, Home, Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import circleNetworkLogo from "@/assets/circle-network-logo.png";
 import { supabase } from "@/integrations/supabase/client";
+import { LocationSelector } from "./LocationSelector";
 
 interface UserProfile {
   full_name: string | null;
@@ -129,13 +130,8 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
-                {/* Location */}
-                {profile?.location && (
-                  <div className="hidden lg:flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4" />
-                    <span>{profile.location}</span>
-                  </div>
-                )}
+                {/* Location Selector */}
+                <LocationSelector />
 
                 {/* Shopping Cart */}
                 <Button variant="ghost" size="icon">

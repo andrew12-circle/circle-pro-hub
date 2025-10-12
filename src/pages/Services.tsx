@@ -9,9 +9,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Star, MapPin, Shield, Heart, Share2 } from "lucide-react";
 import { getServices } from "@/data/services";
 import { ServiceCard } from "../../contracts/marketplace";
+import { useLocation } from "@/hooks/use-location";
 
 const Services = () => {
   const [searchParams] = useSearchParams();
+  const { location: userLocation } = useLocation();
   const [services, setServices] = useState<ServiceCard[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,9 +23,12 @@ const Services = () => {
       try {
         const category = searchParams.get("category") || undefined;
         const search = searchParams.get("search") || undefined;
+        const locationParam = searchParams.get("location") || undefined;
+
+        const location = locationParam || userLocation?.city;
 
         const results = await getServices({
-          filters: { category, search },
+          filters: { category, search, location },
         });
         setServices(results);
       } catch (error) {
@@ -34,7 +39,7 @@ const Services = () => {
     };
 
     loadServices();
-  }, [searchParams]);
+  }, [searchParams, userLocation]);
 
   const formatPrice = (amount: number): string => {
     return `$${amount.toLocaleString()}`;
@@ -71,9 +76,13 @@ const Services = () => {
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Services</h1>
           <p className="text-muted-foreground">
-            {searchParams.get("category")
-              ? `${services.length} services in ${searchParams.get("category")}`
-              : `${services.length} services available`}
+            {(searchParams.get("location") || userLocation?.formatted) && (
+              <span className="inline-flex items-center gap-1 mr-2">
+                <MapPin className="h-4 w-4" />
+                {searchParams.get("location") || userLocation?.formatted}
+              </span>
+            )}
+            {services.length} services available
           </p>
         </div>
 
