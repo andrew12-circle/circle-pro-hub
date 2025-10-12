@@ -488,10 +488,12 @@ const Marketplace = () => {
         </div>
       </div>
 
-      {/* Main Content - Full Width */}
-      <div className="w-full px-4 lg:px-8 py-8 bg-muted/30">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {vendorCards}
+      {/* Main Content */}
+      <div className="py-8 bg-muted/30">
+        <div className="container px-4">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {vendorCards}
+          </div>
         </div>
       </div>
 
