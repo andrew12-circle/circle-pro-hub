@@ -91,7 +91,8 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0 [&>button]:hidden">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden rounded-2xl p-0 [&>button]:hidden">
+        <div className="overflow-y-auto max-h-[90vh] rounded-2xl">
         {/* Header with gradient - More Condensed */}
         <div className="relative bg-gradient-to-br from-blue-800 via-blue-900 to-purple-900 text-white p-6 md:p-8">
           {/* Close button */}
@@ -367,6 +368,7 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
               </div>
             </div>
           </div>
+        </div>
         </div>
       </DialogContent>
     </Dialog>
