@@ -85,64 +85,39 @@ const Profile = () => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Invalid file",
-        description: "Please upload an image file",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Please upload an image smaller than 5MB",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setUploading(true);
 
     try {
+      // Use storage adapter (handles validation + presigned upload)
+      const { storage } = await import('@/adapters/storage');
+      const { generateSafeFilename } = await import('@/lib/fileValidation');
+      
       // Delete old avatar if exists
       if (profile.avatar_url) {
-        const oldPath = profile.avatar_url.split('/').pop();
-        if (oldPath) {
-          await supabase.storage
-            .from('avatars')
-            .remove([`${user.id}/${oldPath}`]);
+        try {
+          const oldPath = profile.avatar_url.split('/avatars/').pop();
+          if (oldPath) {
+            await storage.delete(oldPath, 'avatars');
+          }
+        } catch (err) {
+          // Ignore delete errors (file might not exist)
+          console.warn('Failed to delete old avatar:', err);
         }
       }
 
-      // Upload new avatar
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
+      // Upload new avatar via storage adapter
+      const filePath = generateSafeFilename(file.name, user.id);
+      const uploaded = await storage.upload(file, filePath, 'avatars');
 
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      // Update profile
+      // Update profile with new URL
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: publicUrl })
+        .update({ avatar_url: uploaded.url })
         .eq('id', user.id);
 
       if (updateError) throw updateError;
 
-      setProfile({ ...profile, avatar_url: publicUrl });
+      setProfile({ ...profile, avatar_url: uploaded.url });
       
       toast({
         title: "Success",

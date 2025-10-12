@@ -2,9 +2,20 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 npm run typecheck
-# Scan for accidentally committed secrets
-if git grep -i 'service_role' -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.json' ':!*.lock' ':!node_modules'; then
-  echo "Error: Found 'service_role' in code - never commit service_role keys!"
-  exit 1
+
+# Security check: prevent committing service role keys
+echo "🔒 Running security checks..."
+
+if git diff --cached --name-only | grep -qE '\.(ts|tsx|js|jsx|json)$'; then
+  # Check for service_role or SUPABASE_SERVICE_ROLE_KEY in staged files
+  if git diff --cached | grep -iE '(service_role|SUPABASE_SERVICE_ROLE_KEY)'; then
+    echo "❌ ERROR: Found 'service_role' or 'SUPABASE_SERVICE_ROLE_KEY' in staged files!"
+    echo "This is a security risk. Service role keys must NEVER be committed."
+    echo ""
+    echo "Remove the key and use environment variables instead."
+    exit 1
+  fi
 fi
+
+echo "✅ Security checks passed"
 npx lint-staged
