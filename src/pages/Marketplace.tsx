@@ -269,15 +269,15 @@ const Marketplace = () => {
     <div className="min-h-screen">
       <Navbar />
       
-      {/* Hero Section with Search */}
-      <section className="w-full py-12 bg-gradient-to-b from-primary/5 to-background border-b">
+      {/* Hero Section */}
+      <section className="w-full py-16 md:py-24 bg-background border-b">
         <div className="container px-4">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
-            <h1 className="text-3xl md:text-4xl font-bold">
-              Complete Marketplace
+          <div className="max-w-4xl">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
+              Find proven services. Buy outcomes, not tools.
             </h1>
-            <p className="text-lg text-muted-foreground">
-              Browse all services, vendors, and exclusive deals
+            <p className="text-xl text-muted-foreground">
+              Pro members save 10–40% on select listings
             </p>
           </div>
         </div>
