@@ -315,6 +315,43 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
             </Button>
           </div>
         </div>
+
+        {/* Verified Pricing Disclaimer */}
+        <div className="border-t bg-blue-50 dark:bg-blue-950/20 p-8 md:p-12">
+          <div className="flex gap-4">
+            <div className="flex-shrink-0">
+              <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h4 className="font-semibold text-lg mb-2 text-blue-900 dark:text-blue-100">Verified Pricing Disclaimer</h4>
+              <p className="text-sm text-blue-800 dark:text-blue-200 mb-4">
+                This service has verified pricing through our verification process. However, pricing is subject to change and vendors may not have updated their information since changes occurred.
+              </p>
+              <p className="text-sm text-blue-800 dark:text-blue-200 mb-4">
+                Circle Marketplace cannot guarantee service quality, satisfaction, or discounts as we are a marketplace platform that represents other companies to make shopping easier. Please verify all details directly with the vendor.
+              </p>
+              <div className="flex items-center gap-2 text-xs text-blue-700 dark:text-blue-300 mb-4">
+                <Calendar className="h-4 w-4" />
+                <span>Last updated: Oct 6, 2025</span>
+              </div>
+              <p className="text-xs text-blue-700 dark:text-blue-300 mb-4">
+                We make choosing simple. If prices changed since this date, verify directly. You'll finalize billing with the company - we're just a facilitator.
+              </p>
+              <div className="flex gap-3">
+                <Button variant="outline" size="sm">
+                  <Globe className="h-4 w-4 mr-2" />
+                  Visit Website
+                </Button>
+                <Button variant="outline" size="sm">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Book Consultation
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
