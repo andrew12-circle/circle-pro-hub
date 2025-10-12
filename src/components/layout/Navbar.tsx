@@ -1,14 +1,77 @@
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Search, ShoppingCart, User, Heart } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Search, ShoppingCart, User, Heart, MapPin, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
 import circleNetworkLogo from "@/assets/circle-network-logo.png";
+import { supabase } from "@/integrations/supabase/client";
+
+interface UserProfile {
+  full_name: string | null;
+  avatar_url: string | null;
+  location: string | null;
+  points: number;
+}
+
+interface UserRole {
+  role: 'admin' | 'pro' | 'user';
+}
 export const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
+  const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isPro, setIsPro] = useState(false);
   const isMarketplace = location.pathname === "/marketplace";
+
+  // Check authentication state
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch user profile and role
+  useEffect(() => {
+    if (user) {
+      const fetchUserData = async () => {
+        // Fetch profile
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (profileData) {
+          setProfile(profileData);
+        }
+
+        // Check if user has pro role
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'pro')
+          .maybeSingle();
+
+        setIsPro(!!roleData);
+      };
+
+      fetchUserData();
+    } else {
+      setProfile(null);
+      setIsPro(false);
+    }
+  }, [user]);
 
   // Initialize search from URL params on marketplace page
   useEffect(() => {
@@ -55,28 +118,68 @@ export const Navbar = () => {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center space-x-2">
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/marketplace">
-              <Search className="h-5 w-5" />
-            </Link>
-          </Button>
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/saved">
-              <Heart className="h-5 w-5" />
-            </Link>
-          </Button>
-          <Button variant="ghost" size="icon">
-            <ShoppingCart className="h-5 w-5" />
-          </Button>
-          <Button variant="ghost" size="icon" asChild>
-            <Link to="/profile">
-              <User className="h-5 w-5" />
-            </Link>
-          </Button>
-          <Button asChild>
-            <Link to="/auth">Sign In</Link>
-          </Button>
+        <div className="flex items-center gap-3">
+          {user ? (
+            <>
+              {/* Location */}
+              {profile?.location && (
+                <div className="hidden lg:flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <MapPin className="h-4 w-4" />
+                  <span>{profile.location}</span>
+                </div>
+              )}
+
+              {/* Shopping Cart */}
+              <Button variant="ghost" size="icon">
+                <ShoppingCart className="h-5 w-5" />
+              </Button>
+
+              {/* Points */}
+              <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted">
+                <Crown className="h-4 w-4 text-yellow-600" />
+                <span className="text-sm font-medium">{profile?.points || 0} Points</span>
+              </div>
+
+              {/* User Avatar with Pro Badge */}
+              <Link to="/profile" className="relative">
+                <Avatar className={`h-10 w-10 ${isPro ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+                  <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
+                  <AvatarFallback>
+                    <User className="h-5 w-5" />
+                  </AvatarFallback>
+                </Avatar>
+                {isPro && (
+                  <Badge className="absolute -bottom-1 -right-1 px-1.5 py-0 text-[10px] font-bold bg-primary">
+                    PRO
+                  </Badge>
+                )}
+              </Link>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/marketplace">
+                  <Search className="h-5 w-5" />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/saved">
+                  <Heart className="h-5 w-5" />
+                </Link>
+              </Button>
+              <Button variant="ghost" size="icon">
+                <ShoppingCart className="h-5 w-5" />
+              </Button>
+              <Button variant="ghost" size="icon" asChild>
+                <Link to="/profile">
+                  <User className="h-5 w-5" />
+                </Link>
+              </Button>
+              <Button asChild>
+                <Link to="/auth">Sign In</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </nav>;
