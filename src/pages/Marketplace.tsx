@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { useSearchParams } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Collapsible,
   CollapsibleContent,
@@ -117,6 +118,41 @@ const Marketplace = () => {
   const [minRating, setMinRating] = useState(0);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [topRated, setTopRated] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [isPro, setIsPro] = useState(false);
+
+  // Check authentication state and pro status
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch user's pro status
+  useEffect(() => {
+    if (user) {
+      const fetchProStatus = async () => {
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'pro')
+          .maybeSingle();
+
+        setIsPro(!!roleData);
+      };
+
+      fetchProStatus();
+    } else {
+      setIsPro(false);
+    }
+  }, [user]);
 
   // Read category from URL params on mount
   useEffect(() => {
@@ -198,7 +234,7 @@ const Marketplace = () => {
                   <Crown className="h-3 w-3 text-primary" />
                   <span className="font-medium text-primary">Pro</span>
                 </div>
-                <span className="font-bold text-xs text-primary">${vendor.proPrice}/mo</span>
+                <span className={`font-bold text-xs text-primary ${!isPro ? 'line-through' : ''}`}>${vendor.proPrice}/mo</span>
               </div>
 
               {/* Co-pay Section */}
@@ -209,7 +245,7 @@ const Marketplace = () => {
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-green-700 dark:text-green-400">From:</span>
-                  <span className="font-bold text-green-700 dark:text-green-400">${vendor.copayWithVendor}/mo</span>
+                  <span className={`font-bold text-green-700 dark:text-green-400 ${!isPro ? 'line-through' : ''}`}>${vendor.copayWithVendor}/mo</span>
                 </div>
               </div>
 
@@ -326,7 +362,7 @@ const Marketplace = () => {
                 <Crown className="h-4 w-4 text-primary" />
                 <span className="font-medium text-primary">Unlock Pro Price</span>
               </div>
-              <span className="font-bold text-lg text-primary">${vendor.proPrice}/mo</span>
+              <span className={`font-bold text-lg text-primary ${!isPro ? 'line-through' : ''}`}>${vendor.proPrice}/mo</span>
             </div>
 
             {/* Co-pay Section */}
@@ -341,11 +377,11 @@ const Marketplace = () => {
               <div className="space-y-1">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-green-700 dark:text-green-400">With Vendor Help:</span>
-                  <span className="font-bold text-green-700 dark:text-green-400">${vendor.copayWithVendor}/mo</span>
+                  <span className={`font-bold text-green-700 dark:text-green-400 ${!isPro ? 'line-through' : ''}`}>${vendor.copayWithVendor}/mo</span>
                 </div>
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-green-700 dark:text-green-400">Non Settlement Service Provider:</span>
-                  <span className="font-bold text-green-700 dark:text-green-400">${vendor.copayNonSettlement}/mo</span>
+                  <span className={`font-bold text-green-700 dark:text-green-400 ${!isPro ? 'line-through' : ''}`}>${vendor.copayNonSettlement}/mo</span>
                 </div>
               </div>
             </div>
