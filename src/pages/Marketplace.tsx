@@ -77,16 +77,29 @@ const Marketplace = () => {
             
             {/* Category Dropdown */}
             <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-[200px]">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
                 <SelectItem value="photography">Photography</SelectItem>
-                <SelectItem value="social-media">Social Media</SelectItem>
+                <SelectItem value="print-mail">Print & Mail</SelectItem>
+                <SelectItem value="signage">Signage & Branding</SelectItem>
+                <SelectItem value="open-house">Open House</SelectItem>
+                <SelectItem value="gifting">Client Gifting</SelectItem>
+                <SelectItem value="property-access">Lockboxes</SelectItem>
+                <SelectItem value="presentations">Presentations</SelectItem>
                 <SelectItem value="website-seo">Website & SEO</SelectItem>
-                <SelectItem value="video">Video Production</SelectItem>
-                <SelectItem value="staging">Virtual Staging</SelectItem>
+                <SelectItem value="social-media">Social Media</SelectItem>
+                <SelectItem value="lead-gen">Lead Generation</SelectItem>
+                <SelectItem value="video-media">Video & Media</SelectItem>
+                <SelectItem value="automation">Automation</SelectItem>
+                <SelectItem value="crm">CRM & Database</SelectItem>
+                <SelectItem value="transaction">Transaction Tools</SelectItem>
+                <SelectItem value="coaching">Coaching</SelectItem>
+                <SelectItem value="finance">Finance & Ops</SelectItem>
+                <SelectItem value="compliance">Compliance</SelectItem>
+                <SelectItem value="insurance">Insurance</SelectItem>
               </SelectContent>
             </Select>
             
