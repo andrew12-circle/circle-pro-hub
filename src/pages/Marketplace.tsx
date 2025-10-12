@@ -290,7 +290,7 @@ const Marketplace = () => {
           <div className="container px-4 py-4">
             <div className="max-w-4xl mx-auto">
               {/* Header with Toggle */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="relative mb-4">
                 <div className="flex items-center justify-center gap-2">
                   <h2 className="text-3xl md:text-5xl font-bold text-primary">
                     Need Advice?
@@ -300,7 +300,7 @@ const Marketplace = () => {
                   </Badge>
                 </div>
                 <CollapsibleTrigger asChild>
-                  <Button variant="ghost" size="sm" className="gap-2">
+                  <Button variant="ghost" size="sm" className="absolute right-0 top-1/2 -translate-y-1/2 gap-2">
                     {adviceSectionOpen ? (
                       <>
                         <ChevronUp className="h-4 w-4" />
