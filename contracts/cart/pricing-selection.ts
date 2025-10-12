@@ -11,6 +11,7 @@ export const PricingSelectionSchema = z.object({
   pointsCost: z.number().int().nonnegative().optional(),
   copayPartnerShare: MoneySchema.optional(),
   userShare: MoneySchema.optional(),
+  vendorPartnerId: z.string().uuid().optional(),
 });
 
 export type PricingMode = z.infer<typeof PricingModeSchema>;
