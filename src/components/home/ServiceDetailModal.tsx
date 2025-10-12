@@ -93,7 +93,7 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0 [&>button]:hidden">
         {/* Header with gradient - More Condensed */}
-        <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 text-white p-6 md:p-8">
+        <div className="relative bg-gradient-to-br from-blue-800 via-blue-900 to-purple-900 text-white p-6 md:p-8">
           {/* Close button */}
           <div className="absolute top-4 right-4 flex gap-2">
             <Button variant="ghost" size="icon" className="bg-white/10 hover:bg-white/20 text-white">
