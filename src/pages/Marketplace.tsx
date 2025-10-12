@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 import {
   Collapsible,
   CollapsibleContent,
@@ -118,7 +119,7 @@ const Marketplace = () => {
   const [minRating, setMinRating] = useState(0);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [topRated, setTopRated] = useState(false);
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isPro, setIsPro] = useState(false);
   const [expandedCards, setExpandedCards] = useState<Record<number, boolean>>({});
 

@@ -2,10 +2,11 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShoppingCart, User, Heart, Crown, Home, Menu } from "lucide-react";
+import { Search, ShoppingCart, User as UserIcon, Heart, Crown, Home, Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import circleNetworkLogo from "@/assets/circle-network-logo.png";
 import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 import { LocationSelector } from "./LocationSelector";
 import { useCart } from "@/lib/cartStore";
 
@@ -24,7 +25,7 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isPro, setIsPro] = useState(false);
   const { itemCount } = useCart();
@@ -160,7 +161,7 @@ export const Navbar = () => {
                   <Avatar className={`h-10 w-10 ${isPro ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
                     <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
                     <AvatarFallback>
-                      <User className="h-5 w-5" />
+                      <UserIcon className="h-5 w-5" />
                     </AvatarFallback>
                   </Avatar>
                   {isPro && (
@@ -196,7 +197,7 @@ export const Navbar = () => {
                 </Button>
                 <Button variant="ghost" size="icon" asChild>
                   <Link to="/profile">
-                    <User className="h-5 w-5" />
+                    <UserIcon className="h-5 w-5" />
                   </Link>
                 </Button>
                 <Button asChild>
@@ -226,11 +227,11 @@ export const Navbar = () => {
               <Avatar className={`h-6 w-6 ${isPro ? 'ring-1 ring-primary' : ''}`}>
                 <AvatarImage src={profile.avatar_url} alt={profile.full_name || 'User'} />
                 <AvatarFallback>
-                  <User className="h-4 w-4" />
+                  <UserIcon className="h-4 w-4" />
                 </AvatarFallback>
               </Avatar>
             ) : (
-              <User className="h-6 w-6" />
+              <UserIcon className="h-6 w-6" />
             )}
           </Link>
 

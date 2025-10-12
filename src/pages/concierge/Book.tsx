@@ -174,6 +174,24 @@ const Book = () => {
   const selectedPackage = service.packages.find((p) => p.id === selectedPackageId);
   const timeSlots = generateTimeSlots();
 
+  // Safety check for invalid package selection
+  if (!selectedPackage) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 container mx-auto px-4 py-12">
+          <Card>
+            <CardHeader>
+              <CardTitle>Package Not Found</CardTitle>
+              <CardDescription>The selected package is not available.</CardDescription>
+            </CardHeader>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />

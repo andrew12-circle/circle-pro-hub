@@ -9,13 +9,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import type { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
 import { MapPin, Crown, User as UserIcon, Mail, LogOut, Camera } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -147,10 +148,10 @@ const Profile = () => {
         title: "Success",
         description: "Profile picture updated successfully!",
       });
-    } catch (error: any) {
+    } catch (error) {
       toast({
         title: "Error",
-        description: error.message || "Failed to upload profile picture",
+        description: error instanceof Error ? error.message : "Failed to upload profile picture",
         variant: "destructive",
       });
     } finally {

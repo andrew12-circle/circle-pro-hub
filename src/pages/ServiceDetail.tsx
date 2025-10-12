@@ -118,6 +118,17 @@ const ServiceDetail = () => {
   }
 
   const currentPackage = service.packages.find((pkg) => pkg.id === selectedPackage);
+  if (!currentPackage) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-1 container px-4 py-8">
+          <p>Package not found</p>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">

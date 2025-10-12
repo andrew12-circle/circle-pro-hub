@@ -26,8 +26,8 @@ export async function getTransactions(userId: string): Promise<PointsTransaction
   const data = await response.json();
   
   const transactions = data.transactions
-    .filter((t: any) => t.userId === userId)
-    .map((t: any) => ({
+    .filter((t: PointsTransaction) => t.userId === userId)
+    .map((t: PointsTransaction & { createdAt: string }) => ({
       ...t,
       createdAt: new Date(t.createdAt)
     }));
