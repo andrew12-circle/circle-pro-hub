@@ -20,7 +20,8 @@ const vendors = [
     copayWithVendor: 75,
     copayNonSettlement: 75,
     verified: true,
-    discount: "20% OFF"
+    discount: "20% OFF",
+    reviewHighlight: "These photos made my listing look like a million bucks! Sold in 3 days."
   },
   {
     id: 2,
@@ -38,7 +39,8 @@ const vendors = [
     copayWithVendor: 150,
     copayNonSettlement: 150,
     verified: true,
-    discount: "20% OFF"
+    discount: "20% OFF",
+    reviewHighlight: "My engagement tripled in the first month. Worth every penny!"
   },
   {
     id: 3,
@@ -56,7 +58,8 @@ const vendors = [
     copayWithVendor: 20,
     copayNonSettlement: 20,
     verified: true,
-    discount: "10% OFF"
+    discount: "10% OFF",
+    reviewHighlight: "Incredible quality and fast turnaround. Helps vacant homes sell faster."
   },
   {
     id: 4,
@@ -74,7 +77,8 @@ const vendors = [
     copayWithVendor: 250,
     copayNonSettlement: 250,
     verified: true,
-    discount: "20% OFF"
+    discount: "20% OFF",
+    reviewHighlight: "Went from page 3 to #1 on Google in 60 days. Leads are pouring in!"
   },
 ];
 
@@ -137,6 +141,31 @@ export const FeaturedVendors = () => {
                     </div>
                     <div className="text-lg font-bold">{vendor.name}</div>
                   </div>
+                </div>
+
+                {/* Reviews Highlight */}
+                <div className="p-4 bg-muted/30 border-b">
+                  <div className="flex gap-1 mb-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${
+                          i < Math.floor(vendor.rating)
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-muted-foreground/30"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-sm italic text-muted-foreground">
+                    "{vendor.reviewHighlight}"
+                  </p>
+                  <Link 
+                    to={`/service/${vendor.id}#reviews`} 
+                    className="text-xs text-primary hover:underline font-medium mt-1 inline-block"
+                  >
+                    Read {vendor.reviews} reviews →
+                  </Link>
                 </div>
 
                 {/* Pricing */}
