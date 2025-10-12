@@ -1,14 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { ServiceDetailModal } from "@/components/home/ServiceDetailModal";
-import { Star, CheckCircle2, Share2, Heart, Crown, HandshakeIcon } from "lucide-react";
+import { Star, CheckCircle2, Share2, Heart, Crown, HandshakeIcon, SlidersHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Search, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { useSearchParams } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -104,7 +103,8 @@ const vendors = [
 
 const Marketplace = () => {
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchParams] = useSearchParams();
+  const searchQuery = searchParams.get("search") || "";
   const [priceRange, setPriceRange] = useState([0, 500]);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [minRating, setMinRating] = useState(0);
@@ -279,18 +279,6 @@ const Marketplace = () => {
             <p className="text-lg text-muted-foreground">
               Browse all services, vendors, and exclusive deals
             </p>
-            
-            {/* Search Bar */}
-            <div className="relative max-w-2xl mx-auto">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                type="search"
-                placeholder="Search for services, vendors, categories..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 pr-4 py-6 text-lg rounded-xl"
-              />
-            </div>
           </div>
         </div>
       </section>
