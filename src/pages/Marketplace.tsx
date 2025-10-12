@@ -120,6 +120,7 @@ const Marketplace = () => {
   const [topRated, setTopRated] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [isPro, setIsPro] = useState(false);
+  const [expandedCards, setExpandedCards] = useState<Record<number, boolean>>({});
 
   // Check authentication state and pro status
   useEffect(() => {
@@ -170,6 +171,13 @@ const Marketplace = () => {
     setTopRated(false);
   };
 
+  const toggleCardExpansion = (vendorId: number) => {
+    setExpandedCards(prev => ({
+      ...prev,
+      [vendorId]: !prev[vendorId]
+    }));
+  };
+
   // Vendor cards
   const vendorCards = vendors.map((vendor) => (
     <div key={vendor.id} className="group">
@@ -209,14 +217,14 @@ const Marketplace = () => {
 
             {/* Description */}
             <div className="p-3 border-b">
-              <p className="text-xs text-muted-foreground line-clamp-2 mb-1">
+              <p className={`text-xs text-muted-foreground mb-1 ${expandedCards[vendor.id] ? '' : 'line-clamp-2'}`}>
                 🔥 {vendor.tagline}
               </p>
               <button 
-                onClick={() => setSelectedServiceId(vendor.id.toString())}
+                onClick={() => toggleCardExpansion(vendor.id)}
                 className="text-xs text-primary hover:underline font-medium"
               >
-                See more
+                {expandedCards[vendor.id] ? 'See less' : 'See more'}
               </button>
             </div>
 
@@ -302,14 +310,14 @@ const Marketplace = () => {
 
           {/* Description */}
           <div className="p-4 border-b">
-            <p className="text-sm text-muted-foreground line-clamp-3 mb-2">
+            <p className={`text-sm text-muted-foreground mb-2 ${expandedCards[vendor.id] ? '' : 'line-clamp-3'}`}>
               🔥 {vendor.tagline}
             </p>
             <button 
-              onClick={() => setSelectedServiceId(vendor.id.toString())}
+              onClick={() => toggleCardExpansion(vendor.id)}
               className="text-sm text-primary hover:underline font-medium"
             >
-              See more
+              {expandedCards[vendor.id] ? 'See less' : 'See more'}
             </button>
           </div>
 
