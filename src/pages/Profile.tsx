@@ -26,6 +26,7 @@ const Profile = () => {
     avatar_url: "",
     points: 0,
   });
+  const [detectingLocation, setDetectingLocation] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -179,6 +180,58 @@ const Profile = () => {
     setSaving(false);
   };
 
+  const handleDetectLocation = async () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Error",
+        description: "Geolocation is not supported by your browser",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDetectingLocation(true);
+    
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          // Use reverse geocoding to get city, state from coordinates
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`
+          );
+          const data = await response.json();
+          
+          const city = data.address?.city || data.address?.town || data.address?.village || '';
+          const state = data.address?.state || '';
+          const location = city && state ? `${city}, ${state}` : data.display_name;
+          
+          setProfile({ ...profile, location });
+          
+          toast({
+            title: "Location detected",
+            description: `Set to ${location}`,
+          });
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Failed to detect location. Please enter manually.",
+            variant: "destructive",
+          });
+        } finally {
+          setDetectingLocation(false);
+        }
+      },
+      (error) => {
+        toast({
+          title: "Error",
+          description: "Unable to access your location. Please enable location services.",
+          variant: "destructive",
+        });
+        setDetectingLocation(false);
+      }
+    );
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/");
@@ -289,15 +342,25 @@ const Profile = () => {
                 <Label htmlFor="location">
                   Location <span className="text-xs text-muted-foreground">(Important for local service recommendations)</span>
                 </Label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="location"
-                    value={profile.location}
-                    onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                    placeholder="e.g., Franklin, Tennessee"
-                    className="pl-10"
-                  />
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="location"
+                      value={profile.location}
+                      onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                      placeholder="e.g., Franklin, Tennessee"
+                      className="pl-10"
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleDetectLocation}
+                    disabled={detectingLocation}
+                  >
+                    {detectingLocation ? "Detecting..." : "Auto-detect"}
+                  </Button>
                 </div>
               </div>
 
