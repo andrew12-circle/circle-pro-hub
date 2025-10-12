@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Search, ShoppingCart, User, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
 import circleNetworkLogo from "@/assets/circle-network-logo.png";
-
 export const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -17,7 +16,6 @@ export const Navbar = () => {
       setSearchQuery(searchParams.get("search") || "");
     }
   }, [isMarketplace, searchParams]);
-
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (isMarketplace) {
@@ -28,7 +26,9 @@ export const Navbar = () => {
       } else {
         params.delete("search");
       }
-      navigate(`/marketplace?${params.toString()}`, { replace: true });
+      navigate(`/marketplace?${params.toString()}`, {
+        replace: true
+      });
     } else {
       // Navigate to marketplace with search query
       if (searchQuery.trim()) {
@@ -38,27 +38,19 @@ export const Navbar = () => {
       }
     }
   };
-
-  return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+  return <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
           <img src={circleNetworkLogo} alt="Circle Network" className="h-8 w-auto object-contain" />
-          <span className="font-semibold text-xl">Circle Marketplace</span>
+          <span className="font-semibold text-xl">Marketplace</span>
         </Link>
 
         {/* Search Bar */}
         <div className="hidden md:flex flex-1 max-w-xl mx-8">
           <form onSubmit={handleSearch} className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="search"
-              placeholder={isMarketplace ? "Search services, vendors, categories..." : "What do you need help with?"}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+            <input type="search" placeholder={isMarketplace ? "Search services, vendors, categories..." : "What do you need help with?"} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-10 pr-4 py-2 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary" />
           </form>
         </div>
 
@@ -87,6 +79,5 @@ export const Navbar = () => {
           </Button>
         </div>
       </div>
-    </nav>
-  );
+    </nav>;
 };
