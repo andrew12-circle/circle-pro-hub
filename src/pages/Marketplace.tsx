@@ -331,12 +331,22 @@ const Marketplace = () => {
             </div>
           </div>
 
-          {/* Reviews Highlight - Condensed, only shown if reviews exist */}
-          {vendor.reviews > 0 && vendor.reviewHighlight && (
+          {/* Reviews - Condensed, only shown if reviews exist */}
+          {vendor.reviews > 0 && (
             <div className="px-4 py-2 bg-muted/20 border-b">
-              <p className="text-xs italic text-muted-foreground line-clamp-1">
-                "{vendor.reviewHighlight}"
-              </p>
+              <div className="flex items-center gap-1">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-3 w-3 ${
+                      i < Math.floor(vendor.rating)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-muted-foreground/30"
+                    }`}
+                  />
+                ))}
+                <span className="text-xs text-muted-foreground ml-1">({vendor.reviews})</span>
+              </div>
             </div>
           )}
 
