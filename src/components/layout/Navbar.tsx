@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShoppingCart, User, Heart, MapPin, Crown } from "lucide-react";
+import { Search, ShoppingCart, User, Heart, MapPin, Crown, Home, Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import circleNetworkLogo from "@/assets/circle-network-logo.png";
 import { supabase } from "@/integrations/supabase/client";
@@ -101,86 +101,136 @@ export const Navbar = () => {
       }
     }
   };
-  return <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between px-4">
-        {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
-          <img src={circleNetworkLogo} alt="Circle Network" className="h-12 w-auto object-contain" />
-          <span className="font-semibold text-xl">Marketplace</span>
-        </Link>
+  return (
+    <>
+      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex h-16 items-center justify-between px-4">
+          {/* Logo */}
+          <Link to="/" className="flex items-center space-x-2">
+            <img src={circleNetworkLogo} alt="Circle Network" className="h-12 w-auto object-contain" />
+            <span className="font-semibold text-xl hidden md:inline">Marketplace</span>
+          </Link>
 
-        {/* Search Bar */}
-        <div className="hidden md:flex flex-1 max-w-xl mx-8">
-          <form onSubmit={handleSearch} className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input type="search" placeholder={isMarketplace ? "Search services, vendors, categories..." : "What do you need help with?"} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-10 pr-4 py-2 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary" />
-          </form>
-        </div>
+          {/* Search Bar - Full width on mobile */}
+          <div className="flex flex-1 max-w-xl mx-4 md:mx-8">
+            <form onSubmit={handleSearch} className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <input 
+                type="search" 
+                placeholder={isMarketplace ? "Search services, vendors, categories..." : "What do you need help with?"} 
+                value={searchQuery} 
+                onChange={e => setSearchQuery(e.target.value)} 
+                className="w-full pl-10 pr-4 py-2 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary" 
+              />
+            </form>
+          </div>
 
-        {/* Actions */}
-        <div className="flex items-center gap-3">
-          {user ? (
-            <>
-              {/* Location */}
-              {profile?.location && (
-                <div className="hidden lg:flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4" />
-                  <span>{profile.location}</span>
-                </div>
-              )}
-
-              {/* Shopping Cart */}
-              <Button variant="ghost" size="icon">
-                <ShoppingCart className="h-5 w-5" />
-              </Button>
-
-              {/* Points */}
-              <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted">
-                <Crown className="h-4 w-4 text-yellow-600" />
-                <span className="text-sm font-medium">{profile?.points || 0} Points</span>
-              </div>
-
-              {/* User Avatar with Pro Badge */}
-              <Link to="/profile" className="relative">
-                <Avatar className={`h-10 w-10 ${isPro ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
-                  <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
-                  <AvatarFallback>
-                    <User className="h-5 w-5" />
-                  </AvatarFallback>
-                </Avatar>
-                {isPro && (
-                  <Badge className="absolute -bottom-1 -right-1 px-1.5 py-0 text-[10px] font-bold bg-primary">
-                    PRO
-                  </Badge>
+          {/* Actions - Hidden on mobile (will be in bottom nav) */}
+          <div className="hidden md:flex items-center gap-3">
+            {user ? (
+              <>
+                {/* Location */}
+                {profile?.location && (
+                  <div className="hidden lg:flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    <span>{profile.location}</span>
+                  </div>
                 )}
-              </Link>
-            </>
-          ) : (
-            <>
-              <Button variant="ghost" size="icon" asChild>
-                <Link to="/marketplace">
-                  <Search className="h-5 w-5" />
+
+                {/* Shopping Cart */}
+                <Button variant="ghost" size="icon">
+                  <ShoppingCart className="h-5 w-5" />
+                </Button>
+
+                {/* Points */}
+                <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted">
+                  <Crown className="h-4 w-4 text-yellow-600" />
+                  <span className="text-sm font-medium">{profile?.points || 0} Points</span>
+                </div>
+
+                {/* User Avatar with Pro Badge */}
+                <Link to="/profile" className="relative">
+                  <Avatar className={`h-10 w-10 ${isPro ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+                    <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
+                    <AvatarFallback>
+                      <User className="h-5 w-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                  {isPro && (
+                    <Badge className="absolute -bottom-1 -right-1 px-1.5 py-0 text-[10px] font-bold bg-primary">
+                      PRO
+                    </Badge>
+                  )}
                 </Link>
-              </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <Link to="/saved">
-                  <Heart className="h-5 w-5" />
-                </Link>
-              </Button>
-              <Button variant="ghost" size="icon">
-                <ShoppingCart className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <Link to="/profile">
-                  <User className="h-5 w-5" />
-                </Link>
-              </Button>
-              <Button asChild>
-                <Link to="/auth">Sign In</Link>
-              </Button>
-            </>
-          )}
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="icon" asChild>
+                  <Link to="/marketplace">
+                    <Search className="h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="icon" asChild>
+                  <Link to="/saved">
+                    <Heart className="h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="icon">
+                  <ShoppingCart className="h-5 w-5" />
+                </Button>
+                <Button variant="ghost" size="icon" asChild>
+                  <Link to="/profile">
+                    <User className="h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button asChild>
+                  <Link to="/auth">Sign In</Link>
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
+
+      {/* Bottom Navigation - Mobile Only */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t">
+        <div className="flex items-center justify-around h-16 px-4">
+          <Link 
+            to="/" 
+            className={`flex flex-col items-center gap-1 px-4 py-2 ${location.pathname === '/' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            <Home className="h-6 w-6" />
+            <span className="text-xs">Home</span>
+          </Link>
+
+          <Link 
+            to="/profile" 
+            className={`flex flex-col items-center gap-1 px-4 py-2 relative ${location.pathname === '/profile' ? 'text-primary' : 'text-muted-foreground'}`}
+          >
+            {user && profile?.avatar_url ? (
+              <Avatar className={`h-6 w-6 ${isPro ? 'ring-1 ring-primary' : ''}`}>
+                <AvatarImage src={profile.avatar_url} alt={profile.full_name || 'User'} />
+                <AvatarFallback>
+                  <User className="h-4 w-4" />
+                </AvatarFallback>
+              </Avatar>
+            ) : (
+              <User className="h-6 w-6" />
+            )}
+            <span className="text-xs">Profile</span>
+          </Link>
+
+          <button className="flex flex-col items-center gap-1 px-4 py-2 text-muted-foreground relative">
+            <ShoppingCart className="h-6 w-6" />
+            <span className="text-xs">Cart</span>
+          </button>
+
+          <button className="flex flex-col items-center gap-1 px-4 py-2 text-muted-foreground">
+            <Menu className="h-6 w-6" />
+            <span className="text-xs">Menu</span>
+          </button>
         </div>
       </div>
-    </nav>;
+    </>
+  );
 };
