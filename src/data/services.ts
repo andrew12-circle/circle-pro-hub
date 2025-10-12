@@ -121,7 +121,11 @@ export async function getServices(params: GetServicesParams = {}): Promise<Servi
 }
 
 export async function getServiceById(id: string): Promise<ServiceFunnel | null> {
-  const allServices = servicesFixtures as ServiceFunnel[];
-  const service = allServices.find((s) => s.id === id);
-  return service || null;
+  const cacheKey = `service:${id}`;
+  
+  return cache.getOrSet(cacheKey, 60, async () => {
+    const allServices = servicesFixtures as ServiceFunnel[];
+    const service = allServices.find((s) => s.id === id);
+    return service || null;
+  });
 }
