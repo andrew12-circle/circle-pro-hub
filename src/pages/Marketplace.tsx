@@ -163,6 +163,9 @@ const Marketplace = () => {
               </div>
               <div className="flex gap-1 flex-shrink-0">
                 <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <Share2 className="h-3.5 w-3.5" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7">
                   <Heart className="h-3.5 w-3.5" />
                 </Button>
               </div>
