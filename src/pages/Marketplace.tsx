@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { ServiceDetailModal } from "@/components/home/ServiceDetailModal";
 import { Star, CheckCircle2, Share2, Heart, Crown, HandshakeIcon, SlidersHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -274,7 +275,7 @@ const Marketplace = () => {
   ));
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
       
       {/* Advice Engine Hero - Condensed */}
@@ -493,6 +494,8 @@ const Marketplace = () => {
           {vendorCards}
         </div>
       </div>
+
+      <Footer />
 
       <ServiceDetailModal 
         open={!!selectedServiceId}
