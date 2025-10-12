@@ -1,0 +1,76 @@
+{
+  "partners": [
+    {
+      "id": "vp-360-branding",
+      "name": "360 Branding",
+      "markets": ["franklin-tn", "nashville-tn", "brentwood-tn"],
+      "minAgentDealsPerYear": 10,
+      "allowedServiceIds": [],
+      "prohibitedServiceIds": [],
+      "copayPolicy": { 
+        "enabled": true, 
+        "sharePct": 30, 
+        "maxShareCentsPerOrder": 50000 
+      },
+      "intake": { 
+        "bookingLink": "https://cal.com/360-branding/intro", 
+        "contactEmail": "ops@360branding.io" 
+      },
+      "visibility": "public"
+    },
+    {
+      "id": "vp-national-media",
+      "name": "National Media Co.",
+      "markets": ["any"],
+      "minAgentDealsPerYear": 0,
+      "allowedServiceIds": [],
+      "prohibitedServiceIds": [],
+      "copayPolicy": { 
+        "enabled": true, 
+        "sharePct": 20 
+      },
+      "visibility": "public"
+    },
+    {
+      "id": "vp-keller-williams",
+      "name": "Keller Williams Co-Pay Program",
+      "markets": ["san francisco", "los angeles", "san diego", "sacramento"],
+      "minAgentDealsPerYear": 5,
+      "allowedServiceIds": [],
+      "prohibitedServiceIds": [],
+      "copayPolicy": { 
+        "enabled": true, 
+        "sharePct": 50, 
+        "maxShareCentsPerOrder": 100000 
+      },
+      "visibility": "public"
+    },
+    {
+      "id": "vp-remax",
+      "name": "RE/MAX Agent Advantage",
+      "markets": ["san francisco", "oakland", "san jose", "berkeley"],
+      "minAgentDealsPerYear": 8,
+      "allowedServiceIds": [],
+      "prohibitedServiceIds": [],
+      "copayPolicy": { 
+        "enabled": true, 
+        "sharePct": 40, 
+        "maxShareCentsPerOrder": 80000 
+      },
+      "visibility": "public"
+    },
+    {
+      "id": "vp-elite-invite",
+      "name": "Elite Vendor (Invite)",
+      "markets": ["franklin-tn"],
+      "minAgentDealsPerYear": 25,
+      "allowedServiceIds": [],
+      "prohibitedServiceIds": [],
+      "copayPolicy": { 
+        "enabled": true, 
+        "sharePct": 40 
+      },
+      "visibility": "invite-only"
+    }
+  ]
+}

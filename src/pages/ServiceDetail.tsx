@@ -17,7 +17,7 @@ import { AddToCartModal } from "@/components/commerce/AddToCartModal";
 import { ProUpsellBanner } from "@/components/commerce/ProUpsellBanner";
 import { useProMember } from "@/hooks/use-pro-member";
 import { useLocation } from "@/hooks/use-location";
-import { useCart } from "@/lib/cartStore";
+import { useCart } from "@/state/cart/CartProvider";
 import { createShareLink } from "@/data/share";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,7 +30,7 @@ const ServiceDetail = () => {
   const { toast } = useToast();
   const { isPro, loading: proLoading } = useProMember();
   const { location: userLocation } = useLocation();
-  const { addItem } = useCart();
+  const { add } = useCart();
   const [service, setService] = useState<ServiceFunnel | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
@@ -363,7 +363,7 @@ const ServiceDetail = () => {
                     wallet={wallet}
                     eligiblePartners={eligiblePartners}
                     onConfirm={(selection) => {
-                      addItem({
+                      add({
                         ...selection,
                         serviceName: service.name,
                         vendorName: service.vendor.name,

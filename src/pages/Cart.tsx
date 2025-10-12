@@ -7,14 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ShoppingCart, Trash2, ArrowLeft, Crown, Users, Coins } from "lucide-react";
-import { useCart } from "@/lib/cartStore";
+import { useCart } from "@/state/cart/CartProvider";
 import { PricingMode } from "../../contracts/cart/pricing-selection";
 import { ProUpsellBanner } from "@/components/commerce/ProUpsellBanner";
 import { useProMember } from "@/hooks/use-pro-member";
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { items, removeItem, clearCart, itemCount } = useCart();
+  const { items, remove, clear, itemCount } = useCart();
   const { isPro, loading: proLoading } = useProMember();
 
   const formatPrice = (amount: number, currency: string = "USD"): string => {
@@ -105,7 +105,7 @@ const Cart = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               {items.map((item) => (
-                <Card key={item.cartItemId}>
+                <Card key={item.id}>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -122,7 +122,7 @@ const Cart = () => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => removeItem(item.cartItemId)}
+                        onClick={() => remove(item.id)}
                         className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -171,7 +171,7 @@ const Cart = () => {
 
               <Button
                 variant="outline"
-                onClick={clearCart}
+                onClick={clear}
                 className="w-full text-destructive hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-2" />

@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import servicesFixture from "../../../fixtures/services.json";
 import { Save, FileJson } from "lucide-react";
 
 export function ServicesManagement() {
@@ -13,9 +12,14 @@ export function ServicesManagement() {
   const [publishedJson, setPublishedJson] = useState("");
 
   useEffect(() => {
-    // Load from fixtures
-    setDraftJson(JSON.stringify(servicesFixture, null, 2));
-    setPublishedJson(JSON.stringify(servicesFixture, null, 2));
+    fetch('/fixtures/services.json')
+      .then(res => res.json())
+      .then(data => {
+        const json = JSON.stringify(data, null, 2);
+        setDraftJson(json);
+        setPublishedJson(json);
+      })
+      .catch(console.error);
   }, []);
 
   const handleSaveDraft = () => {

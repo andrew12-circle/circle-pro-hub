@@ -67,7 +67,8 @@ export async function getServices(params?: GetServicesParams): Promise<ServiceCa
   
   // If API base is not set yet, fall back to local fixtures to keep UI running.
   if (!API) {
-    const services = (await import('../../fixtures/services.json')).default as ServiceCard[];
+    const response = await fetch('/fixtures/services.json');
+    const services = await response.json() as ServiceCard[];
     
     // Apply client-side filtering for fixture mode
     let filtered = services;
@@ -110,7 +111,8 @@ export async function getServiceById(
   if (!id) return null;
   
   if (!API) {
-    const services = (await import('../../fixtures/services.json')).default as ServiceFunnel[];
+    const response = await fetch('/fixtures/services.json');
+    const services = await response.json() as ServiceFunnel[];
     const service = services.find((s) => s.id === id);
     return service || null;
   }

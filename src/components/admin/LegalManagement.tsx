@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import legalFixture from "../../../fixtures/legal.json";
 import { Save, FileText } from "lucide-react";
 
 export function LegalManagement() {
@@ -12,7 +11,10 @@ export function LegalManagement() {
   const [legalJson, setLegalJson] = useState("");
 
   useEffect(() => {
-    setLegalJson(JSON.stringify(legalFixture, null, 2));
+    fetch('/fixtures/legal.json')
+      .then(res => res.json())
+      .then(data => setLegalJson(JSON.stringify(data, null, 2)))
+      .catch(console.error);
   }, []);
 
   const handleSave = () => {

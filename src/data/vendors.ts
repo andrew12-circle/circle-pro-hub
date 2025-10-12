@@ -1,6 +1,10 @@
 import { ServiceCard } from "../../contracts/marketplace";
 import { VendorPartner } from "../../contracts/affiliates/partner";
 import { cache } from "@/adapters/cache";
+import { eligiblePartners, type AgentProfile, type VendorPartner as DomainVendorPartner } from '@/lib/vendor_rules';
+import { getServiceById } from './services';
+
+const API = import.meta.env.VITE_API_BASE?.replace(/\/$/, '') || '';
 
 export interface Vendor {
   id: string;
@@ -10,6 +14,26 @@ export interface Vendor {
   rating: number;
   reviews: number;
   services: ServiceCard[];
+}
+
+export async function getAllPartners(): Promise<DomainVendorPartner[]> {
+  if (!API) {
+    const response = await fetch('/fixtures/vendors.json');
+    const fixtureData = await response.json();
+    return fixtureData.partners as DomainVendorPartner[];
+  }
+  const res = await fetch(`${API}/api/partners`, { credentials: 'include' });
+  if (!res.ok) throw new Error('partners_fetch_failed');
+  return (await res.json()) as DomainVendorPartner[];
+}
+
+export async function getEligiblePartnersForService(
+  service: Pick<ServiceCard, 'id' | 'vendor'>,
+  cityKey: string,
+  agent: AgentProfile
+): Promise<DomainVendorPartner[]> {
+  const partners = await getAllPartners();
+  return eligiblePartners(partners, service, cityKey, agent);
 }
 
 export async function getVendorById(id: string): Promise<Vendor | null> {
@@ -22,11 +46,8 @@ export async function getVendors(): Promise<Vendor[]> {
   throw new Error("Not implemented");
 }
 
-import { eligiblePartners, type AgentProfile, type VendorPartner as DomainVendorPartner } from '@/lib/vendor_rules';
-import { getServiceById } from './services';
-
 /**
- * Get eligible co-pay partners for a service
+ * Get eligible co-pay partners for a service (legacy API for backward compat)
  */
 export async function getEligiblePartners(params: {
   serviceId: string;
@@ -40,50 +61,19 @@ export async function getEligiblePartners(params: {
     const service = await getServiceById(params.serviceId);
     if (!service) return [];
 
-    // 2. Fetch all partners from fixtures (TODO: Replace with BFF/DB call)
-    const allPartners: DomainVendorPartner[] = [
-      {
-        id: crypto.randomUUID(),
-        name: "Keller Williams Co-Pay Program",
-        markets: ["san francisco", "los angeles", "san diego", "sacramento"],
-        minAgentDealsPerYear: 5,
-        allowedServiceIds: [params.serviceId],
-        prohibitedServiceIds: [],
-        copayPolicy: {
-          enabled: true,
-          sharePct: 50,
-          maxShareCentsPerOrder: 50000,
-        },
-      },
-      {
-        id: crypto.randomUUID(),
-        name: "RE/MAX Agent Advantage",
-        markets: ["san francisco", "oakland", "san jose", "berkeley"],
-        minAgentDealsPerYear: 8,
-        allowedServiceIds: [params.serviceId],
-        prohibitedServiceIds: [],
-        copayPolicy: {
-          enabled: true,
-          sharePct: 40,
-          maxShareCentsPerOrder: 40000,
-        },
-      },
-    ];
-
-    // 3. Build agent profile
+    // 2. Build agent profile
     const agentProfile: AgentProfile = {
       dealsLast12m: params.agentDealsPerYear || 0,
     };
 
-    // 4. Call pure eligibility function
-    const eligible = eligiblePartners(
-      allPartners,
+    // 3. Call new getEligiblePartnersForService
+    const eligible = await getEligiblePartnersForService(
       { id: service.id, vendor: service.vendor },
       params.city || '',
       agentProfile
     );
 
-    // 5. Map domain types back to contract types for now
+    // 4. Map domain types back to contract types
     return eligible.map((p) => ({
       id: p.id,
       name: p.name,
