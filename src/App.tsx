@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Category from "./pages/Category";
+import Marketplace from "./pages/Marketplace";
 import Saved from "./pages/Saved";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
@@ -21,6 +22,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/category/:slug" element={<Category />} />
           <Route path="/saved" element={<Saved />} />
           <Route path="/profile" element={<Profile />} />

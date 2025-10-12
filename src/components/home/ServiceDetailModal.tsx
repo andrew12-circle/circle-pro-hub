@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { CheckCircle2, Calendar, Globe, DollarSign, X, Share2, Users } from "lucide-react";
+import { CheckCircle2, Calendar, Globe, DollarSign, X, Share2 } from "lucide-react";
 
 interface ServiceDetailModalProps {
   open: boolean;

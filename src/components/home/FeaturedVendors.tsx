@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 
 interface FeaturedVendorsProps {
   onServiceClick: (serviceId: string) => void;
+  featured?: boolean;
 }
 
 const vendors = [
@@ -85,20 +86,26 @@ const vendors = [
   },
 ];
 
-export const FeaturedVendors = ({ onServiceClick }: FeaturedVendorsProps) => {
+export const FeaturedVendors = ({ onServiceClick, featured = false }: FeaturedVendorsProps) => {
+  const displayVendors = featured ? vendors.slice(0, 4) : vendors;
+
   return (
     <section className="w-full py-16 bg-muted/50">
       <div className="container px-4">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">Top Rated Vendors</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-2">{featured ? "Top Rated Vendors" : "All Vendors"}</h2>
             <p className="text-lg text-muted-foreground">Trusted by thousands of agents nationwide</p>
           </div>
-          <Button variant="outline">View All</Button>
+          {featured && (
+            <Button variant="outline" asChild>
+              <a href="/marketplace">View All</a>
+            </Button>
+          )}
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {vendors.map((vendor) => (
+          {displayVendors.map((vendor) => (
             <div key={vendor.id} className="group">
               <div className="bg-card rounded-2xl border overflow-hidden hover-lift">
                 {/* Header */}

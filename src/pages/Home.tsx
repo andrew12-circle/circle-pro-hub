@@ -13,8 +13,8 @@ const Home = () => {
       <Navbar />
       <main>
         <HeroSection />
-        <CategoryGrid />
-        <FeaturedVendors onServiceClick={setSelectedServiceId} />
+        <CategoryGrid featured />
+        <FeaturedVendors onServiceClick={setSelectedServiceId} featured />
       </main>
       
       <ServiceDetailModal 

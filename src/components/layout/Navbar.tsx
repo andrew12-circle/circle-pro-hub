@@ -29,6 +29,11 @@ export const Navbar = () => {
         {/* Actions */}
         <div className="flex items-center space-x-2">
           <Button variant="ghost" size="icon" asChild>
+            <Link to="/marketplace">
+              <Search className="h-5 w-5" />
+            </Link>
+          </Button>
+          <Button variant="ghost" size="icon" asChild>
             <Link to="/saved">
               <Heart className="h-5 w-5" />
             </Link>
