@@ -331,30 +331,14 @@ const Marketplace = () => {
             </div>
           </div>
 
-          {/* Reviews Highlight */}
-          <div className="p-4 bg-muted/30 border-b">
-            <div className="flex gap-1 mb-2">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-4 w-4 ${
-                    i < Math.floor(vendor.rating)
-                      ? "fill-yellow-400 text-yellow-400"
-                      : "text-muted-foreground/30"
-                  }`}
-                />
-              ))}
+          {/* Reviews Highlight - Condensed, only shown if reviews exist */}
+          {vendor.reviews > 0 && vendor.reviewHighlight && (
+            <div className="px-4 py-2 bg-muted/20 border-b">
+              <p className="text-xs italic text-muted-foreground line-clamp-1">
+                "{vendor.reviewHighlight}"
+              </p>
             </div>
-            <p className="text-sm italic text-muted-foreground">
-              "{vendor.reviewHighlight}"
-            </p>
-            <button 
-              onClick={() => setSelectedServiceId(vendor.id.toString())}
-              className="text-xs text-primary hover:underline font-medium mt-1 inline-block"
-            >
-              Read {vendor.reviews} reviews →
-            </button>
-          </div>
+          )}
 
           {/* Pricing */}
           <div className="p-4 space-y-3">
