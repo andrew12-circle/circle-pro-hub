@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { Button } from "@/components/ui/button";
 import { Search, ShoppingCart, User, Heart } from "lucide-react";
 import { useState, useEffect } from "react";
+import circleNetworkLogo from "@/assets/circle-network-logo.png";
 
 export const Navbar = () => {
   const location = useLocation();
@@ -43,9 +44,7 @@ export const Navbar = () => {
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-            <span className="text-white font-bold text-lg">C</span>
-          </div>
+          <img src={circleNetworkLogo} alt="Circle Network" className="h-8 w-auto object-contain" />
           <span className="font-semibold text-xl">Circle Marketplace</span>
         </Link>
 
