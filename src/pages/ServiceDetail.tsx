@@ -12,10 +12,13 @@ import { Star, Shield, Heart, Share2, ArrowLeft, ShoppingCart, MessageCircle, Ph
 import { getServiceById } from "@/data/services";
 import { ServiceFunnel } from "../../contracts/marketplace";
 import { AddToCartModal } from "@/components/commerce/AddToCartModal";
+import { ProUpsellBanner } from "@/components/commerce/ProUpsellBanner";
+import { useProMember } from "@/hooks/use-pro-member";
 
 const ServiceDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { isPro, loading: proLoading } = useProMember();
   const [service, setService] = useState<ServiceFunnel | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
@@ -254,6 +257,11 @@ const ServiceDetail = () => {
 
           {/* Sidebar - Quick actions */}
           <div className="space-y-4">
+            {/* Pro Upsell Banner */}
+            {!proLoading && !isPro && (
+              <ProUpsellBanner variant="compact" dismissible />
+            )}
+            
             <Card className="sticky top-4">
               <CardHeader>
                 <CardTitle>Quick Actions</CardTitle>

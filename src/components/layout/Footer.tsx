@@ -67,6 +67,16 @@ export const Footer = () => {
             <h3 className="font-semibold text-sm mb-4">Marketplace</h3>
             <ul className="space-y-2">
               <li>
+                <Link to="/services" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Browse Services
+                </Link>
+              </li>
+              <li>
+                <Link to="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                  Pricing
+                </Link>
+              </li>
+              <li>
                 <Link to="/seller-agreement" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Seller Agreement
                 </Link>

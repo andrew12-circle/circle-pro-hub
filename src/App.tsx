@@ -10,6 +10,7 @@ import Services from "./pages/Services";
 import ServiceDetail from "./pages/ServiceDetail";
 import Cart from "./pages/Cart";
 import Wallet from "./pages/Wallet";
+import Pricing from "./pages/Pricing";
 import Saved from "./pages/Saved";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
@@ -32,6 +33,7 @@ const App = () => {
             <Route path="/services/:id" element={<ServiceDetail />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/account/wallet" element={<Wallet />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="/saved" element={<Saved />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin" element={<Admin />} />

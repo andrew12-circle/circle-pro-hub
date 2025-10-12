@@ -9,10 +9,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ShoppingCart, Trash2, ArrowLeft, Crown, Users, Coins } from "lucide-react";
 import { useCart } from "@/lib/cartStore";
 import { PricingMode } from "../../contracts/cart/pricing-selection";
+import { ProUpsellBanner } from "@/components/commerce/ProUpsellBanner";
+import { useProMember } from "@/hooks/use-pro-member";
 
 const Cart = () => {
   const navigate = useNavigate();
   const { items, removeItem, clearCart, itemCount } = useCart();
+  const { isPro, loading: proLoading } = useProMember();
 
   const formatPrice = (amount: number, currency: string = "USD"): string => {
     return new Intl.NumberFormat("en-US", {
@@ -176,7 +179,13 @@ const Cart = () => {
               </Button>
             </div>
 
-            <div className="lg:col-span-1">
+            {/* Order Summary Sidebar */}
+            <div className="lg:col-span-1 space-y-4">
+              {/* Pro Upsell Banner */}
+              {!proLoading && !isPro && (
+                <ProUpsellBanner variant="compact" dismissible />
+              )}
+              
               <Card className="sticky top-4">
                 <CardHeader>
                   <CardTitle>Order Summary</CardTitle>

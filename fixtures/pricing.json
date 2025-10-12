@@ -1,0 +1,139 @@
+{
+  "hero": {
+    "headline": "Simple, Transparent Pricing",
+    "subheadline": "Choose the plan that works best for you. All plans include access to our marketplace.",
+    "highlightText": "Save up to 30% with Pro membership"
+  },
+  "tiers": [
+    {
+      "id": "retail",
+      "name": "Retail",
+      "description": "Perfect for getting started",
+      "price": {
+        "amount": 0,
+        "currency": "USD",
+        "interval": "one-time"
+      },
+      "features": [
+        "Access to all services",
+        "Standard pricing",
+        "Basic support",
+        "Search and browse marketplace",
+        "Save favorites",
+        "Order history"
+      ],
+      "cta": {
+        "text": "Get Started",
+        "href": "/services"
+      },
+      "highlighted": false
+    },
+    {
+      "id": "pro",
+      "name": "Pro Member",
+      "description": "Best value for regular users",
+      "price": {
+        "amount": 49,
+        "currency": "USD",
+        "interval": "month"
+      },
+      "features": [
+        "Everything in Retail, plus:",
+        "Save 15-30% on all services",
+        "Exclusive Pro badge",
+        "Priority customer support",
+        "Early access to new vendors",
+        "Quarterly bonus points",
+        "Annual service discounts",
+        "Dedicated account manager"
+      ],
+      "cta": {
+        "text": "Upgrade to Pro",
+        "href": "/auth?upgrade=pro"
+      },
+      "highlighted": true,
+      "badge": "Most Popular"
+    },
+    {
+      "id": "enterprise",
+      "name": "Enterprise",
+      "description": "For brokerages and teams",
+      "price": {
+        "amount": null,
+        "currency": "USD",
+        "interval": "custom"
+      },
+      "features": [
+        "Everything in Pro, plus:",
+        "Co-pay partnership program",
+        "Custom pricing tiers",
+        "Team management dashboard",
+        "Bulk service ordering",
+        "Dedicated support team",
+        "Custom integrations",
+        "Usage analytics"
+      ],
+      "cta": {
+        "text": "Contact Sales",
+        "href": "mailto:sales@circleprohub.com"
+      },
+      "highlighted": false
+    }
+  ],
+  "faq": [
+    {
+      "question": "How does Pro membership pricing work?",
+      "answer": "Pro membership is $49/month and gives you access to discounted pricing on all services. The average Pro member saves $150+ per month on services, making the membership pay for itself quickly."
+    },
+    {
+      "question": "Can I cancel my Pro membership anytime?",
+      "answer": "Yes! You can cancel your Pro membership at any time. You'll retain Pro benefits through the end of your current billing period."
+    },
+    {
+      "question": "What payment methods do you accept?",
+      "answer": "We accept all major credit cards (Visa, Mastercard, American Express, Discover) and ACH bank transfers for Enterprise customers."
+    },
+    {
+      "question": "How do Circle Points work?",
+      "answer": "Circle Points are earned by completing services and can be redeemed for discounts on future purchases. Points never expire and there's no limit to how many you can earn."
+    },
+    {
+      "question": "What is the Co-Pay program?",
+      "answer": "Our Co-Pay program allows partnered brokerages to subsidize service costs for their agents. Contact sales to learn about partnership opportunities."
+    },
+    {
+      "question": "Is there a contract or commitment?",
+      "answer": "No long-term contracts required. Pro membership is month-to-month, and Retail is completely free with no strings attached."
+    }
+  ],
+  "proUpsell": {
+    "headline": "Not a Pro Member?",
+    "subheadline": "Unlock exclusive savings and benefits",
+    "benefits": [
+      {
+        "icon": "TrendingDown",
+        "title": "Save 15-30%",
+        "description": "On every service purchase"
+      },
+      {
+        "icon": "Crown",
+        "title": "Pro Badge",
+        "description": "Show your status"
+      },
+      {
+        "icon": "Zap",
+        "title": "Priority Support",
+        "description": "Get help faster"
+      },
+      {
+        "icon": "Gift",
+        "title": "Bonus Points",
+        "description": "Earn more rewards"
+      }
+    ],
+    "cta": {
+      "text": "Upgrade Now",
+      "href": "/pricing"
+    }
+  }
+}
