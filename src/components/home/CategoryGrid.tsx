@@ -52,7 +52,7 @@ export const CategoryGrid = ({ featured = false, noContainer = false }: Category
         {displayCategories.map((category) => (
           <Link
             key={category.slug}
-            to={`/category/${category.slug}`}
+            to={`/marketplace?category=${category.slug}`}
             className="group"
           >
             <div className="relative overflow-hidden rounded-2xl border bg-card p-6 hover-lift hover-scale cursor-pointer">

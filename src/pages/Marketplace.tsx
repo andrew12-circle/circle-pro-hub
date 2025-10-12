@@ -111,6 +111,14 @@ const Marketplace = () => {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [topRated, setTopRated] = useState(false);
 
+  // Read category from URL params on mount
+  useEffect(() => {
+    const categoryParam = searchParams.get("category");
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [searchParams]);
+
   const resetFilters = () => {
     setSelectedCategory("all");
     setPriceRange([0, 500]);
