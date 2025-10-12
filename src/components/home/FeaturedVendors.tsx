@@ -1,7 +1,10 @@
-import { Link } from "react-router-dom";
 import { Star, CheckCircle2, Share2, Heart, Crown, HandshakeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+
+interface FeaturedVendorsProps {
+  onServiceClick: (serviceId: string) => void;
+}
 
 const vendors = [
   {
@@ -82,7 +85,7 @@ const vendors = [
   },
 ];
 
-export const FeaturedVendors = () => {
+export const FeaturedVendors = ({ onServiceClick }: FeaturedVendorsProps) => {
   return (
     <section className="w-full py-16 bg-muted/50">
       <div className="container px-4">
@@ -96,7 +99,7 @@ export const FeaturedVendors = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {vendors.map((vendor) => (
-            <div key={vendor.id} id={`vendor-${vendor.id}`} className="group">
+            <div key={vendor.id} className="group">
               <div className="bg-card rounded-2xl border overflow-hidden hover-lift">
                 {/* Header */}
                 <div className="p-4 border-b flex items-center justify-between">
@@ -128,13 +131,12 @@ export const FeaturedVendors = () => {
                   <p className="text-sm text-muted-foreground line-clamp-3 mb-2">
                     🔥 {vendor.tagline}
                   </p>
-                  <Link 
-                    to={`/service/${vendor.id}`}
-                    state={{ vendorId: vendor.id, returnTo: 'featured-vendors' }}
+                  <button 
+                    onClick={() => onServiceClick(vendor.id.toString())}
                     className="text-sm text-primary hover:underline font-medium"
                   >
                     See more
-                  </Link>
+                  </button>
                 </div>
 
                 {/* Logo */}
@@ -164,12 +166,12 @@ export const FeaturedVendors = () => {
                   <p className="text-sm italic text-muted-foreground">
                     "{vendor.reviewHighlight}"
                   </p>
-                  <Link 
-                    to={`/service/${vendor.id}#reviews`} 
+                  <button 
+                    onClick={() => onServiceClick(vendor.id.toString())}
                     className="text-xs text-primary hover:underline font-medium mt-1 inline-block"
                   >
                     Read {vendor.reviews} reviews →
-                  </Link>
+                  </button>
                 </div>
 
                 {/* Pricing */}
@@ -224,13 +226,11 @@ export const FeaturedVendors = () => {
                     <Button variant="outline" size="sm">
                       Add
                     </Button>
-                    <Button size="sm" asChild>
-                      <Link 
-                        to={`/service/${vendor.id}`}
-                        state={{ vendorId: vendor.id, returnTo: 'featured-vendors' }}
-                      >
-                        Learn more
-                      </Link>
+                    <Button 
+                      size="sm"
+                      onClick={() => onServiceClick(vendor.id.toString())}
+                    >
+                      Learn more
                     </Button>
                   </div>
 
