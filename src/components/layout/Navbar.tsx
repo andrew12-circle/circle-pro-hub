@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import circleNetworkLogo from "@/assets/circle-network-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import { LocationSelector } from "./LocationSelector";
+import { useCart } from "@/lib/cartStore";
 
 interface UserProfile {
   full_name: string | null;
@@ -26,6 +27,7 @@ export const Navbar = () => {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isPro, setIsPro] = useState(false);
+  const { itemCount } = useCart();
   const isMarketplace = location.pathname === "/marketplace";
 
   // Check authentication state
@@ -134,8 +136,17 @@ export const Navbar = () => {
                 <LocationSelector />
 
                 {/* Shopping Cart */}
-                <Button variant="ghost" size="icon">
-                  <ShoppingCart className="h-5 w-5" />
+                <Button variant="ghost" size="icon" asChild className="relative">
+                  <Link to="/cart">
+                    <ShoppingCart className="h-5 w-5" />
+                    {itemCount > 0 && (
+                      <Badge 
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                      >
+                        {itemCount}
+                      </Badge>
+                    )}
+                  </Link>
                 </Button>
 
                 {/* Points */}
@@ -171,8 +182,17 @@ export const Navbar = () => {
                     <Heart className="h-5 w-5" />
                   </Link>
                 </Button>
-                <Button variant="ghost" size="icon">
-                  <ShoppingCart className="h-5 w-5" />
+                <Button variant="ghost" size="icon" asChild className="relative">
+                  <Link to="/cart">
+                    <ShoppingCart className="h-5 w-5" />
+                    {itemCount > 0 && (
+                      <Badge 
+                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                      >
+                        {itemCount}
+                      </Badge>
+                    )}
+                  </Link>
                 </Button>
                 <Button variant="ghost" size="icon" asChild>
                   <Link to="/profile">
@@ -214,9 +234,19 @@ export const Navbar = () => {
             )}
           </Link>
 
-          <button className="flex items-center justify-center p-3 text-muted-foreground relative">
+          <Link 
+            to="/cart" 
+            className="flex items-center justify-center p-3 text-muted-foreground relative"
+          >
             <ShoppingCart className="h-6 w-6" />
-          </button>
+            {itemCount > 0 && (
+              <Badge 
+                className="absolute top-1 right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+              >
+                {itemCount}
+              </Badge>
+            )}
+          </Link>
 
           <button className="flex items-center justify-center p-3 text-muted-foreground">
             <Menu className="h-6 w-6" />

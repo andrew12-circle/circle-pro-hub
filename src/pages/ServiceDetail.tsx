@@ -8,9 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, Shield, Heart, Share2, ArrowLeft, Calendar, MessageCircle, Phone } from "lucide-react";
+import { Star, Shield, Heart, Share2, ArrowLeft, ShoppingCart, MessageCircle, Phone } from "lucide-react";
 import { getServiceById } from "@/data/services";
 import { ServiceFunnel } from "../../contracts/marketplace";
+import { AddToCartModal } from "@/components/commerce/AddToCartModal";
 
 const ServiceDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,6 +19,7 @@ const ServiceDetail = () => {
   const [service, setService] = useState<ServiceFunnel | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
+  const [cartModalOpen, setCartModalOpen] = useState(false);
 
   useEffect(() => {
     const loadService = async () => {
@@ -257,9 +259,13 @@ const ServiceDetail = () => {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button className="w-full" size="lg">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Book Now
+                <Button 
+                  className="w-full" 
+                  size="lg"
+                  onClick={() => setCartModalOpen(true)}
+                >
+                  <ShoppingCart className="w-4 h-4 mr-2" />
+                  Add to Cart
                 </Button>
                 <Button variant="outline" className="w-full">
                   <MessageCircle className="w-4 h-4 mr-2" />
@@ -300,6 +306,19 @@ const ServiceDetail = () => {
         </div>
       </main>
       <Footer />
+      
+      {service && currentPackage && (
+        <AddToCartModal
+          open={cartModalOpen}
+          onOpenChange={setCartModalOpen}
+          serviceId={service.id}
+          serviceName={service.name}
+          vendorName={service.vendor.name}
+          packageId={currentPackage.id}
+          packageName={currentPackage.name}
+          pricing={currentPackage.pricing}
+        />
+      )}
     </div>
   );
 };
