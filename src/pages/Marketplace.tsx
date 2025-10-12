@@ -160,7 +160,6 @@ const Marketplace = () => {
                   <span className="font-semibold">{vendor.rating}</span>
                   <span className="text-muted-foreground">({vendor.reviews})</span>
                 </div>
-                <div className="text-xs text-muted-foreground">{vendor.vendor}</div>
               </div>
               <div className="flex gap-1 flex-shrink-0">
                 <Button variant="ghost" size="icon" className="h-7 w-7">
