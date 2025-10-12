@@ -1,0 +1,74 @@
+{
+  "terms": {
+    "id": "terms-v1",
+    "slug": "terms-of-service",
+    "title": "Terms of Service",
+    "lastUpdated": "2025-01-15T00:00:00.000Z",
+    "version": "1.0",
+    "content": "## Acceptance of Terms\n\nBy accessing and using CircleMarketplace.io, you accept and agree to be bound by the terms and provision of this agreement.\n\n## Use License\n\nPermission is granted to temporarily access the materials on CircleMarketplace.io for personal, non-commercial transitory viewing only.\n\n## Account Terms\n\n- You must be 18 years or older to use this service.\n- You are responsible for maintaining the security of your account.\n- You may not use the service for any illegal purpose.\n\n## Service Modifications\n\nCircleMarketplace.io reserves the right to modify or discontinue the service with or without notice.\n\n## Limitation of Liability\n\nIn no event shall CircleMarketplace.io be liable for any damages arising out of the use or inability to use the materials on our platform."
+  },
+  "privacy": {
+    "id": "privacy-v1",
+    "slug": "privacy-policy",
+    "title": "Privacy Policy",
+    "lastUpdated": "2025-01-15T00:00:00.000Z",
+    "version": "1.0",
+    "content": "## Information We Collect\n\nWe collect information you provide directly to us, including:\n- Name and contact information\n- Account credentials\n- Payment information\n- Transaction history\n\n## How We Use Your Information\n\nWe use the information we collect to:\n- Provide, maintain, and improve our services\n- Process transactions\n- Send you technical notices and support messages\n- Respond to your comments and questions\n\n## Information Sharing\n\nWe do not share your personal information with third parties except:\n- With your consent\n- To comply with laws\n- To protect our rights\n\n## Data Security\n\nWe use industry-standard security measures including 256-bit SSL encryption to protect your data.\n\n## Your Rights\n\nYou have the right to:\n- Access your personal data\n- Correct inaccurate data\n- Request deletion of your data\n- Opt out of marketing communications"
+  },
+  "cookies": {
+    "id": "cookies-v1",
+    "slug": "cookie-policy",
+    "title": "Cookie Policy",
+    "lastUpdated": "2025-01-15T00:00:00.000Z",
+    "version": "1.0",
+    "content": "## What Are Cookies\n\nCookies are small text files stored on your device when you visit our website.\n\n## How We Use Cookies\n\nWe use cookies to:\n- Keep you signed in\n- Understand how you use our service\n- Improve your experience\n- Show you relevant content\n\n## Types of Cookies We Use\n\n**Essential Cookies**: Required for the website to function properly.\n\n**Analytics Cookies**: Help us understand how visitors interact with our website.\n\n**Preference Cookies**: Remember your settings and preferences.\n\n## Managing Cookies\n\nYou can control cookies through your browser settings. Note that disabling cookies may affect website functionality."
+  },
+  "compliance": {
+    "id": "compliance-v1",
+    "slug": "compliance-info",
+    "title": "Compliance Information",
+    "lastUpdated": "2025-01-15T00:00:00.000Z",
+    "version": "1.0",
+    "content": "## RESPA Compliance\n\nCircleMarketplace.io complies with the Real Estate Settlement Procedures Act (RESPA). We do not engage in:\n- Kickbacks for referrals\n- Unearned fees\n- Required use of specific service providers\n\n## UDAP Compliance\n\nWe adhere to Unfair or Deceptive Acts or Practices regulations:\n- All pricing is clearly disclosed\n- No hidden fees\n- Transparent vendor relationships\n\n## PCI DSS Compliance\n\nWe maintain Payment Card Industry Data Security Standards compliance for secure payment processing.\n\n## ADA Compliance\n\nOur platform strives to meet Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards.\n\n## Geographic Restrictions\n\nServices are available only where permitted by law. Some services may be restricted in certain jurisdictions."
+  },
+  "sellerAgreement": {
+    "id": "seller-v1",
+    "slug": "seller-agreement",
+    "title": "Seller Agreement",
+    "lastUpdated": "2025-01-15T00:00:00.000Z",
+    "version": "1.0",
+    "content": "## Seller Responsibilities\n\nAs a seller on CircleMarketplace.io, you agree to:\n- Provide accurate service descriptions\n- Honor published pricing\n- Maintain professional standards\n- Respond to inquiries promptly\n- Fulfill services as described\n\n## Listing Requirements\n\n- All listings must be accurate and complete\n- Pricing must be clearly stated\n- Service limitations must be disclosed\n- Verify marks require documentation\n\n## Prohibited Activities\n\nSellers may not:\n- List services they cannot fulfill\n- Engage in price manipulation\n- Provide false information\n- Circumvent platform fees\n\n## Payment Terms\n\n- Platform fees are deducted from transactions\n- Payments processed within 5-7 business days\n- Refunds handled per platform policy\n\n## Account Termination\n\nWe reserve the right to suspend or terminate seller accounts for policy violations."
+  },
+  "buyerProtection": {
+    "id": "buyer-v1",
+    "slug": "buyer-protection",
+    "title": "Buyer Protection",
+    "lastUpdated": "2025-01-15T00:00:00.000Z",
+    "version": "1.0",
+    "content": "## Our Commitment to Buyers\n\nCircleMarketplace.io is committed to protecting buyers through:\n- Secure payment processing\n- Verified vendor program\n- Dispute resolution process\n- Transparent pricing\n\n## What's Protected\n\n- Services not delivered as described\n- Unauthorized charges\n- Quality issues with documented evidence\n\n## Filing a Claim\n\nTo file a buyer protection claim:\n1. Contact the seller first to resolve the issue\n2. If unresolved, submit a formal dispute within 30 days\n3. Provide documentation and evidence\n4. Await review (typically 5-10 business days)\n\n## Refund Process\n\nApproved claims result in:\n- Full or partial refund\n- Points restoration (if applicable)\n- Vendor review impact\n\n## Limitations\n\nBuyer protection does not cover:\n- Buyer's remorse\n- Services correctly delivered\n- Issues not reported within timeframe"
+  },
+  "prohibited": {
+    "id": "prohibited-v1",
+    "slug": "prohibited-items",
+    "title": "Prohibited Items & Services",
+    "lastUpdated": "2025-01-15T00:00:00.000Z",
+    "version": "1.0",
+    "content": "## Prohibited Services\n\nThe following services are not permitted on CircleMarketplace.io:\n\n### Illegal Services\n- Any service illegal under federal, state, or local law\n- Unlicensed professional services requiring licensure\n- Services violating RESPA or other real estate regulations\n\n### Dangerous Services\n- Services posing safety risks without proper certification\n- Asbestos or lead-based services by unlicensed providers\n- Structural work without proper licensing\n\n### Fraudulent Practices\n- Appraisal manipulation\n- Fake reviews or testimonials\n- Misleading service descriptions\n- Guarantee of loan approval or specific outcomes\n\n### Restricted Content\n- Adult or explicit content\n- Discriminatory services\n- Services targeting vulnerable populations\n\n## Enforcement\n\nViolations result in:\n- Immediate listing removal\n- Account suspension or termination\n- Legal action if warranted\n- Report to relevant authorities"
+  },
+  "disputeResolution": {
+    "id": "dispute-v1",
+    "slug": "dispute-resolution",
+    "title": "Dispute Resolution",
+    "lastUpdated": "2025-01-15T00:00:00.000Z",
+    "version": "1.0",
+    "content": "## Dispute Resolution Process\n\n### Step 1: Direct Communication\nAttempt to resolve the issue directly with the other party through our messaging system.\n\n### Step 2: Formal Dispute\nIf direct communication fails, file a formal dispute:\n- Provide detailed description\n- Include supporting documentation\n- Submit within 30 days of issue\n\n### Step 3: Platform Review\nOur team will:\n- Review all evidence from both parties\n- Request additional information if needed\n- Issue a decision within 5-10 business days\n\n### Step 4: Mediation\nFor unresolved disputes over $500:\n- Professional mediation available\n- Costs split between parties\n- Non-binding recommendations\n\n### Step 5: Arbitration\nFor disputes not resolved through mediation:\n- Binding arbitration available\n- Governed by American Arbitration Association rules\n- Decision is final and enforceable\n\n## Prohibited Resolution Methods\n\n- Public defamation\n- Harassment\n- Legal action before completing platform process"
+  },
+  "refundPolicy": {
+    "id": "refund-v1",
+    "slug": "refund-policy",
+    "title": "Refund Policy",
+    "lastUpdated": "2025-01-15T00:00:00.000Z",
+    "version": "1.0",
+    "content": "## Refund Eligibility\n\nRefunds may be issued when:\n- Service not delivered as described\n- Seller cancels confirmed booking\n- Service quality significantly below standard\n- Documented breach of seller agreement\n\n## Refund Timeframes\n\n**Before Service Delivery:**\n- Full refund if canceled 48+ hours before scheduled service\n- 50% refund if canceled 24-48 hours before\n- No refund if canceled less than 24 hours before\n\n**After Service Delivery:**\n- Claim must be filed within 30 days\n- Review process takes 5-10 business days\n- Refund issued within 5-7 business days if approved\n\n## Refund Methods\n\n- Original payment method\n- Platform credit\n- Points restoration (if applicable)\n\n## Partial Refunds\n\nPartial refunds may be issued when:\n- Service partially completed\n- Minor issues with deliverables\n- Mutually agreed resolution\n\n## Non-Refundable Items\n\n- Services completed as described\n- Buyer's remorse\n- Issues caused by buyer\n- Services outside refund timeframe"
+  }
+}

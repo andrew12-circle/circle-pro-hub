@@ -2,6 +2,7 @@ export * from "./common";
 export * from "./marketplace";
 export * from "./ui/pricing-page";
 export * from "./forms/vendor-intake";
+export * from "./forms/support-ticket";
 export * from "./affiliates/core";
 export * from "./affiliates/partner";
 export * from "./content/legal";

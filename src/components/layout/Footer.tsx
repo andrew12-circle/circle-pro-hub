@@ -35,17 +35,17 @@ export const Footer = () => {
             <h3 className="font-semibold text-sm mb-4">Legal</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/legal#terms-of-service" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Terms of Service
                 </Link>
               </li>
               <li>
-                <Link to="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/legal#privacy-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/cookies" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/legal#cookie-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Cookie Policy
                 </Link>
               </li>
@@ -55,7 +55,7 @@ export const Footer = () => {
                 </button>
               </li>
               <li>
-                <Link to="/compliance" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/legal#compliance-info" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Compliance Info
                 </Link>
               </li>
@@ -77,17 +77,17 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/seller-agreement" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/legal#seller-agreement" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Seller Agreement
                 </Link>
               </li>
               <li>
-                <Link to="/buyer-protection" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/legal#buyer-protection" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Buyer Protection
                 </Link>
               </li>
               <li>
-                <Link to="/prohibited" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/legal#prohibited-items" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Prohibited Items
                 </Link>
               </li>
@@ -99,27 +99,27 @@ export const Footer = () => {
             <h3 className="font-semibold text-sm mb-4">Support</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/circle-ministry" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/support" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Circle Ministry
                 </Link>
               </li>
               <li>
-                <Link to="/affiliate" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/support" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Affiliate Program
                 </Link>
               </li>
               <li>
-                <Link to="/dispute-resolution" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/legal#dispute-resolution" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Dispute Resolution
                 </Link>
               </li>
               <li>
-                <Link to="/refund-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/legal#refund-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Refund Policy
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/support" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   Contact Support
                 </Link>
               </li>
