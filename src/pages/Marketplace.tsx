@@ -414,25 +414,9 @@ const Marketplace = () => {
       </div>
 
       {/* Main Content - Full Width */}
-      <div className="w-full">
-        {/* Results Header */}
-        <div className="px-4 lg:px-8 py-6 border-b bg-background">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold">All Services & Vendors</h2>
-              <p className="text-sm text-muted-foreground mt-1">Trusted by thousands of agents nationwide</p>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">{vendors.length}</span> results
-            </div>
-          </div>
-        </div>
-
-        {/* Vendors Grid */}
-        <div className="px-4 lg:px-8 py-8 bg-muted/30">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {vendorCards}
-          </div>
+      <div className="w-full px-4 lg:px-8 py-8 bg-muted/30">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {vendorCards}
         </div>
       </div>
 
