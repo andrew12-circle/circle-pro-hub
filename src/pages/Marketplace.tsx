@@ -285,9 +285,9 @@ const Marketplace = () => {
             {/* Header */}
             <div className="text-center mb-4">
               <div className="flex items-center justify-center gap-2 mb-2">
-                <h1 className="text-2xl md:text-3xl font-bold text-primary">
-                  Need Advice?
-                </h1>
+              <h1 className="text-3xl md:text-5xl font-bold text-primary">
+                Need Advice?
+              </h1>
                 <Badge className="bg-yellow-400 text-black hover:bg-yellow-500 text-xs font-semibold">
                   BETA
                 </Badge>
