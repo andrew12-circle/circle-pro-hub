@@ -92,8 +92,8 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto p-0">
-        {/* Header with gradient */}
-        <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 text-white p-8 md:p-12">
+        {/* Header with gradient - More Condensed */}
+        <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 text-white p-6 md:p-8">
           {/* Close button */}
           <div className="absolute top-4 right-4 flex gap-2">
             <Button variant="ghost" size="icon" className="bg-white/10 hover:bg-white/20 text-white">
@@ -109,8 +109,8 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
             </Button>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-6 items-start">
+            <div className="space-y-3">
               {service.verified && (
                 <Badge className="bg-emerald-500/20 text-emerald-100 border-emerald-400/30">
                   <CheckCircle2 className="h-3 w-3 mr-1" />
@@ -118,34 +118,50 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
                 </Badge>
               )}
               
-              <h1 className="text-3xl md:text-4xl font-bold leading-tight">
+              <h1 className="text-2xl md:text-3xl font-bold leading-tight">
                 {service.name}
               </h1>
               
-              <p className="text-blue-100 text-lg leading-relaxed">
+              <p className="text-blue-100 text-base leading-relaxed">
                 {service.description}
               </p>
 
-              {/* Metrics */}
-              <div className="grid grid-cols-3 gap-3 pt-4">
+              {/* Metrics - More Compact */}
+              <div className="grid grid-cols-3 gap-2 pt-2">
                 {service.metrics.map((metric, idx) => (
-                  <div key={idx} className="bg-white/10 backdrop-blur rounded-xl p-3 border border-white/20">
-                    <div className="text-2xl font-bold">{metric.value}</div>
-                    <div className="text-xs text-blue-100 mt-1">{metric.label}</div>
-                    <div className="text-[10px] text-blue-200/70 mt-0.5">{metric.description}</div>
+                  <div key={idx} className="bg-white/10 backdrop-blur rounded-lg p-2.5 border border-white/20">
+                    <div className="text-xl font-bold">{metric.value}</div>
+                    <div className="text-[10px] text-blue-100 mt-0.5 leading-tight">{metric.label}</div>
+                    <div className="text-[9px] text-blue-200/70">{metric.description}</div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Large logo/brand area */}
-            <div className="bg-white rounded-2xl p-8 flex items-center justify-center aspect-square">
-              <div className="text-center">
-                <div className="h-24 w-24 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                  <span className="text-4xl font-bold text-primary">PP</span>
+            {/* Large logo/brand area with media thumbnails */}
+            <div className="space-y-3">
+              <div className="bg-white rounded-xl p-6 flex items-center justify-center aspect-video">
+                <div className="text-center">
+                  <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                    <span className="text-3xl font-bold text-primary">PP</span>
+                  </div>
+                  <div className="text-xl font-bold text-foreground">{service.vendor}</div>
+                  <div className="text-xs text-muted-foreground mt-1">{service.tagline}</div>
                 </div>
-                <div className="text-2xl font-bold text-foreground">{service.vendor}</div>
-                <div className="text-sm text-muted-foreground mt-2">{service.tagline}</div>
+              </div>
+              
+              {/* Media Thumbnails */}
+              <div className="grid grid-cols-4 gap-2">
+                {[1, 2, 3, 4].map((idx) => (
+                  <div 
+                    key={idx} 
+                    className="bg-white/20 backdrop-blur rounded-lg aspect-video border border-white/30 hover:bg-white/30 transition-colors cursor-pointer overflow-hidden"
+                  >
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400/30 to-purple-400/30">
+                      <div className="text-white/60 text-xs font-medium">Video {idx}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
