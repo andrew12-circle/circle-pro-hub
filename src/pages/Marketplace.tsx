@@ -137,144 +137,244 @@ const Marketplace = () => {
   // Vendor cards
   const vendorCards = vendors.map((vendor) => (
     <div key={vendor.id} className="group">
-      <div className="bg-card rounded-2xl border overflow-hidden hover-lift">
-        {/* Header */}
-        <div className="p-4 border-b flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-xl">
-              {vendor.avatar}
-            </div>
-            <div>
-              <div className="font-semibold text-sm">{vendor.vendor}</div>
-              <div className="flex items-center gap-1 text-xs">
-                <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                <span className="font-semibold">{vendor.rating}</span>
-                <span className="text-muted-foreground">({vendor.reviews})</span>
+      <div className="bg-card rounded-2xl border overflow-hidden hover-lift flex flex-col md:flex-col">
+        {/* Mobile: Horizontal Layout */}
+        <div className="flex md:hidden">
+          {/* Left: Logo/Image */}
+          <div className="w-32 flex-shrink-0 bg-gradient-to-br from-background to-muted/30 flex items-center justify-center border-r p-4">
+            <div className="text-center">
+              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-1">
+                <span className="text-xl font-bold text-primary">{vendor.logo}</span>
               </div>
             </div>
           </div>
-          <div className="flex gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Share2 className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Heart className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
 
-        {/* Description */}
-        <div className="p-4 border-b">
-          <p className="text-sm text-muted-foreground line-clamp-3 mb-2">
-            🔥 {vendor.tagline}
-          </p>
-          <button 
-            onClick={() => setSelectedServiceId(vendor.id.toString())}
-            className="text-sm text-primary hover:underline font-medium"
-          >
-            See more
-          </button>
-        </div>
-
-        {/* Logo */}
-        <div className="aspect-[4/3] bg-gradient-to-br from-background to-muted/30 flex items-center justify-center border-b">
-          <div className="text-center">
-            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
-              <span className="text-2xl font-bold text-primary">{vendor.logo}</span>
+          {/* Right: Content */}
+          <div className="flex-1 flex flex-col">
+            {/* Header */}
+            <div className="p-3 border-b flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-sm line-clamp-2 mb-1">{vendor.name}</div>
+                <div className="flex items-center gap-1 text-xs mb-1">
+                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400 flex-shrink-0" />
+                  <span className="font-semibold">{vendor.rating}</span>
+                  <span className="text-muted-foreground">({vendor.reviews})</span>
+                </div>
+                <div className="text-xs text-muted-foreground">{vendor.vendor}</div>
+              </div>
+              <div className="flex gap-1 flex-shrink-0">
+                <Button variant="ghost" size="icon" className="h-7 w-7">
+                  <Heart className="h-3.5 w-3.5" />
+                </Button>
+              </div>
             </div>
-            <div className="text-lg font-bold">{vendor.name}</div>
+
+            {/* Description */}
+            <div className="p-3 border-b">
+              <p className="text-xs text-muted-foreground line-clamp-2 mb-1">
+                🔥 {vendor.tagline}
+              </p>
+              <button 
+                onClick={() => setSelectedServiceId(vendor.id.toString())}
+                className="text-xs text-primary hover:underline font-medium"
+              >
+                See more
+              </button>
+            </div>
+
+            {/* Pricing */}
+            <div className="p-3 space-y-2">
+              {/* Retail Price */}
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted-foreground">Retail:</span>
+                <span className="font-bold">${vendor.retailPrice}/mo</span>
+              </div>
+
+              {/* Pro Price */}
+              <div className="flex items-center justify-between p-1.5 bg-primary/5 rounded border border-primary/20">
+                <div className="flex items-center gap-1 text-xs">
+                  <Crown className="h-3 w-3 text-primary" />
+                  <span className="font-medium text-primary">Pro</span>
+                </div>
+                <span className="font-bold text-xs text-primary">${vendor.proPrice}/mo</span>
+              </div>
+
+              {/* Co-pay Section */}
+              <div className="p-2 bg-green-50 dark:bg-green-950/20 rounded border border-green-200 dark:border-green-800">
+                <div className="flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400 mb-1">
+                  <HandshakeIcon className="h-3 w-3" />
+                  <span>Co-Pay</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-green-700 dark:text-green-400">From:</span>
+                  <span className="font-bold text-green-700 dark:text-green-400">${vendor.copayWithVendor}/mo</span>
+                </div>
+              </div>
+
+              {/* Discount Badge */}
+              {vendor.discount && (
+                <Badge className="bg-red-500 text-white hover:bg-red-600 text-xs w-full justify-center">
+                  {vendor.discount}
+                </Badge>
+              )}
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" className="text-xs h-8">
+                  Add
+                </Button>
+                <Button 
+                  size="sm"
+                  className="text-xs h-8"
+                  onClick={() => setSelectedServiceId(vendor.id.toString())}
+                >
+                  Learn more
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Reviews Highlight */}
-        <div className="p-4 bg-muted/30 border-b">
-          <div className="flex gap-1 mb-2">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-4 w-4 ${
-                  i < Math.floor(vendor.rating)
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "text-muted-foreground/30"
-                }`}
-              />
-            ))}
-          </div>
-          <p className="text-sm italic text-muted-foreground">
-            "{vendor.reviewHighlight}"
-          </p>
-          <button 
-            onClick={() => setSelectedServiceId(vendor.id.toString())}
-            className="text-xs text-primary hover:underline font-medium mt-1 inline-block"
-          >
-            Read {vendor.reviews} reviews →
-          </button>
-        </div>
-
-        {/* Pricing */}
-        <div className="p-4 space-y-3">
-          {/* Retail Price */}
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Retail Price:</span>
-            <span className="font-bold text-lg">${vendor.retailPrice}/mo</span>
-          </div>
-
-          {/* Pro Price */}
-          <div className="flex items-center justify-between p-2 bg-primary/5 rounded-lg border border-primary/20">
-            <div className="flex items-center gap-1 text-sm">
-              <Crown className="h-4 w-4 text-primary" />
-              <span className="font-medium text-primary">Unlock Pro Price</span>
+        {/* Desktop: Vertical Layout (unchanged) */}
+        <div className="hidden md:block">
+          {/* Header */}
+          <div className="p-4 border-b flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-xl">
+                {vendor.avatar}
+              </div>
+              <div>
+                <div className="font-semibold text-sm">{vendor.vendor}</div>
+                <div className="flex items-center gap-1 text-xs">
+                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                  <span className="font-semibold">{vendor.rating}</span>
+                  <span className="text-muted-foreground">({vendor.reviews})</span>
+                </div>
+              </div>
             </div>
-            <span className="font-bold text-lg text-primary">${vendor.proPrice}/mo</span>
+            <div className="flex gap-1">
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Share2 className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Heart className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
-          {/* Co-pay Section */}
-          <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800 space-y-2">
-            <div className="flex items-center gap-1 text-sm font-medium text-green-700 dark:text-green-400">
-              <HandshakeIcon className="h-4 w-4" />
-              <span>Unlock Co-Pay</span>
-            </div>
-            <p className="text-xs text-green-600 dark:text-green-500">
-              We have vendors lined up: Lender's, Title, HOI, Warranty, Moving Etc. click quick apply waiting to help reduce your bill
+          {/* Description */}
+          <div className="p-4 border-b">
+            <p className="text-sm text-muted-foreground line-clamp-3 mb-2">
+              🔥 {vendor.tagline}
             </p>
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-green-700 dark:text-green-400">With Vendor Help:</span>
-                <span className="font-bold text-green-700 dark:text-green-400">${vendor.copayWithVendor}/mo</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-green-700 dark:text-green-400">Non Settlement Service Provider:</span>
-                <span className="font-bold text-green-700 dark:text-green-400">${vendor.copayNonSettlement}/mo</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Discount Badge */}
-          {vendor.discount && (
-            <div className="flex justify-center">
-              <Badge className="bg-red-500 text-white hover:bg-red-600">
-                {vendor.discount}
-              </Badge>
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className="grid grid-cols-2 gap-2 pt-2">
-            <Button variant="outline" size="sm">
-              Add
-            </Button>
-            <Button 
-              size="sm"
+            <button 
               onClick={() => setSelectedServiceId(vendor.id.toString())}
+              className="text-sm text-primary hover:underline font-medium"
             >
-              Learn more
-            </Button>
+              See more
+            </button>
           </div>
 
-          {/* Guarantee Text */}
-          <p className="text-[10px] text-muted-foreground leading-tight pt-2">
-            <span className="font-semibold">Pro Savings Guarantee.</span> If your first month Pro credits and coverage do not equal or exceed your membership fee we credit the difference as marketplace credit.
-          </p>
+          {/* Logo */}
+          <div className="aspect-[4/3] bg-gradient-to-br from-background to-muted/30 flex items-center justify-center border-b">
+            <div className="text-center">
+              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                <span className="text-2xl font-bold text-primary">{vendor.logo}</span>
+              </div>
+              <div className="text-lg font-bold">{vendor.name}</div>
+            </div>
+          </div>
+
+          {/* Reviews Highlight */}
+          <div className="p-4 bg-muted/30 border-b">
+            <div className="flex gap-1 mb-2">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className={`h-4 w-4 ${
+                    i < Math.floor(vendor.rating)
+                      ? "fill-yellow-400 text-yellow-400"
+                      : "text-muted-foreground/30"
+                  }`}
+                />
+              ))}
+            </div>
+            <p className="text-sm italic text-muted-foreground">
+              "{vendor.reviewHighlight}"
+            </p>
+            <button 
+              onClick={() => setSelectedServiceId(vendor.id.toString())}
+              className="text-xs text-primary hover:underline font-medium mt-1 inline-block"
+            >
+              Read {vendor.reviews} reviews →
+            </button>
+          </div>
+
+          {/* Pricing */}
+          <div className="p-4 space-y-3">
+            {/* Retail Price */}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Retail Price:</span>
+              <span className="font-bold text-lg">${vendor.retailPrice}/mo</span>
+            </div>
+
+            {/* Pro Price */}
+            <div className="flex items-center justify-between p-2 bg-primary/5 rounded-lg border border-primary/20">
+              <div className="flex items-center gap-1 text-sm">
+                <Crown className="h-4 w-4 text-primary" />
+                <span className="font-medium text-primary">Unlock Pro Price</span>
+              </div>
+              <span className="font-bold text-lg text-primary">${vendor.proPrice}/mo</span>
+            </div>
+
+            {/* Co-pay Section */}
+            <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800 space-y-2">
+              <div className="flex items-center gap-1 text-sm font-medium text-green-700 dark:text-green-400">
+                <HandshakeIcon className="h-4 w-4" />
+                <span>Unlock Co-Pay</span>
+              </div>
+              <p className="text-xs text-green-600 dark:text-green-500">
+                We have vendors lined up: Lender's, Title, HOI, Warranty, Moving Etc. click quick apply waiting to help reduce your bill
+              </p>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-green-700 dark:text-green-400">With Vendor Help:</span>
+                  <span className="font-bold text-green-700 dark:text-green-400">${vendor.copayWithVendor}/mo</span>
+                </div>
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-green-700 dark:text-green-400">Non Settlement Service Provider:</span>
+                  <span className="font-bold text-green-700 dark:text-green-400">${vendor.copayNonSettlement}/mo</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Discount Badge */}
+            {vendor.discount && (
+              <div className="flex justify-center">
+                <Badge className="bg-red-500 text-white hover:bg-red-600">
+                  {vendor.discount}
+                </Badge>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-2 pt-2">
+              <Button variant="outline" size="sm">
+                Add
+              </Button>
+              <Button 
+                size="sm"
+                onClick={() => setSelectedServiceId(vendor.id.toString())}
+              >
+                Learn more
+              </Button>
+            </div>
+
+            {/* Guarantee Text */}
+            <p className="text-[10px] text-muted-foreground leading-tight pt-2">
+              <span className="font-semibold">Pro Savings Guarantee.</span> If your first month Pro credits and coverage do not equal or exceed your membership fee we credit the difference as marketplace credit.
+            </p>
+          </div>
         </div>
       </div>
     </div>
