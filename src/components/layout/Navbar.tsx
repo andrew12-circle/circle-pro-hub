@@ -102,15 +102,15 @@ export const Navbar = () => {
     }
   };
   return <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between px-4">
+      <div className="container flex h-16 items-center justify-between px-4 gap-2">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
+        <Link to="/" className="flex items-center space-x-2 flex-shrink-0">
           <img src={circleNetworkLogo} alt="Circle Network" className="h-12 w-auto object-contain" />
-          <span className="font-semibold text-xl">Marketplace</span>
+          <span className="hidden md:inline font-semibold text-xl">Marketplace</span>
         </Link>
 
-        {/* Search Bar */}
-        <div className="hidden md:flex flex-1 max-w-xl mx-8">
+        {/* Search Bar - Always visible */}
+        <div className="flex flex-1 max-w-xl">
           <form onSubmit={handleSearch} className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input type="search" placeholder={isMarketplace ? "Search services, vendors, categories..." : "What do you need help with?"} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="w-full pl-10 pr-4 py-2 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary" />
@@ -118,7 +118,7 @@ export const Navbar = () => {
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 flex-shrink-0">
           {user ? (
             <>
               {/* Location */}
@@ -129,20 +129,20 @@ export const Navbar = () => {
                 </div>
               )}
 
-              {/* Shopping Cart */}
-              <Button variant="ghost" size="icon">
+               {/* Shopping Cart */}
+              <Button variant="ghost" size="icon" className="hidden sm:flex">
                 <ShoppingCart className="h-5 w-5" />
               </Button>
 
               {/* Points */}
-              <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted">
+              <div className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted">
                 <Crown className="h-4 w-4 text-yellow-600" />
                 <span className="text-sm font-medium">{profile?.points || 0} Points</span>
               </div>
 
               {/* User Avatar with Pro Badge */}
               <Link to="/profile" className="relative">
-                <Avatar className={`h-10 w-10 ${isPro ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+                <Avatar className={`h-9 w-9 md:h-10 md:w-10 ${isPro ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
                   <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
                   <AvatarFallback>
                     <User className="h-5 w-5" />
@@ -157,17 +157,7 @@ export const Navbar = () => {
             </>
           ) : (
             <>
-              <Button variant="ghost" size="icon" asChild>
-                <Link to="/marketplace">
-                  <Search className="h-5 w-5" />
-                </Link>
-              </Button>
-              <Button variant="ghost" size="icon" asChild>
-                <Link to="/saved">
-                  <Heart className="h-5 w-5" />
-                </Link>
-              </Button>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" className="hidden sm:flex">
                 <ShoppingCart className="h-5 w-5" />
               </Button>
               <Button variant="ghost" size="icon" asChild>
@@ -175,7 +165,7 @@ export const Navbar = () => {
                   <User className="h-5 w-5" />
                 </Link>
               </Button>
-              <Button asChild>
+              <Button asChild className="hidden sm:flex">
                 <Link to="/auth">Sign In</Link>
               </Button>
             </>
