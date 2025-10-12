@@ -48,15 +48,6 @@ export const CategoryGrid = () => {
               className="group"
             >
               <div className="relative overflow-hidden rounded-2xl border bg-card p-6 hover-lift hover-scale cursor-pointer">
-                {/* Only show badge if count > 0 */}
-                {category.count > 0 && (
-                  <Badge 
-                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full p-0 flex items-center justify-center bg-primary text-primary-foreground text-xs font-semibold"
-                  >
-                    {category.count}
-                  </Badge>
-                )}
-                
                 <div className={`inline-flex p-3 rounded-xl ${category.color} mb-4`}>
                   <category.icon className="h-6 w-6" />
                 </div>
