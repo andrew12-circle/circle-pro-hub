@@ -109,7 +109,7 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
             </Button>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6 items-start">
+          <div className="grid md:grid-cols-2 gap-6 items-start mt-8">
             <div className="space-y-3">
               {service.verified && (
                 <Badge className="bg-emerald-500/20 text-emerald-100 border-emerald-400/30">
