@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
-import { CategoryGrid } from "@/components/home/CategoryGrid";
 import { FeaturedVendors } from "@/components/home/FeaturedVendors";
 import { ServiceDetailModal } from "@/components/home/ServiceDetailModal";
 import { Search, SlidersHorizontal } from "lucide-react";
@@ -189,14 +188,7 @@ const Marketplace = () => {
 
       {/* Main Content - Full Width */}
       <div className="w-full px-4 lg:px-8 py-8">
-        <main className="space-y-16">
-          <div>
-            <CategoryGrid noContainer />
-          </div>
-          <div>
-            <FeaturedVendors onServiceClick={setSelectedServiceId} noContainer />
-          </div>
-        </main>
+        <FeaturedVendors onServiceClick={setSelectedServiceId} noContainer />
       </div>
 
       <ServiceDetailModal 
