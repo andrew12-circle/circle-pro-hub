@@ -1,10 +1,29 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, User, Lock, Eye, EyeOff, Check } from "lucide-react";
 import logo from "@/assets/circle-network-logo.png";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { z } from "zod";
+
+const signUpSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  fullName: z.string().min(2, "Full name must be at least 2 characters"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[a-z]/, "Password must contain a lowercase letter")
+    .regex(/[A-Z]/, "Password must contain an uppercase letter")
+    .regex(/\d/, "Password must contain a number")
+    .regex(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain a special character"),
+});
+
+const signInSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(false);
@@ -12,6 +31,26 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    // Check if user is already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate("/");
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        navigate("/");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const passwordRequirements = [
     { text: "At least 8 characters", met: password.length >= 8 },
@@ -19,6 +58,132 @@ const Auth = () => {
     { text: "At least one number", met: /\d/.test(password) },
     { text: "At least one symbol (!@#$%^&*)", met: /[!@#$%^&*(),.?":{}|<>]/.test(password) },
   ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      if (isLogin) {
+        // Sign in
+        const validation = signInSchema.safeParse({ email, password });
+        if (!validation.success) {
+          toast({
+            title: "Validation Error",
+            description: validation.error.errors[0].message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) {
+          if (error.message.includes("Invalid login credentials")) {
+            toast({
+              title: "Sign In Failed",
+              description: "Invalid email or password. Please try again.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Sign In Failed",
+              description: error.message,
+              variant: "destructive",
+            });
+          }
+          return;
+        }
+
+        toast({
+          title: "Welcome back!",
+          description: "You've successfully signed in.",
+        });
+      } else {
+        // Sign up
+        const validation = signUpSchema.safeParse({ email, fullName, password });
+        if (!validation.success) {
+          toast({
+            title: "Validation Error",
+            description: validation.error.errors[0].message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              full_name: fullName,
+            },
+          },
+        });
+
+        if (error) {
+          if (error.message.includes("already registered")) {
+            toast({
+              title: "Account Exists",
+              description: "This email is already registered. Please sign in instead.",
+              variant: "destructive",
+            });
+          } else {
+            toast({
+              title: "Sign Up Failed",
+              description: error.message,
+              variant: "destructive",
+            });
+          }
+          return;
+        }
+
+        toast({
+          title: "Account Created!",
+          description: "You can now sign in with your credentials.",
+        });
+        setIsLogin(true);
+        setPassword("");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        },
+      });
+
+      if (error) {
+        toast({
+          title: "Google Sign In Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to sign in with Google. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
@@ -46,7 +211,7 @@ const Auth = () => {
                 type="button"
                 variant="outline"
                 className="w-full mb-4 h-12"
-                onClick={() => {/* TODO: Implement Google auth */}}
+                onClick={handleGoogleSignIn}
               >
                 <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -68,7 +233,7 @@ const Auth = () => {
             </>
           )}
 
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">Email</Label>
               <div className="relative">
@@ -170,8 +335,8 @@ const Auth = () => {
               </div>
             )}
 
-            <Button type="submit" className="w-full h-12 text-base font-semibold" size="lg">
-              {isLogin ? "Sign In" : "Create Account"}
+            <Button type="submit" className="w-full h-12 text-base font-semibold" size="lg" disabled={isLoading}>
+              {isLoading ? "Loading..." : isLogin ? "Sign In" : "Create Account"}
             </Button>
           </form>
 
