@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Star, CheckCircle2 } from "lucide-react";
+import { Star, CheckCircle2, Share2, Heart, Crown, HandshakeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -7,42 +7,74 @@ const vendors = [
   {
     id: 1,
     name: "Premium Real Estate Photos",
-    tagline: "Professional HDR photography that sells homes faster",
+    vendor: "Pro Photography Studio",
+    avatar: "📷",
+    logo: "PP",
+    tagline: "Real Agents. Real Results. This isn't theory. Thousands of agents just like you trust us for professional HDR photography that sells homes 40% faster.",
     rating: 4.9,
     reviews: 847,
-    startingPrice: 149,
+    retailPrice: 149,
+    proPrice: 119,
+    proDiscount: 20,
+    copayPrice: 75,
+    copayWithVendor: 75,
+    copayNonSettlement: 75,
     verified: true,
-    pro: true,
+    discount: "20% OFF"
   },
   {
     id: 2,
     name: "Social Media Mastery",
-    tagline: "Daily content creation for real estate agents",
+    vendor: "Digital Marketing Pro",
+    avatar: "📱",
+    logo: "SM",
+    tagline: "Daily content creation for busy agents. Stop posting sporadically and start building a brand that attracts leads on autopilot.",
     rating: 4.8,
     reviews: 623,
-    startingPrice: 299,
+    retailPrice: 299,
+    proPrice: 239,
+    proDiscount: 20,
+    copayPrice: 150,
+    copayWithVendor: 150,
+    copayNonSettlement: 150,
     verified: true,
-    pro: true,
+    discount: "20% OFF"
   },
   {
     id: 3,
     name: "Virtual Staging Pro",
-    tagline: "Transform empty rooms into dream homes",
+    vendor: "Staging Experts",
+    avatar: "🏠",
+    logo: "VS",
+    tagline: "Transform empty rooms into dream homes. Professional virtual staging that helps buyers visualize the lifestyle, not just the space.",
     rating: 5.0,
     reviews: 412,
-    startingPrice: 39,
+    retailPrice: 39,
+    proPrice: 35,
+    proDiscount: 10,
+    copayPrice: 20,
+    copayWithVendor: 20,
+    copayNonSettlement: 20,
     verified: true,
-    pro: false,
+    discount: "10% OFF"
   },
   {
     id: 4,
     name: "SEO & Lead Generation",
-    tagline: "Get ranked #1 in your local market",
+    vendor: "Growth Hackers Inc",
+    avatar: "🎯",
+    logo: "GH",
+    tagline: "Get ranked #1 in your local market. Our proven SEO system gets you found by buyers and sellers actively searching right now.",
     rating: 4.7,
     reviews: 534,
-    startingPrice: 499,
+    retailPrice: 499,
+    proPrice: 399,
+    proDiscount: 20,
+    copayPrice: 250,
+    copayWithVendor: 250,
+    copayNonSettlement: 250,
     verified: true,
-    pro: true,
+    discount: "20% OFF"
   },
 ];
 
@@ -60,59 +92,117 @@ export const FeaturedVendors = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {vendors.map((vendor) => (
-            <Link key={vendor.id} to={`/service/${vendor.id}`} className="group">
-              <div className="bg-card rounded-2xl border overflow-hidden hover-lift cursor-pointer">
-                {/* Vendor Image Placeholder */}
-                <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-                  <span className="text-4xl font-bold text-primary/30">{vendor.name.charAt(0)}</span>
+            <div key={vendor.id} className="group">
+              <div className="bg-card rounded-2xl border overflow-hidden hover-lift">
+                {/* Header */}
+                <div className="p-4 border-b flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-xl">
+                      {vendor.avatar}
+                    </div>
+                    <div>
+                      <div className="font-semibold text-sm">{vendor.vendor}</div>
+                      <div className="flex items-center gap-1 text-xs">
+                        <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        <span className="font-semibold">{vendor.rating}</span>
+                        <span className="text-muted-foreground">({vendor.reviews})</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Heart className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
 
-                <div className="p-5 space-y-3">
-                  {/* Badges */}
-                  <div className="flex gap-2 flex-wrap">
-                    {vendor.verified && (
-                      <Badge className="badge-verified text-xs">
-                        <CheckCircle2 className="h-3 w-3 mr-1" />
-                        Verified
-                      </Badge>
-                    )}
-                    {vendor.pro && (
-                      <Badge className="badge-pro text-xs">
-                        Pro Available
-                      </Badge>
-                    )}
-                  </div>
+                {/* Description */}
+                <div className="p-4 border-b">
+                  <p className="text-sm text-muted-foreground line-clamp-3 mb-2">
+                    🔥 {vendor.tagline}
+                  </p>
+                  <Link to={`/service/${vendor.id}`} className="text-sm text-primary hover:underline font-medium">
+                    See more
+                  </Link>
+                </div>
 
-                  {/* Vendor Info */}
-                  <div>
-                    <h3 className="font-semibold text-lg mb-1 group-hover:text-primary transition-colors">
-                      {vendor.name}
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{vendor.tagline}</p>
-                  </div>
-
-                  {/* Rating */}
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="font-semibold text-sm">{vendor.rating}</span>
+                {/* Logo */}
+                <div className="aspect-[4/3] bg-gradient-to-br from-background to-muted/30 flex items-center justify-center border-b">
+                  <div className="text-center">
+                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+                      <span className="text-2xl font-bold text-primary">{vendor.logo}</span>
                     </div>
-                    <span className="text-sm text-muted-foreground">({vendor.reviews})</span>
+                    <div className="text-lg font-bold">{vendor.name}</div>
+                  </div>
+                </div>
+
+                {/* Pricing */}
+                <div className="p-4 space-y-3">
+                  {/* Retail Price */}
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Retail Price:</span>
+                    <span className="font-bold text-lg">${vendor.retailPrice}/mo</span>
                   </div>
 
-                  {/* Price */}
-                  <div className="pt-3 border-t">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <span className="text-xs text-muted-foreground">From</span>
-                        <div className="font-bold text-lg">${vendor.startingPrice}</div>
+                  {/* Pro Price */}
+                  <div className="flex items-center justify-between p-2 bg-primary/5 rounded-lg border border-primary/20">
+                    <div className="flex items-center gap-1 text-sm">
+                      <Crown className="h-4 w-4 text-primary" />
+                      <span className="font-medium text-primary">Unlock Pro Price</span>
+                    </div>
+                    <span className="font-bold text-lg text-primary">${vendor.proPrice}/mo</span>
+                  </div>
+
+                  {/* Co-pay Section */}
+                  <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800 space-y-2">
+                    <div className="flex items-center gap-1 text-sm font-medium text-green-700 dark:text-green-400">
+                      <HandshakeIcon className="h-4 w-4" />
+                      <span>Unlock Co-Pay</span>
+                    </div>
+                    <p className="text-xs text-green-600 dark:text-green-500">
+                      We have vendors lined up: Lender's, Title, HOI, Warranty, Moving Etc. click quick apply waiting to help reduce your bill
+                    </p>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-green-700 dark:text-green-400">With Vendor Help:</span>
+                        <span className="font-bold text-green-700 dark:text-green-400">${vendor.copayWithVendor}/mo</span>
                       </div>
-                      <Button size="sm">View Details</Button>
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="text-green-700 dark:text-green-400">Non Settlement Service Provider:</span>
+                        <span className="font-bold text-green-700 dark:text-green-400">${vendor.copayNonSettlement}/mo</span>
+                      </div>
                     </div>
                   </div>
+
+                  {/* Discount Badge */}
+                  {vendor.discount && (
+                    <div className="flex justify-center">
+                      <Badge className="bg-red-500 text-white hover:bg-red-600">
+                        {vendor.discount}
+                      </Badge>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="grid grid-cols-2 gap-2 pt-2">
+                    <Button variant="outline" size="sm">
+                      Add
+                    </Button>
+                    <Button size="sm" asChild>
+                      <Link to={`/service/${vendor.id}`}>Learn more</Link>
+                    </Button>
+                  </div>
+
+                  {/* Guarantee Text */}
+                  <p className="text-[10px] text-muted-foreground leading-tight pt-2">
+                    <span className="font-semibold">Pro Savings Guarantee.</span> If your first month Pro credits and coverage do not equal or exceed your membership fee we credit the difference as marketplace credit.
+                  </p>
                 </div>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
       </div>
