@@ -54,6 +54,11 @@ const Profile = () => {
           avatar_url: profileData.avatar_url || "",
           points: profileData.points || 0,
         });
+        
+        // Auto-detect location if not set
+        if (!profileData.location) {
+          autoDetectLocation(session.user.id);
+        }
       }
 
       // Check pro status
@@ -180,7 +185,41 @@ const Profile = () => {
     setSaving(false);
   };
 
+  const autoDetectLocation = async (userId: string) => {
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&format=json`
+          );
+          const data = await response.json();
+          
+          const city = data.address?.city || data.address?.town || data.address?.village || '';
+          const state = data.address?.state || '';
+          const location = city && state ? `${city}, ${state}` : data.display_name;
+          
+          // Auto-save the detected location
+          await supabase
+            .from('profiles')
+            .update({ location })
+            .eq('id', userId);
+          
+          setProfile(prev => ({ ...prev, location }));
+        } catch (error) {
+          // Silently fail for auto-detection
+        }
+      },
+      () => {
+        // Silently fail if location access denied
+      }
+    );
+  };
+
   const handleDetectLocation = async () => {
+    if (!user) return;
+    
     if (!navigator.geolocation) {
       toast({
         title: "Error",
