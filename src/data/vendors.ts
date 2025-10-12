@@ -22,6 +22,9 @@ export async function getVendors(): Promise<Vendor[]> {
   throw new Error("Not implemented");
 }
 
+import { eligiblePartners, type AgentProfile, type VendorPartner as DomainVendorPartner } from '@/lib/vendor_rules';
+import { getServiceById } from './services';
+
 /**
  * Get eligible co-pay partners for a service
  */
@@ -33,63 +36,76 @@ export async function getEligiblePartners(params: {
   const cacheKey = `eligible-partners:${params.serviceId}:${params.city || "any"}:${params.agentDealsPerYear || 0}`;
   
   return cache.getOrSet(cacheKey, 60, async () => {
-    // TODO: Replace with real data from DB/API
-    // For now, return fixture data that passes eligibility
-    const mockPartners: VendorPartner[] = [
+    // 1. Fetch service data
+    const service = await getServiceById(params.serviceId);
+    if (!service) return [];
+
+    // 2. Fetch all partners from fixtures (TODO: Replace with BFF/DB call)
+    const allPartners: DomainVendorPartner[] = [
       {
         id: crypto.randomUUID(),
         name: "Keller Williams Co-Pay Program",
-        logo: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=200&h=200&fit=crop",
-        verified: true,
-        description: "Exclusive co-pay benefits for KW agents with qualifying transaction volume",
-        markets: ["San Francisco", "Los Angeles", "San Diego", "Sacramento"],
-        copayEligibility: {
+        markets: ["san francisco", "los angeles", "san diego", "sacramento"],
+        minAgentDealsPerYear: 5,
+        allowedServiceIds: [params.serviceId],
+        prohibitedServiceIds: [],
+        copayPolicy: {
           enabled: true,
-          markets: ["San Francisco", "Los Angeles", "San Diego", "Sacramento"],
-          minAgentDealsPerYear: 5,
-          allowedServiceIds: [params.serviceId],
-          prohibitedServiceIds: [],
+          sharePct: 50,
+          maxShareCentsPerOrder: 50000,
         },
-        rating: 4.8,
-        reviews: 234,
-        benefits: [
-          "50% cost sharing on approved services",
-          "Priority vendor access",
-          "Dedicated account manager",
-          "Monthly reporting dashboard",
-        ],
       },
       {
         id: crypto.randomUUID(),
         name: "RE/MAX Agent Advantage",
-        logo: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=200&h=200&fit=crop",
-        verified: true,
-        description: "Co-pay assistance for high-performing RE/MAX agents",
-        markets: ["San Francisco", "Oakland", "San Jose", "Berkeley"],
-        copayEligibility: {
+        markets: ["san francisco", "oakland", "san jose", "berkeley"],
+        minAgentDealsPerYear: 8,
+        allowedServiceIds: [params.serviceId],
+        prohibitedServiceIds: [],
+        copayPolicy: {
           enabled: true,
-          markets: ["San Francisco", "Oakland", "San Jose", "Berkeley"],
-          minAgentDealsPerYear: 8,
-          allowedServiceIds: [params.serviceId],
-          prohibitedServiceIds: [],
+          sharePct: 40,
+          maxShareCentsPerOrder: 40000,
         },
-        rating: 4.6,
-        reviews: 189,
-        benefits: [
-          "40% cost sharing on select services",
-          "Quarterly bonus credits",
-          "Network vendor discounts",
-          "Training resources included",
-        ],
       },
     ];
 
-    // In production, this would query DB with eligibility rules
-    return mockPartners.filter((partner) => {
-      const meetsDeals = (params.agentDealsPerYear || 0) >= partner.copayEligibility.minAgentDealsPerYear;
-      const meetsLocation = !params.city || partner.markets.includes(params.city);
-      return meetsDeals && meetsLocation;
-    });
+    // 3. Build agent profile
+    const agentProfile: AgentProfile = {
+      dealsLast12m: params.agentDealsPerYear || 0,
+    };
+
+    // 4. Call pure eligibility function
+    const eligible = eligiblePartners(
+      allPartners,
+      { id: service.id, vendor: service.vendor },
+      params.city || '',
+      agentProfile
+    );
+
+    // 5. Map domain types back to contract types for now
+    return eligible.map((p) => ({
+      id: p.id,
+      name: p.name,
+      logo: "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=200&h=200&fit=crop",
+      verified: true,
+      description: `Co-pay benefits for qualifying agents`,
+      markets: p.markets,
+      copayEligibility: {
+        enabled: p.copayPolicy.enabled,
+        markets: p.markets,
+        minAgentDealsPerYear: p.minAgentDealsPerYear || 0,
+        allowedServiceIds: p.allowedServiceIds || [],
+        prohibitedServiceIds: p.prohibitedServiceIds || [],
+      },
+      rating: 4.7,
+      reviews: 200,
+      benefits: [
+        `${p.copayPolicy.sharePct}% cost sharing on approved services`,
+        "Priority vendor access",
+        "Dedicated account manager",
+      ],
+    } as VendorPartner));
   });
 }
 

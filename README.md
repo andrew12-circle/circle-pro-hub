@@ -60,6 +60,25 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Environment Variables
+
+### Backend Configuration
+- `VITE_API_BASE` - Backend For Frontend API base URL
+  - Leave empty for fixture-only mode (local dev)
+  - Set to your BFF URL for production
+  - Example: `https://api.circlenetwork.com`
+
+### Data Adapter Switching
+When `VITE_API_BASE` is not set:
+- Services read from `fixtures/services.json`
+- Partners read from `fixtures/partners.json`
+- Full app functionality available offline
+
+When `VITE_API_BASE` is set:
+- All reads route through BFF
+- BFF handles caching, rate limiting, search
+- Fixtures become BFF backup only
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/4d53106d-1d42-47ef-86b5-63065057c3e1) and click on Share -> Publish.

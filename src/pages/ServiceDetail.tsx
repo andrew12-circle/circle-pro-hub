@@ -10,23 +10,33 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Star, Shield, Heart, Share2, ArrowLeft, ShoppingCart, MessageCircle, Phone, Check } from "lucide-react";
 import { getServiceById } from "@/data/services";
-import { ServiceFunnel } from "../../contracts/marketplace";
+import { getEligiblePartners } from "@/data/vendors";
+import { getBalance } from "@/data/wallet";
+import { ServiceCard, ServiceFunnel } from "../../contracts/marketplace";
 import { AddToCartModal } from "@/components/commerce/AddToCartModal";
 import { ProUpsellBanner } from "@/components/commerce/ProUpsellBanner";
 import { useProMember } from "@/hooks/use-pro-member";
+import { useLocation } from "@/hooks/use-location";
+import { useCart } from "@/lib/cartStore";
 import { createShareLink } from "@/data/share";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import type { VendorPartner } from "../../contracts/affiliates/partner";
+import type { PointsBalance } from "@/data/wallet";
 
 const ServiceDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isPro, loading: proLoading } = useProMember();
+  const { location: userLocation } = useLocation();
+  const { addItem } = useCart();
   const [service, setService] = useState<ServiceFunnel | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
-  const [cartModalOpen, setCartModalOpen] = useState(false);
   const [shareButtonState, setShareButtonState] = useState<"idle" | "copied">("idle");
+  const [eligiblePartners, setEligiblePartners] = useState<VendorPartner[]>([]);
+  const [wallet, setWallet] = useState<PointsBalance | null>(null);
 
   useEffect(() => {
     const loadService = async () => {
@@ -48,6 +58,35 @@ const ServiceDetail = () => {
 
     loadService();
   }, [id]);
+
+  // Load eligible partners and wallet when service is loaded
+  useEffect(() => {
+    const loadData = async () => {
+      if (!service || !id) return;
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        // Load eligible partners
+        const partners = await getEligiblePartners({
+          serviceId: id,
+          city: userLocation?.city,
+          agentDealsPerYear: 10, // TODO: Get from user profile
+        });
+        setEligiblePartners(partners);
+
+        // Load wallet balance
+        if (session?.user) {
+          const balance = await getBalance(session.user.id);
+          setWallet(balance);
+        }
+      } catch (error) {
+        console.error("Failed to load data:", error);
+      }
+    };
+
+    loadData();
+  }, [service, id, userLocation]);
 
   const formatPrice = (amount: number): string => {
     return `$${amount.toLocaleString()}`;
@@ -317,14 +356,32 @@ const ServiceDetail = () => {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
-                  className="w-full" 
-                  size="lg"
-                  onClick={() => setCartModalOpen(true)}
-                >
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  Add to Cart
-                </Button>
+                {service && currentPackage && (
+                  <AddToCartModal
+                    service={service as ServiceCard}
+                    userIsPro={isPro}
+                    wallet={wallet}
+                    eligiblePartners={eligiblePartners}
+                    onConfirm={(selection) => {
+                      addItem({
+                        ...selection,
+                        serviceName: service.name,
+                        vendorName: service.vendor.name,
+                        packageName: currentPackage.name,
+                      });
+                      toast({
+                        title: "Added to cart",
+                        description: `${service.name} has been added to your cart.`,
+                      });
+                    }}
+                    trigger={
+                      <Button className="w-full" size="lg">
+                        <ShoppingCart className="h-4 w-4 mr-2" />
+                        Add to Cart
+                      </Button>
+                    }
+                  />
+                )}
                 <Button variant="outline" className="w-full">
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Ask a Question
@@ -365,18 +422,6 @@ const ServiceDetail = () => {
       </main>
       <Footer />
       
-      {service && currentPackage && (
-        <AddToCartModal
-          open={cartModalOpen}
-          onOpenChange={setCartModalOpen}
-          serviceId={service.id}
-          serviceName={service.name}
-          vendorName={service.vendor.name}
-          packageId={currentPackage.id}
-          packageName={currentPackage.name}
-          pricing={currentPackage.pricing}
-        />
-      )}
     </div>
   );
 };

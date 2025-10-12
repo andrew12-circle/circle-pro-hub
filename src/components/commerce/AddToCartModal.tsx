@@ -1,560 +1,249 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Lock, Crown, Users, Coins, ShoppingCart, TrendingDown, Shield, Star, ArrowRight } from "lucide-react";
-import { PricingMode, PricingSelection } from "../../../contracts/cart/pricing-selection";
-import { PricePlan } from "../../../contracts/marketplace";
-import { VendorPartner } from "../../../contracts/affiliates/partner";
-import { useCart } from "@/lib/cartStore";
-import { useProMember } from "@/hooks/use-pro-member";
-import { featureFlags } from "@/lib/featureFlags";
-import { useToast } from "@/hooks/use-toast";
-import { getBalance, PointsBalance } from "@/data/wallet";
-import { supabase } from "@/integrations/supabase/client";
-import { getEligiblePartners } from "@/data/vendors";
-import { useLocation } from "@/hooks/use-location";
-import { PartnerPreviewSheet } from "./PartnerPreviewSheet";
+// src/components/commerce/AddToCartModal.tsx
+'use client';
+import * as React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Shield, Star, ArrowRight } from 'lucide-react';
+import type { ServiceCard } from '../../../contracts/marketplace';
+import type { PricingSelection, PricingMode } from '../../../contracts/cart/pricing-selection';
+import type { VendorPartner } from '../../../contracts/affiliates/partner';
+import type { PointsBalance } from '@/data/wallet';
 
-interface AddToCartModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  serviceId: string;
-  serviceName: string;
-  vendorName: string;
-  packageId?: string;
-  packageName?: string;
-  pricing: PricePlan;
-}
+type Props = {
+  service: ServiceCard;
+  userIsPro: boolean;
+  wallet?: PointsBalance | null;
+  /** Optional pre-filtered partners (use lib/eligiblePartners upstream). */
+  eligiblePartners?: VendorPartner[];
+  /** Called when user confirms a pricing mode (push to your cart store here). */
+  onConfirm: (selection: PricingSelection) => void;
+  /** Optional trigger (e.g., "Add to cart" button). If omitted, render a default trigger. */
+  trigger?: React.ReactNode;
+};
 
 export function AddToCartModal({
-  open,
-  onOpenChange,
-  serviceId,
-  serviceName,
-  vendorName,
-  packageId,
-  packageName,
-  pricing,
-}: AddToCartModalProps) {
-  const navigate = useNavigate();
-  const { addItem } = useCart();
-  const { isPro, loading: proLoading } = useProMember();
-  const { toast } = useToast();
-  const { location } = useLocation();
-  
-  const [selectedMode, setSelectedMode] = useState<PricingMode>("retail");
-  const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null);
-  const [eligiblePartners, setEligiblePartners] = useState<VendorPartner[]>([]);
-  const [loadingPartners, setLoadingPartners] = useState(false);
-  const [previewPartner, setPreviewPartner] = useState<VendorPartner | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [walletBalance, setWalletBalance] = useState<PointsBalance | null>(null);
-  const [loadingWallet, setLoadingWallet] = useState(true);
+  service,
+  userIsPro,
+  wallet,
+  eligiblePartners = [],
+  onConfirm,
+  trigger,
+}: Props) {
+  const [open, setOpen] = React.useState(false);
+  const [mode, setMode] = React.useState<PricingMode>('retail');
+  const [selectedPartnerId, setSelectedPartnerId] = React.useState<string | undefined>(undefined);
+  const [pointsToUse, setPointsToUse] = React.useState<number>(0);
 
-  // Load wallet balance
-  useEffect(() => {
-    const loadWallet = async () => {
-      setLoadingWallet(true);
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          const balance = await getBalance(session.user.id);
-          setWalletBalance(balance);
-        }
-      } catch (error) {
-        console.error("Error loading wallet:", error);
-      } finally {
-        setLoadingWallet(false);
-      }
+  const copayAvailable = userIsPro && eligiblePartners.length > 0 && !!service.pricing.copay;
+  const proAvailable = userIsPro && !!service.pricing.pro;
+  const pointsAvailable = userIsPro && (wallet?.points ?? 0) > 0;
+
+  // Ensure invalid combos get reset when toggling modes or losing eligibility
+  React.useEffect(() => {
+    if (mode === 'copay' && !copayAvailable) {
+      setMode(proAvailable ? 'pro' : 'retail');
+      setSelectedPartnerId(undefined);
+    }
+    if (mode === 'pro' && !proAvailable) setMode('retail');
+    if (mode === 'points' && !pointsAvailable) setMode(userIsPro ? 'pro' : 'retail');
+  }, [mode, copayAvailable, proAvailable, pointsAvailable, userIsPro]);
+
+  function confirm() {
+    const selection: PricingSelection = {
+      serviceId: service.id,
+      mode,
+      price: mode === 'pro' && service.pricing.pro 
+        ? service.pricing.pro 
+        : mode === 'copay' && service.pricing.copay
+        ? service.pricing.copay
+        : service.pricing.retail,
+      vendorPartnerId: mode === 'copay' ? selectedPartnerId : undefined,
+      pointsCost: mode === 'points' ? clamp(pointsToUse, 0, wallet?.points ?? 0) : undefined,
+      copayPartnerShare: mode === 'copay' ? service.pricing.copayWithVendor : undefined,
+      userShare: mode === 'copay' ? service.pricing.copay : undefined,
     };
-
-    if (open) {
-      loadWallet();
-    }
-  }, [open]);
-
-  // Auto-select best available pricing mode
-  useEffect(() => {
-    if (proLoading || loadingWallet) return;
-    
-    // Priority: Pro > Points > Retail
-    if (isPro && pricing.pro) {
-      setSelectedMode("pro");
-    } else if (walletBalance && walletBalance.points > 0 && featureFlags.wallet) {
-      setSelectedMode("points");
-    } else {
-      setSelectedMode("retail");
-    }
-  }, [isPro, proLoading, pricing.pro, walletBalance, loadingWallet]);
-
-  // Fetch eligible partners when Co-Pay mode is selected
-  useEffect(() => {
-    if (selectedMode !== "copay") {
-      setEligiblePartners([]);
-      setSelectedPartnerId(null);
-      return;
-    }
-
-    const fetchPartners = async () => {
-      setLoadingPartners(true);
-      try {
-        // TODO: Get real agent profile from user data
-        const partners = await getEligiblePartners({
-          serviceId,
-          city: location?.city,
-          agentDealsPerYear: 10, // Mock value - replace with real user data
-        });
-        setEligiblePartners(partners);
-        
-        if (partners.length === 0) {
-          toast({
-            title: "No eligible partners",
-            description: "You don't have any co-pay partners available for this service.",
-            variant: "destructive",
-          });
-        }
-      } catch (error) {
-        console.error("Failed to fetch eligible partners:", error);
-        toast({
-          title: "Error loading partners",
-          description: "Could not load co-pay partners. Please try again.",
-          variant: "destructive",
-        });
-      } finally {
-        setLoadingPartners(false);
-      }
-    };
-
-    fetchPartners();
-  }, [selectedMode, serviceId, location]);
-
-  const formatPrice = (amount: number, currency: string = "USD"): string => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency,
-    }).format(amount);
-  };
-
-  const getPricingForMode = (mode: PricingMode) => {
-    switch (mode) {
-      case "pro":
-        return pricing.pro || pricing.retail;
-      case "copay":
-        return pricing.copay || pricing.retail;
-      case "points":
-        // For points, use retail as base but will be reduced by points
-        return pricing.retail;
-      case "retail":
-      default:
-        return pricing.retail;
-    }
-  };
-
-  // Calculate points cost (simple 1:1 ratio with cents, max available points)
-  const calculatePointsCost = () => {
-    if (!walletBalance) return 0;
-    const priceInCents = pricing.retail.amount * 100;
-    return Math.min(walletBalance.points, priceInCents);
-  };
-
-  const getPointsReduction = () => {
-    const pointsCost = calculatePointsCost();
-    return pointsCost / 100; // Convert points back to dollars
-  };
-
-  const handleAddToCart = () => {
-    const selectedPrice = getPricingForMode(selectedMode);
-
-    // Validate partner selection for Co-Pay
-    if (selectedMode === "copay" && !selectedPartnerId) {
-      toast({
-        title: "Partner required",
-        description: "Please select a co-pay partner to continue.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const pointsCost = selectedMode === "points" ? calculatePointsCost() : undefined;
-    const reducedPrice = selectedMode === "points" 
-      ? { amount: selectedPrice.amount - getPointsReduction(), currency: selectedPrice.currency }
-      : selectedPrice;
-
-    const pricingSelection: Omit<PricingSelection, never> = {
-      serviceId,
-      packageId,
-      mode: selectedMode,
-      price: reducedPrice,
-      pointsCost,
-      copayPartnerShare: selectedMode === "copay" ? pricing.copayWithVendor : undefined,
-      userShare: selectedMode === "copay" ? pricing.copay : undefined,
-      vendorPartnerId: selectedMode === "copay" ? selectedPartnerId || undefined : undefined,
-    };
-
-    addItem({
-      ...pricingSelection,
-      serviceName,
-      vendorName,
-      packageName,
-    });
-
-    toast({
-      title: "Added to cart",
-      description: `${serviceName} has been added to your cart.`,
-    });
-
-    onOpenChange(false);
-  };
-
-  const handleAddAndViewCart = () => {
-    handleAddToCart();
-    navigate("/cart");
-  };
-
-  const getProUpsellMessage = () => {
-    if (pricing.pro && pricing.proPctSavings) {
-      const savings = pricing.retail.amount - pricing.pro.amount;
-      return `Upgrade to Pro and save ${formatPrice(savings)} (${pricing.proPctSavings}%) on this service!`;
-    }
-    return "Upgrade to Pro for exclusive member pricing!";
-  };
+    onConfirm(selection);
+    // close + reset light state
+    setOpen(false);
+    setSelectedPartnerId(undefined);
+  }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger ?? <Button aria-label="Add to cart">Add to cart</Button>}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Choose Your Pricing</DialogTitle>
-          <DialogDescription>
-            Select how you'd like to purchase {serviceName}
-            {packageName && ` - ${packageName}`}
-          </DialogDescription>
+          <DialogTitle>Select how you want to cover this</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {!isPro && pricing.pro && (
-            <Alert className="border-primary/50 bg-primary/5">
-              <Crown className="h-4 w-4 text-primary" />
-              <AlertDescription className="text-sm">
-                {getProUpsellMessage()}{" "}
-                <Button
-                  variant="link"
-                  className="h-auto p-0 text-primary"
-                  onClick={() => navigate("/account/billing")}
-                >
-                  Upgrade now →
-                </Button>
-              </AlertDescription>
-            </Alert>
-          )}
+        <div className="space-y-4">
+          {/* Modes */}
+          <div className="grid grid-cols-2 gap-3">
+            <ModeButton
+              label="Retail"
+              active={mode === 'retail'}
+              onClick={() => setMode('retail')}
+              helper="Pay standard price"
+            />
+            <ModeButton
+              label="Pro"
+              active={mode === 'pro'}
+              onClick={() => setMode('pro')}
+              disabled={!proAvailable}
+              helper={proAvailable ? 'Member savings' : 'Requires Pro'}
+            />
+            <ModeButton
+              label="Co-Pay"
+              active={mode === 'copay'}
+              onClick={() => setMode('copay')}
+              disabled={!copayAvailable}
+              helper={copayAvailable ? 'Get vendor help' : 'Not available'}
+            />
+            <ModeButton
+              label="Use Points"
+              active={mode === 'points'}
+              onClick={() => setMode('points')}
+              disabled={!pointsAvailable}
+              helper={pointsAvailable ? 'Spend Circle Points' : 'No points available'}
+            />
+          </div>
 
-          <RadioGroup value={selectedMode} onValueChange={(v) => setSelectedMode(v as PricingMode)}>
-            <div className="flex items-start space-x-3 rounded-lg border p-4 cursor-pointer hover:bg-accent/50 transition-colors">
-              <RadioGroupItem value="retail" id="retail" className="mt-1" />
-              <Label htmlFor="retail" className="flex-1 cursor-pointer">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-semibold">Retail Price</span>
-                  <span className="text-xl font-bold">
-                    {formatPrice(pricing.retail.amount, pricing.retail.currency)}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Standard pricing available to everyone
-                </p>
-              </Label>
-            </div>
-
-            <div
-              className={`flex items-start space-x-3 rounded-lg border p-4 ${
-                isPro && pricing.pro
-                  ? "cursor-pointer hover:bg-accent/50 transition-colors"
-                  : "opacity-50 cursor-not-allowed"
-              }`}
-            >
-              <RadioGroupItem
-                value="pro"
-                id="pro"
-                disabled={!isPro || !pricing.pro}
-                className="mt-1"
-              />
-              <Label htmlFor="pro" className={`flex-1 ${isPro && pricing.pro ? "cursor-pointer" : "cursor-not-allowed"}`}>
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">Pro Member Price</span>
-                    <Crown className="h-4 w-4 text-yellow-600" />
-                    {pricing.proPctSavings && (
-                      <Badge variant="default" className="text-xs">
-                        Save {pricing.proPctSavings}%
-                      </Badge>
-                    )}
-                  </div>
-                  {pricing.pro && (
-                    <span className="text-xl font-bold text-primary">
-                      {formatPrice(pricing.pro.amount, pricing.pro.currency)}
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  {isPro
-                    ? "Exclusive pricing for Pro members"
-                    : "Requires Pro membership"}
-                </p>
-                {!isPro && (
-                  <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                    <Lock className="h-3 w-3" />
-                    <span>Pro membership required</span>
-                  </div>
-                )}
-              </Label>
-            </div>
-
-            <div
-              className={`flex items-start space-x-3 rounded-lg border p-4 ${
-                featureFlags.copay && pricing.copay
-                  ? "cursor-pointer hover:bg-accent/50 transition-colors"
-                  : "opacity-50 cursor-not-allowed"
-              }`}
-            >
-              <RadioGroupItem
-                value="copay"
-                id="copay"
-                disabled={!featureFlags.copay || !pricing.copay}
-                className="mt-1"
-              />
-              <Label htmlFor="copay" className={`flex-1 ${featureFlags.copay && pricing.copay ? "cursor-pointer" : "cursor-not-allowed"}`}>
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">Co-Pay Pricing</span>
-                    <Users className="h-4 w-4 text-blue-600" />
-                    {!featureFlags.copay && (
-                      <Badge variant="secondary" className="text-xs">Coming Soon</Badge>
-                    )}
-                  </div>
-                  {pricing.copay && (
-                    <span className="text-xl font-bold text-blue-600">
-                      {formatPrice(pricing.copay.amount, pricing.copay.currency)}
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Your brokerage covers part of the cost
-                </p>
-                {!featureFlags.copay && (
-                  <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                    <Lock className="h-3 w-3" />
-                    <span>Feature coming soon</span>
-                  </div>
-                )}
-              </Label>
-            </div>
-
-            {/* Partner Selection Grid - Show when Co-Pay is selected */}
-            {selectedMode === "copay" && featureFlags.copay && (
-              <div className="ml-7 mt-3 space-y-3">
-                {loadingPartners ? (
-                  <div className="space-y-2">
-                    <Skeleton className="h-24 w-full" />
-                    <Skeleton className="h-24 w-full" />
-                  </div>
-                ) : eligiblePartners.length > 0 ? (
-                  <>
-                    <p className="text-sm font-medium text-muted-foreground mb-2">
-                      Select your co-pay partner:
-                    </p>
-                    <div className="grid gap-2">
-                      {eligiblePartners.map((partner) => (
-                        <Card
-                          key={partner.id}
-                          className={`cursor-pointer transition-all hover:border-primary ${
-                            selectedPartnerId === partner.id
-                              ? "border-primary bg-primary/5"
-                              : ""
-                          }`}
-                          onClick={() => setSelectedPartnerId(partner.id)}
-                        >
-                          <CardContent className="p-3">
-                            <div className="flex items-center gap-3">
-                              <img
-                                src={partner.logo}
-                                alt={partner.name}
-                                className="w-12 h-12 rounded object-cover"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <h4 className="font-semibold text-sm truncate">
-                                    {partner.name}
-                                  </h4>
-                                  {partner.verified && (
-                                    <Shield className="h-3 w-3 text-blue-600 flex-shrink-0" />
-                                  )}
-                                </div>
-                                <p className="text-xs text-muted-foreground line-clamp-1">
-                                  {partner.description}
-                                </p>
-                                {partner.rating && (
-                                  <div className="flex items-center gap-1 mt-1">
-                                    <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                    <span className="text-xs font-medium">
-                                      {partner.rating}
-                                    </span>
-                                    {partner.reviews && (
-                                      <span className="text-xs text-muted-foreground">
-                                        ({partner.reviews})
-                                      </span>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setPreviewPartner(partner);
-                                  setSheetOpen(true);
-                                }}
-                              >
-                                <ArrowRight className="h-4 w-4" />
-                              </Button>
+          {/* Co-Pay partner selector */}
+          {mode === 'copay' && (
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Select a vendor partner</div>
+              {eligiblePartners.length === 0 ? (
+                <div className="text-sm text-muted-foreground">No eligible partners found for your market.</div>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 max-h-60 overflow-auto pr-1">
+                  {eligiblePartners.map((p) => (
+                    <Card
+                      key={p.id}
+                      className={`cursor-pointer p-3 border ${
+                        selectedPartnerId === p.id ? 'ring-2 ring-primary' : 'hover:border-primary/50'
+                      }`}
+                      onClick={() => setSelectedPartnerId(p.id)}
+                    >
+                      <div className="flex items-start gap-2">
+                        <img
+                          src={p.logo}
+                          alt={p.name}
+                          className="w-10 h-10 rounded object-cover flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1 mb-1">
+                            <div className="font-semibold text-sm truncate">{p.name}</div>
+                            {p.verified && (
+                              <Shield className="h-3 w-3 text-primary flex-shrink-0" />
+                            )}
+                          </div>
+                          <div className="text-xs text-muted-foreground line-clamp-1">
+                            {p.markets.slice(0, 2).join(', ')}
+                            {p.markets.length > 2 && '…'}
+                          </div>
+                          {p.rating && (
+                            <div className="flex items-center gap-1 mt-1">
+                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                              <span className="text-xs font-medium">{p.rating}</span>
+                              {p.reviews && (
+                                <span className="text-xs text-muted-foreground">({p.reviews})</span>
+                              )}
                             </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <Alert>
-                    <AlertDescription className="text-sm">
-                      No eligible co-pay partners found for this service in your area.
-                      Contact your brokerage to learn about partnership opportunities.
-                    </AlertDescription>
-                  </Alert>
-                )}
-              </div>
-            )}
-
-            {/* Points */}
-            {featureFlags.wallet && (
-              <div
-                className={`flex items-start space-x-3 rounded-lg border p-4 ${
-                  walletBalance && walletBalance.points > 0
-                    ? "cursor-pointer hover:bg-accent/50 transition-colors"
-                    : "opacity-50 cursor-not-allowed"
-                }`}
-              >
-                <RadioGroupItem
-                  value="points"
-                  id="points"
-                  disabled={!walletBalance || walletBalance.points === 0}
-                  className="mt-1"
-                />
-                <Label
-                  htmlFor="points"
-                  className={`flex-1 ${
-                    walletBalance && walletBalance.points > 0
-                      ? "cursor-pointer"
-                      : "cursor-not-allowed"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold">Pay with Points</span>
-                      <Coins className="h-4 w-4 text-yellow-600" />
-                      {walletBalance && walletBalance.points > 0 && (
-                        <Badge variant="default" className="text-xs">
-                          {walletBalance.points.toLocaleString()} pts
-                        </Badge>
-                      )}
-                    </div>
-                    {walletBalance && walletBalance.points > 0 && (
-                      <span className="text-xl font-bold text-yellow-600">
-                        {formatPrice(pricing.retail.amount - getPointsReduction())}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {walletBalance && walletBalance.points > 0
-                      ? "Redeem your Circle Points to reduce the cost"
-                      : "Earn points by completing services"}
-                  </p>
-                  {(!walletBalance || walletBalance.points === 0) && (
-                    <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
-                      <Lock className="h-3 w-3" />
-                      <span>No points available</span>
-                    </div>
-                  )}
-                </Label>
-              </div>
-            )}
-          </RadioGroup>
-
-          {/* Savings Display */}
-          {selectedMode === "pro" && pricing.pro && pricing.proPctSavings && (
-            <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-900">
-              <TrendingDown className="h-5 w-5 text-green-600" />
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-green-700 dark:text-green-400">
-                  You're saving {formatPrice(pricing.retail.amount - pricing.pro.amount)}!
-                </p>
-                <p className="text-xs text-green-600 dark:text-green-500">
-                  That's {pricing.proPctSavings}% off retail pricing
-                </p>
-              </div>
+                          )}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // TODO: Open partner preview sheet
+                          }}
+                        >
+                          <ArrowRight className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
-          {/* Points Redemption Display */}
-          {selectedMode === "points" && walletBalance && walletBalance.points > 0 && (
-            <div className="flex items-center gap-2 p-3 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg border border-yellow-200 dark:border-yellow-900">
-              <Coins className="h-5 w-5 text-yellow-600" />
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-yellow-700 dark:text-yellow-400">
-                  Redeeming {calculatePointsCost().toLocaleString()} points
-                </p>
-                <p className="text-xs text-yellow-600 dark:text-yellow-500">
-                  Final amount: {formatPrice(pricing.retail.amount - getPointsReduction())}
-                </p>
+          {/* Points selector */}
+          {mode === 'points' && (
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Use Circle Points</div>
+              <div className="text-xs text-muted-foreground">
+                Available: {wallet?.points ?? 0} pts (no public $/pt value shown)
               </div>
+              <input
+                type="number"
+                min={0}
+                max={wallet?.points ?? 0}
+                value={pointsToUse}
+                onChange={(e) => setPointsToUse(safeInt(e.target.value))}
+                className="w-32 rounded-md border px-2 py-1 text-sm"
+              />
             </div>
           )}
         </div>
 
-        <DialogFooter className="flex-col sm:flex-row gap-2">
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="w-full sm:w-auto">
+        <DialogFooter className="mt-4">
+          <Button variant="ghost" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button onClick={handleAddToCart} variant="secondary" className="flex-1 sm:flex-initial">
-              <ShoppingCart className="mr-2 h-4 w-4" />
-              Add to Cart
-            </Button>
-            <Button onClick={handleAddAndViewCart} className="flex-1 sm:flex-initial">
-              Add & View Cart
-            </Button>
-          </div>
+          <Button
+            onClick={confirm}
+            disabled={
+              (mode === 'copay' && !selectedPartnerId) ||
+              (mode === 'points' && (wallet?.points ?? 0) <= 0)
+            }
+          >
+            Confirm
+          </Button>
         </DialogFooter>
       </DialogContent>
-
-      {/* Partner Preview Sheet */}
-      <PartnerPreviewSheet
-        open={sheetOpen}
-        onOpenChange={setSheetOpen}
-        partner={previewPartner}
-        onConfirm={(partnerId) => setSelectedPartnerId(partnerId)}
-      />
     </Dialog>
   );
+}
+
+function ModeButton({
+  label,
+  helper,
+  active,
+  disabled,
+  onClick,
+}: {
+  label: string;
+  helper?: string;
+  active?: boolean;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className={`text-left rounded-xl border p-3 transition ${
+        active ? 'border-primary/60 bg-primary/[0.03]' : 'border-border hover:border-primary/25'
+      } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+    >
+      <div className="text-sm font-medium">{label}</div>
+      {helper && <div className="mt-0.5 text-xs text-muted-foreground">{helper}</div>}
+    </button>
+  );
+}
+
+function clamp(n: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, n));
+}
+function safeInt(v: string) {
+  const n = Number(v);
+  return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0;
 }

@@ -1,131 +1,126 @@
-import { ServiceCard, ServiceFunnel } from "../../contracts/marketplace";
-import servicesFixtures from "../../fixtures/services.json";
-import { cache } from "@/adapters/cache";
+// src/data/services.ts
+import type { ServiceCard, ServiceFunnel } from '../../contracts/marketplace';
+
+const API = import.meta.env.VITE_API_BASE?.replace(/\/$/, '') || '';
+
+async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
+  const ctrl = new AbortController();
+  const id = setTimeout(() => ctrl.abort(), 12_000);
+  try {
+    const res = await fetch(url, {
+      credentials: 'include',
+      signal: ctrl.signal,
+      headers: { 'accept': 'application/json' },
+      ...init,
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status} ${res.statusText} @ ${url} :: ${text}`);
+    }
+    return (await res.json()) as T;
+  } finally {
+    clearTimeout(id);
+  }
+}
 
 export interface ServiceFilters {
   category?: string;
-  minRating?: number;
-  maxPrice?: number;
-  verified?: boolean;
+  rating?: number;
+  price?: { min?: number; max?: number };
+  verification?: boolean;
   search?: string;
   location?: string;
 }
 
 export interface GetServicesParams {
   filters?: ServiceFilters;
+  page?: number;
   limit?: number;
-  offset?: number;
-  sortBy?: "rating" | "price" | "reviews";
+  sortBy?: string;
 }
 
-function matchesFilters(service: ServiceFunnel, filters?: ServiceFilters): boolean {
-  if (!filters) return true;
-
-  if (filters.category && service.category !== filters.category) {
-    return false;
+/** List services (grid). Backed by BFF cache (ETag + SWR). */
+export async function getServices(params?: GetServicesParams): Promise<ServiceCard[]> {
+  const queryParams: Record<string, string | number | boolean> = {};
+  
+  if (params?.filters) {
+    if (params.filters.category) queryParams.category = params.filters.category;
+    if (params.filters.rating) queryParams.rating = params.filters.rating;
+    if (params.filters.search) queryParams.search = params.filters.search;
+    if (params.filters.location) queryParams.location = params.filters.location;
+    if (params.filters.verification !== undefined) queryParams.verification = params.filters.verification;
+    if (params.filters.price?.min) queryParams.priceMin = params.filters.price.min;
+    if (params.filters.price?.max) queryParams.priceMax = params.filters.price.max;
   }
+  
+  if (params?.page) queryParams.page = params.page;
+  if (params?.limit) queryParams.limit = params.limit;
+  if (params?.sortBy) queryParams.sortBy = params.sortBy;
 
-  if (filters.minRating && service.rating < filters.minRating) {
-    return false;
-  }
-
-  if (filters.maxPrice && service.pricing.retail.amount > filters.maxPrice) {
-    return false;
-  }
-
-  if (filters.verified !== undefined && service.vendor.verified !== filters.verified) {
-    return false;
-  }
-
-  if (filters.search) {
-    const searchLower = filters.search.toLowerCase();
-    const searchableText = `${service.name} ${service.tagline} ${service.category} ${service.vendor.name}`.toLowerCase();
-    if (!searchableText.includes(searchLower)) {
-      return false;
+  const qs = Object.keys(queryParams).length > 0
+    ? '?' +
+      Object.entries(queryParams)
+        .filter(([, v]) => v !== undefined && v !== null && v !== '')
+        .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+        .join('&')
+    : '';
+  
+  // If API base is not set yet, fall back to local fixtures to keep UI running.
+  if (!API) {
+    const services = (await import('../../fixtures/services.json')).default as ServiceCard[];
+    
+    // Apply client-side filtering for fixture mode
+    let filtered = services;
+    
+    if (params?.filters) {
+      if (params.filters.category) {
+        filtered = filtered.filter((s) => s.category === params.filters?.category);
+      }
+      if (params.filters.search) {
+        const search = params.filters.search.toLowerCase();
+        filtered = filtered.filter((s) => 
+          s.name.toLowerCase().includes(search) || 
+          s.tagline.toLowerCase().includes(search)
+        );
+      }
+      if (params.filters.location) {
+        const location = params.filters.location.toLowerCase();
+        filtered = filtered.filter((s) => 
+          s.serviceAreas.some((area) => area.toLowerCase().includes(location))
+        );
+      }
+      if (params.filters.rating) {
+        filtered = filtered.filter((s) => s.rating >= (params.filters?.rating || 0));
+      }
+      if (params.filters.verification) {
+        filtered = filtered.filter((s) => s.vendor.verified);
+      }
     }
+    
+    return filtered;
   }
-
-  if (filters.location) {
-    const locationLower = filters.location.toLowerCase();
-    const serviceAreasLower = service.serviceAreas.map((a) => a.toLowerCase());
-
-    const matches = serviceAreasLower.some(
-      (area) => area.includes(locationLower) || locationLower.includes(area)
-    );
-
-    if (!matches) return false;
-  }
-
-  return true;
-}
-
-function sortServices(services: ServiceFunnel[], sortBy?: string): ServiceFunnel[] {
-  const sorted = [...services];
-
-  switch (sortBy) {
-    case "rating":
-      sorted.sort((a, b) => b.rating - a.rating);
-      break;
-    case "price":
-      sorted.sort((a, b) => a.pricing.retail.amount - b.pricing.retail.amount);
-      break;
-    case "reviews":
-      sorted.sort((a, b) => b.reviews - a.reviews);
-      break;
-    default:
-      // Default: featured first, then rating
-      sorted.sort((a, b) => {
-        if (a.featured && !b.featured) return -1;
-        if (!a.featured && b.featured) return 1;
-        return b.rating - a.rating;
-      });
-  }
-
-  return sorted;
-}
-
-export async function getServices(params: GetServicesParams = {}): Promise<ServiceCard[]> {
-  const cacheKey = `services:${JSON.stringify(params)}`;
   
-  return cache.getOrSet(cacheKey, 90, async () => {
-    const { filters, limit, offset = 0, sortBy } = params;
-
-    // Cast fixtures to ServiceFunnel[] (they contain all funnel data)
-    const allServices = servicesFixtures as ServiceFunnel[];
-
-    // Apply filters
-    let filtered = allServices.filter((service) => matchesFilters(service, filters));
-
-    // Apply sorting
-    filtered = sortServices(filtered, sortBy);
-
-    // Apply pagination
-    const paginated = filtered.slice(offset, limit ? offset + limit : undefined);
-
-    // Map to ServiceCard (subset of ServiceFunnel)
-    return paginated.map((service) => ({
-      id: service.id,
-      name: service.name,
-      vendor: service.vendor,
-      tagline: service.tagline,
-      category: service.category,
-      rating: service.rating,
-      reviews: service.reviews,
-      reviewHighlight: service.reviewHighlight,
-      pricing: service.pricing,
-      featured: service.featured,
-      badges: service.badges,
-      serviceAreas: service.serviceAreas,
-    }));
-  });
+  return fetchJson<ServiceCard[]>(`${API}/api/services${qs}`);
 }
 
-export async function getServiceById(id: string): Promise<ServiceFunnel | null> {
-  const cacheKey = `service:${id}`;
+/** Service detail (funnel). */
+export async function getServiceById(
+  id: string
+): Promise<ServiceFunnel | null> {
+  if (!id) return null;
   
-  return cache.getOrSet(cacheKey, 60, async () => {
-    const allServices = servicesFixtures as ServiceFunnel[];
-    const service = allServices.find((s) => s.id === id);
+  if (!API) {
+    const services = (await import('../../fixtures/services.json')).default as ServiceFunnel[];
+    const service = services.find((s) => s.id === id);
     return service || null;
-  });
+  }
+  
+  try {
+    const data = await fetchJson<{ card: ServiceCard; funnel: ServiceFunnel }>(`${API}/api/services/${id}`);
+    // For now, return the funnel directly (BFF will merge card + funnel)
+    // In fixture mode, we already have full ServiceFunnel
+    return data.funnel || (data as unknown as ServiceFunnel);
+  } catch {
+    return null;
+  }
 }

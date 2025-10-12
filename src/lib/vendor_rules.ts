@@ -1,98 +1,60 @@
-import { VendorPartner, CopayEligibility } from "../../contracts/affiliates/partner";
+// src/lib/vendor_rules.ts
+import type { ServiceCard } from '../../contracts/marketplace';
 
-export interface AgentProfile {
-  city?: string;
-  dealsPerYear?: number;
-}
+export type AgentProfile = {
+  dealsLast12m: number;
+  buyersLast12m?: number;
+  sellersLast12m?: number;
+  avgPriceCents?: number;
+};
 
-export interface EligibilityParams {
-  serviceId: string;
-  city?: string;
-  agentProfile?: AgentProfile;
-}
-
-/**
- * Vendor eligibility rules for Co-Pay pricing
- * 
- * Rule: copay.enabled ∧ city in markets ∧ deals >= minAgentDealsPerYear ∧ 
- *       service in allowed ∧ service ∉ prohibited
- */
-export function isPartnerEligible(
-  partner: VendorPartner,
-  params: EligibilityParams
-): boolean {
-  const { serviceId, city, agentProfile } = params;
-  const { copayEligibility } = partner;
-
-  // Rule 1: Co-pay must be enabled
-  if (!copayEligibility.enabled) {
-    return false;
-  }
-
-  // Rule 2: City must be in partner's markets (if city provided)
-  if (city && !partner.markets.includes(city)) {
-    return false;
-  }
-
-  // Rule 3: Agent must meet minimum deals per year threshold
-  const agentDeals = agentProfile?.dealsPerYear || 0;
-  if (agentDeals < copayEligibility.minAgentDealsPerYear) {
-    return false;
-  }
-
-  // Rule 4: Service must be in allowed list
-  if (!copayEligibility.allowedServiceIds.includes(serviceId)) {
-    return false;
-  }
-
-  // Rule 5: Service must NOT be in prohibited list
-  if (copayEligibility.prohibitedServiceIds.includes(serviceId)) {
-    return false;
-  }
-
-  return true;
-}
+export type VendorPartner = {
+  id: string;
+  name: string;
+  markets: string[]; // e.g., ['nashville', 'franklin-tn']
+  minAgentDealsPerYear?: number;
+  allowedServiceIds?: string[];
+  prohibitedServiceIds?: string[];
+  copayPolicy: {
+    enabled: boolean;
+    sharePct: number; // vendor contribution percentage (internal policy field)
+    maxShareCentsPerOrder?: number;
+  };
+  intake?: { bookingLink?: string; contactEmail?: string };
+  visibility?: 'public' | 'invite-only';
+};
 
 /**
- * Filter and return eligible partners for a given service and agent
+ * Determine which partners are eligible for co-pay on a given service and user context.
+ * Rule: copay.enabled ∧ market match ∧ deals >= minDeals ∧ service ∈ allowed ∧ service ∉ prohibited
  */
-export function getEligiblePartners(
-  allPartners: VendorPartner[],
-  params: EligibilityParams
+export function eligiblePartners(
+  partners: VendorPartner[],
+  service: Pick<ServiceCard, 'id' | 'vendor'>,
+  cityKey: string, // normalized city/market key, e.g., 'franklin-tn'
+  agent: AgentProfile
 ): VendorPartner[] {
-  return allPartners.filter((partner) => isPartnerEligible(partner, params));
+  const deals = agent.dealsLast12m ?? 0;
+
+  return partners.filter((p) => {
+    if (!p.copayPolicy?.enabled) return false;
+
+    // Market rule: partner must include cityKey
+    const marketOk = p.markets?.map(normKey).includes(normKey(cityKey));
+    if (!marketOk) return false;
+
+    // Production threshold
+    if (typeof p.minAgentDealsPerYear === 'number' && deals < p.minAgentDealsPerYear) return false;
+
+    // Allowlist / blocklist
+    if (p.allowedServiceIds && p.allowedServiceIds.length > 0 && !p.allowedServiceIds.includes(service.id))
+      return false;
+    if (p.prohibitedServiceIds && p.prohibitedServiceIds.includes(service.id)) return false;
+
+    return true;
+  });
 }
 
-/**
- * Get eligibility failure reason for debugging/UI messaging
- */
-export function getIneligibilityReason(
-  partner: VendorPartner,
-  params: EligibilityParams
-): string | null {
-  const { serviceId, city, agentProfile } = params;
-  const { copayEligibility } = partner;
-
-  if (!copayEligibility.enabled) {
-    return "Co-pay is not enabled for this partner";
-  }
-
-  if (city && !partner.markets.includes(city)) {
-    return `Not available in ${city}`;
-  }
-
-  const agentDeals = agentProfile?.dealsPerYear || 0;
-  if (agentDeals < copayEligibility.minAgentDealsPerYear) {
-    return `Requires ${copayEligibility.minAgentDealsPerYear}+ deals per year (you have ${agentDeals})`;
-  }
-
-  if (!copayEligibility.allowedServiceIds.includes(serviceId)) {
-    return "This service is not covered by this partner";
-  }
-
-  if (copayEligibility.prohibitedServiceIds.includes(serviceId)) {
-    return "This service is excluded from co-pay";
-  }
-
-  return null;
+function normKey(s?: string) {
+  return (s || '').trim().toLowerCase();
 }

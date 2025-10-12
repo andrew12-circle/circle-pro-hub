@@ -118,3 +118,43 @@ Supabase / External API
 - Legal content only from LegalBundle contract
 - No RESPA/UDAP claims in public UI text
 - Keep valuations of points out of UI
+
+## Data Flow Architecture
+
+### Thin UI Shell, Fat Services
+
+**UI Components (thin):**
+- Receive data via props
+- No direct data fetching or business logic
+- Use callback patterns (onConfirm, onCancel)
+- Example: AddToCartModal
+
+**Page Components (composition):**
+- Fetch data from data/* layer
+- Call pure functions from lib/* for business logic
+- Pass computed results to UI components
+- Handle callbacks and store updates
+
+**Data Layer (data/*):**
+- Reads from BFF API (VITE_API_BASE) when configured
+- Falls back to fixtures for local development
+- Wrapped in cache.getOrSet for performance
+- Returns typed contracts
+
+**Domain Layer (lib/*):**
+- Pure functions (no I/O, no async)
+- Business rules: eligibility, pricing, validation
+- Fully testable in isolation
+- Example: lib/vendor_rules.ts
+
+### BFF Pattern
+
+Set VITE_API_BASE to enable BFF:
+- Development: leave empty, uses fixtures
+- Staging/Production: https://api.circlenetwork.com
+
+BFF handles:
+- Data aggregation (service + funnel in one call)
+- Caching with ETag + stale-while-revalidate
+- Rate limiting
+- Search adapter switching (fixtures → Algolia → DB)
