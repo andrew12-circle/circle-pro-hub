@@ -399,38 +399,119 @@ const Marketplace = () => {
       {/* Horizontal Sticky Filter Bar */}
       <div className="sticky top-[64px] z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b">
         <div className="w-full px-4 lg:px-8 py-2 md:py-4">
-          <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-sm font-medium text-muted-foreground">Filters:</span>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-muted-foreground hidden md:inline">Filters:</span>
             
-            {/* Category Dropdown */}
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-[200px]">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="photography">Photography</SelectItem>
-                <SelectItem value="print-mail">Print & Mail</SelectItem>
-                <SelectItem value="signage">Signage & Branding</SelectItem>
-                <SelectItem value="open-house">Open House</SelectItem>
-                <SelectItem value="gifting">Client Gifting</SelectItem>
-                <SelectItem value="property-access">Lockboxes</SelectItem>
-                <SelectItem value="presentations">Presentations</SelectItem>
-                <SelectItem value="website-seo">Website & SEO</SelectItem>
-                <SelectItem value="social-media">Social Media</SelectItem>
-                <SelectItem value="lead-gen">Lead Generation</SelectItem>
-                <SelectItem value="video-media">Video & Media</SelectItem>
-                <SelectItem value="automation">Automation</SelectItem>
-                <SelectItem value="crm">CRM & Database</SelectItem>
-                <SelectItem value="transaction">Transaction Tools</SelectItem>
-                <SelectItem value="coaching">Coaching</SelectItem>
-                <SelectItem value="finance">Finance & Ops</SelectItem>
-                <SelectItem value="compliance">Compliance</SelectItem>
-                <SelectItem value="insurance">Insurance</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Mobile: Dropdown + More button in same row */}
+            <div className="flex items-center gap-2 flex-1 md:flex-initial">
+              {/* Category Dropdown */}
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-full md:w-[200px]">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  <SelectItem value="photography">Photography</SelectItem>
+                  <SelectItem value="print-mail">Print & Mail</SelectItem>
+                  <SelectItem value="signage">Signage & Branding</SelectItem>
+                  <SelectItem value="open-house">Open House</SelectItem>
+                  <SelectItem value="gifting">Client Gifting</SelectItem>
+                  <SelectItem value="property-access">Lockboxes</SelectItem>
+                  <SelectItem value="presentations">Presentations</SelectItem>
+                  <SelectItem value="website-seo">Website & SEO</SelectItem>
+                  <SelectItem value="social-media">Social Media</SelectItem>
+                  <SelectItem value="lead-gen">Lead Generation</SelectItem>
+                  <SelectItem value="video-media">Video & Media</SelectItem>
+                  <SelectItem value="automation">Automation</SelectItem>
+                  <SelectItem value="crm">CRM & Database</SelectItem>
+                  <SelectItem value="transaction">Transaction Tools</SelectItem>
+                  <SelectItem value="coaching">Coaching</SelectItem>
+                  <SelectItem value="finance">Finance & Ops</SelectItem>
+                  <SelectItem value="compliance">Compliance</SelectItem>
+                  <SelectItem value="insurance">Insurance</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              {/* More Filters Popover - Mobile position */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="md:hidden">
+                    <SlidersHorizontal className="h-4 w-4" />
+                    <span className="ml-2">More</span>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80" align="end">
+                  <div className="space-y-6">
+                    {/* Mobile-only Quick Toggles */}
+                    <div className="space-y-3 pb-6 border-b">
+                      <div className="flex items-center gap-2">
+                        <Checkbox 
+                          id="verified-filter-mobile" 
+                          checked={verifiedOnly} 
+                          onCheckedChange={(checked) => setVerifiedOnly(checked as boolean)}
+                        />
+                        <Label htmlFor="verified-filter-mobile" className="text-sm cursor-pointer">
+                          Verified only
+                        </Label>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Checkbox 
+                          id="top-rated-mobile" 
+                          checked={topRated} 
+                          onCheckedChange={(checked) => setTopRated(checked as boolean)}
+                        />
+                        <Label htmlFor="top-rated-mobile" className="text-sm cursor-pointer">
+                          Top rated (4.5+)
+                        </Label>
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium mb-4">Price Range</h4>
+                      <div className="space-y-2">
+                        <Slider
+                          value={priceRange}
+                          onValueChange={setPriceRange}
+                          max={500}
+                          step={10}
+                          className="w-full"
+                        />
+                        <div className="flex justify-between text-sm text-muted-foreground">
+                          <span>${priceRange[0]}</span>
+                          <span>${priceRange[1]}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium mb-3">Minimum Rating</h4>
+                      <div className="space-y-2">
+                        {[4.5, 4.0, 3.5, 3.0].map((rating) => (
+                          <div key={rating} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`rating-${rating}-mobile`}
+                              checked={minRating === rating}
+                              onCheckedChange={(checked) => {
+                                setMinRating(checked ? rating : 0);
+                              }}
+                            />
+                            <Label
+                              htmlFor={`rating-${rating}-mobile`}
+                              className="text-sm cursor-pointer"
+                            >
+                              {rating}+ stars
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
             
-            {/* Quick Toggles - Hidden on mobile */}
+            {/* Desktop Quick Toggles */}
             <div className="hidden md:flex items-center gap-2">
               <Checkbox 
                 id="verified-filter" 
@@ -453,41 +534,16 @@ const Marketplace = () => {
               </Label>
             </div>
             
-            {/* More Filters Popover */}
+            {/* More Filters Popover - Desktop */}
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="hidden md:flex">
                   <SlidersHorizontal className="h-4 w-4 mr-2" />
                   More Filters
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80" align="start">
                 <div className="space-y-6">
-                  {/* Mobile-only Quick Toggles */}
-                  <div className="md:hidden space-y-3 pb-6 border-b">
-                    <div className="flex items-center gap-2">
-                      <Checkbox 
-                        id="verified-filter-mobile" 
-                        checked={verifiedOnly} 
-                        onCheckedChange={(checked) => setVerifiedOnly(checked as boolean)}
-                      />
-                      <Label htmlFor="verified-filter-mobile" className="text-sm cursor-pointer">
-                        Verified only
-                      </Label>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Checkbox 
-                        id="top-rated-mobile" 
-                        checked={topRated} 
-                        onCheckedChange={(checked) => setTopRated(checked as boolean)}
-                      />
-                      <Label htmlFor="top-rated-mobile" className="text-sm cursor-pointer">
-                        Top rated (4.5+)
-                      </Label>
-                    </div>
-                  </div>
-
                   <div>
                     <h4 className="font-medium mb-4">Price Range</h4>
                     <div className="space-y-2">
