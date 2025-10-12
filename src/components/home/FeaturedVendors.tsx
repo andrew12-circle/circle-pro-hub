@@ -254,7 +254,7 @@ export const FeaturedVendors = ({ onServiceClick, featured = false, noContainer 
   );
 
   return (
-    <section className="w-full py-16 bg-muted/50">
+    <section className="w-full py-16 bg-background">
       {noContainer ? content : <div className="container px-4">{content}</div>}
     </section>
   );
