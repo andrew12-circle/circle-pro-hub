@@ -10,3 +10,4 @@ export * from "./account/favorites";
 export * from "./account/wallet";
 export * from "./cart/pricing-selection";
 export * from "./share/share";
+export * from "./bookings";

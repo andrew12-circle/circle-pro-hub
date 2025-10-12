@@ -21,6 +21,8 @@ import Start from "./pages/partners/Start";
 import ApplyService from "./pages/partners/ApplyService";
 import ApplyCoPartner from "./pages/partners/ApplyCoPartner";
 import Share from "./pages/Share";
+import Book from "./pages/concierge/Book";
+import AdminBookings from "./pages/admin/Bookings";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +51,8 @@ const App = () => {
             <Route path="/partners/apply/service" element={<ApplyService />} />
             <Route path="/partners/apply/copartner" element={<ApplyCoPartner />} />
             <Route path="/s/:id" element={<Share />} />
+            <Route path="/concierge/book" element={<Book />} />
+            <Route path="/admin/bookings" element={<AdminBookings />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -18,6 +18,7 @@ export const ServiceCardSchema = z.object({
     name: z.string(),
     logo: z.string().url(),
     verified: z.boolean().default(false),
+    calendarLink: z.string().url().optional(),
   }),
   tagline: z.string().max(500),
   category: z.string(),
