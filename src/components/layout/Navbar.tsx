@@ -194,18 +194,17 @@ export const Navbar = () => {
 
       {/* Bottom Navigation - Mobile Only */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t">
-        <div className="flex items-center justify-around h-16 px-4">
+        <div className="flex items-center justify-around h-14 px-2">
           <Link 
             to="/" 
-            className={`flex flex-col items-center gap-1 px-4 py-2 ${location.pathname === '/' ? 'text-primary' : 'text-muted-foreground'}`}
+            className={`flex items-center justify-center p-3 ${location.pathname === '/' ? 'text-primary' : 'text-muted-foreground'}`}
           >
             <Home className="h-6 w-6" />
-            <span className="text-xs">Home</span>
           </Link>
 
           <Link 
             to="/profile" 
-            className={`flex flex-col items-center gap-1 px-4 py-2 relative ${location.pathname === '/profile' ? 'text-primary' : 'text-muted-foreground'}`}
+            className={`flex items-center justify-center p-3 relative ${location.pathname === '/profile' ? 'text-primary' : 'text-muted-foreground'}`}
           >
             {user && profile?.avatar_url ? (
               <Avatar className={`h-6 w-6 ${isPro ? 'ring-1 ring-primary' : ''}`}>
@@ -217,17 +216,14 @@ export const Navbar = () => {
             ) : (
               <User className="h-6 w-6" />
             )}
-            <span className="text-xs">Profile</span>
           </Link>
 
-          <button className="flex flex-col items-center gap-1 px-4 py-2 text-muted-foreground relative">
+          <button className="flex items-center justify-center p-3 text-muted-foreground relative">
             <ShoppingCart className="h-6 w-6" />
-            <span className="text-xs">Cart</span>
           </button>
 
-          <button className="flex flex-col items-center gap-1 px-4 py-2 text-muted-foreground">
+          <button className="flex items-center justify-center p-3 text-muted-foreground">
             <Menu className="h-6 w-6" />
-            <span className="text-xs">Menu</span>
           </button>
         </div>
       </div>
