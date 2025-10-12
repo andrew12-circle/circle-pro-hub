@@ -304,12 +304,12 @@ const Marketplace = () => {
                     {adviceSectionOpen ? (
                       <>
                         <ChevronUp className="h-4 w-4" />
-                        Collapse
+                        <span className="hidden sm:inline">Collapse</span>
                       </>
                     ) : (
                       <>
                         <ChevronDown className="h-4 w-4" />
-                        Expand
+                        <span className="hidden sm:inline">Expand</span>
                       </>
                     )}
                   </Button>
