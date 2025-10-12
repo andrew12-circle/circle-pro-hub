@@ -42,7 +42,7 @@ export const Navbar = () => {
       <div className="container flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2">
-          <img src={circleNetworkLogo} alt="Circle Network" className="h-8 w-auto object-contain" />
+          <img src={circleNetworkLogo} alt="Circle Network" className="h-12 w-auto object-contain" />
           <span className="font-semibold text-xl">Marketplace</span>
         </Link>
 
