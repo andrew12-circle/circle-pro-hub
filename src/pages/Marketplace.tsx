@@ -329,7 +329,7 @@ const Marketplace = () => {
             </div>
 
             {/* Category Icons - Compact */}
-            <div className="flex flex-wrap items-center justify-center gap-3 mb-4">
+            <div className="flex flex-wrap items-center justify-center gap-6 mb-4">
               {[
                 { icon: "🏠", label: "CRM", color: "bg-blue-100" },
                 { icon: "📊", label: "Marketing", color: "bg-cyan-100" },
@@ -341,12 +341,12 @@ const Marketplace = () => {
               ].map((cat) => (
                 <button
                   key={cat.label}
-                  className="flex flex-col items-center gap-1 hover:scale-105 transition-transform"
+                  className="flex flex-col items-center gap-2 hover:scale-105 transition-transform"
                 >
-                  <div className={`h-12 w-12 rounded-full ${cat.color} flex items-center justify-center text-xl`}>
+                  <div className={`h-16 w-16 rounded-full ${cat.color} flex items-center justify-center text-2xl`}>
                     {cat.icon}
                   </div>
-                  <span className="text-[10px] font-medium text-center">{cat.label}</span>
+                  <span className="text-xs font-medium text-center">{cat.label}</span>
                 </button>
               ))}
             </div>
