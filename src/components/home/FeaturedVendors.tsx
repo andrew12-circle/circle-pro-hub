@@ -96,7 +96,7 @@ export const FeaturedVendors = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {vendors.map((vendor) => (
-            <div key={vendor.id} className="group">
+            <div key={vendor.id} id={`vendor-${vendor.id}`} className="group">
               <div className="bg-card rounded-2xl border overflow-hidden hover-lift">
                 {/* Header */}
                 <div className="p-4 border-b flex items-center justify-between">
@@ -128,7 +128,11 @@ export const FeaturedVendors = () => {
                   <p className="text-sm text-muted-foreground line-clamp-3 mb-2">
                     🔥 {vendor.tagline}
                   </p>
-                  <Link to={`/service/${vendor.id}`} className="text-sm text-primary hover:underline font-medium">
+                  <Link 
+                    to={`/service/${vendor.id}`}
+                    state={{ vendorId: vendor.id, returnTo: 'featured-vendors' }}
+                    className="text-sm text-primary hover:underline font-medium"
+                  >
                     See more
                   </Link>
                 </div>
@@ -221,7 +225,12 @@ export const FeaturedVendors = () => {
                       Add
                     </Button>
                     <Button size="sm" asChild>
-                      <Link to={`/service/${vendor.id}`}>Learn more</Link>
+                      <Link 
+                        to={`/service/${vendor.id}`}
+                        state={{ vendorId: vendor.id, returnTo: 'featured-vendors' }}
+                      >
+                        Learn more
+                      </Link>
                     </Button>
                   </div>
 
