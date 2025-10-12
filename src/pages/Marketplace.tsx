@@ -56,9 +56,8 @@ const Marketplace = () => {
         </div>
       </section>
 
-      <div className="w-full">
-        <div className="max-w-screen-2xl mx-auto px-4 lg:px-8 py-8">
-          <div className="flex gap-12">
+      <div className="w-full px-4 lg:px-8 py-8">
+        <div className="flex gap-8 lg:gap-12">
             {/* Mobile Filter Button */}
             <div className="lg:hidden fixed bottom-4 right-4 z-40">
               <Sheet>
@@ -106,11 +105,14 @@ const Marketplace = () => {
 
             {/* Main Content */}
             <main className="flex-1 min-w-0 space-y-16">
-              <CategoryGrid />
-              <FeaturedVendors onServiceClick={setSelectedServiceId} />
+              <div>
+                <CategoryGrid noContainer />
+              </div>
+              <div>
+                <FeaturedVendors onServiceClick={setSelectedServiceId} noContainer />
+              </div>
             </main>
           </div>
-        </div>
       </div>
 
       <ServiceDetailModal 

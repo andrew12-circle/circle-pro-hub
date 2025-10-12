@@ -33,48 +33,53 @@ const categories = [
 
 interface CategoryGridProps {
   featured?: boolean;
+  noContainer?: boolean;
 }
 
-export const CategoryGrid = ({ featured = false }: CategoryGridProps) => {
+export const CategoryGrid = ({ featured = false, noContainer = false }: CategoryGridProps) => {
   const displayCategories = featured 
     ? categories.slice(0, 8) // Top 8 categories for homepage
     : categories;
 
+  const content = (
+    <>
+      <div className="text-center mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">Browse by Category</h2>
+        <p className="text-lg text-muted-foreground">Find exactly what you need for your business</p>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
+        {displayCategories.map((category) => (
+          <Link
+            key={category.slug}
+            to={`/category/${category.slug}`}
+            className="group"
+          >
+            <div className="relative overflow-hidden rounded-2xl border bg-card p-6 hover-lift hover-scale cursor-pointer">
+              <div className={`inline-flex p-3 rounded-xl ${category.color} mb-4`}>
+                <category.icon className="h-6 w-6" />
+              </div>
+              <h3 className="font-semibold text-sm">{category.name}</h3>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      {featured && (
+        <div className="text-center mt-8">
+          <Link to="/marketplace">
+            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
+              View All Categories
+            </button>
+          </Link>
+        </div>
+      )}
+    </>
+  );
+
   return (
     <section className="w-full py-16">
-      <div className="container px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Browse by Category</h2>
-          <p className="text-lg text-muted-foreground">Find exactly what you need for your business</p>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-6">
-          {displayCategories.map((category) => (
-            <Link
-              key={category.slug}
-              to={`/category/${category.slug}`}
-              className="group"
-            >
-              <div className="relative overflow-hidden rounded-2xl border bg-card p-6 hover-lift hover-scale cursor-pointer">
-                <div className={`inline-flex p-3 rounded-xl ${category.color} mb-4`}>
-                  <category.icon className="h-6 w-6" />
-                </div>
-                <h3 className="font-semibold text-sm">{category.name}</h3>
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {featured && (
-          <div className="text-center mt-8">
-            <Link to="/marketplace">
-              <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2">
-                View All Categories
-              </button>
-            </Link>
-          </div>
-        )}
-      </div>
+      {noContainer ? content : <div className="container px-4">{content}</div>}
     </section>
   );
 };

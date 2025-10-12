@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 interface FeaturedVendorsProps {
   onServiceClick: (serviceId: string) => void;
   featured?: boolean;
+  noContainer?: boolean;
 }
 
 const vendors = [
@@ -86,25 +87,24 @@ const vendors = [
   },
 ];
 
-export const FeaturedVendors = ({ onServiceClick, featured = false }: FeaturedVendorsProps) => {
+export const FeaturedVendors = ({ onServiceClick, featured = false, noContainer = false }: FeaturedVendorsProps) => {
   const displayVendors = featured ? vendors.slice(0, 4) : vendors;
 
-  return (
-    <section className="w-full py-16 bg-muted/50">
-      <div className="container px-4">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">{featured ? "Top Rated Vendors" : "All Vendors"}</h2>
-            <p className="text-lg text-muted-foreground">Trusted by thousands of agents nationwide</p>
-          </div>
-          {featured && (
-            <Button variant="outline" asChild>
-              <a href="/marketplace">View All</a>
-            </Button>
-          )}
+  const content = (
+    <>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-2">{featured ? "Top Rated Vendors" : "All Vendors"}</h2>
+          <p className="text-lg text-muted-foreground">Trusted by thousands of agents nationwide</p>
         </div>
+        {featured && (
+          <Button variant="outline" asChild>
+            <a href="/marketplace">View All</a>
+          </Button>
+        )}
+      </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {displayVendors.map((vendor) => (
             <div key={vendor.id} className="group">
               <div className="bg-card rounded-2xl border overflow-hidden hover-lift">
@@ -248,9 +248,14 @@ export const FeaturedVendors = ({ onServiceClick, featured = false }: FeaturedVe
                 </div>
               </div>
             </div>
-          ))}
-        </div>
+        ))}
       </div>
+    </>
+  );
+
+  return (
+    <section className="w-full py-16 bg-muted/50">
+      {noContainer ? content : <div className="container px-4">{content}</div>}
     </section>
   );
 };
