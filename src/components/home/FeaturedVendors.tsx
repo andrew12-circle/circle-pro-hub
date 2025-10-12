@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Star, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,7 +60,7 @@ export const FeaturedVendors = () => {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           {vendors.map((vendor) => (
-            <div key={vendor.id} className="group">
+            <Link key={vendor.id} to={`/service/${vendor.id}`} className="group">
               <div className="bg-card rounded-2xl border overflow-hidden hover-lift cursor-pointer">
                 {/* Vendor Image Placeholder */}
                 <div className="aspect-video bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
@@ -111,7 +112,7 @@ export const FeaturedVendors = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
