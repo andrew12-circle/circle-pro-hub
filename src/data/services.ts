@@ -1,5 +1,6 @@
 import { ServiceCard, ServiceFunnel } from "../../contracts/marketplace";
 import servicesFixtures from "../../fixtures/services.json";
+import { cache } from "@/adapters/cache";
 
 export interface ServiceFilters {
   category?: string;
@@ -84,35 +85,39 @@ function sortServices(services: ServiceFunnel[], sortBy?: string): ServiceFunnel
 }
 
 export async function getServices(params: GetServicesParams = {}): Promise<ServiceCard[]> {
-  const { filters, limit, offset = 0, sortBy } = params;
+  const cacheKey = `services:${JSON.stringify(params)}`;
+  
+  return cache.getOrSet(cacheKey, 90, async () => {
+    const { filters, limit, offset = 0, sortBy } = params;
 
-  // Cast fixtures to ServiceFunnel[] (they contain all funnel data)
-  const allServices = servicesFixtures as ServiceFunnel[];
+    // Cast fixtures to ServiceFunnel[] (they contain all funnel data)
+    const allServices = servicesFixtures as ServiceFunnel[];
 
-  // Apply filters
-  let filtered = allServices.filter((service) => matchesFilters(service, filters));
+    // Apply filters
+    let filtered = allServices.filter((service) => matchesFilters(service, filters));
 
-  // Apply sorting
-  filtered = sortServices(filtered, sortBy);
+    // Apply sorting
+    filtered = sortServices(filtered, sortBy);
 
-  // Apply pagination
-  const paginated = filtered.slice(offset, limit ? offset + limit : undefined);
+    // Apply pagination
+    const paginated = filtered.slice(offset, limit ? offset + limit : undefined);
 
-  // Map to ServiceCard (subset of ServiceFunnel)
-  return paginated.map((service) => ({
-    id: service.id,
-    name: service.name,
-    vendor: service.vendor,
-    tagline: service.tagline,
-    category: service.category,
-    rating: service.rating,
-    reviews: service.reviews,
-    reviewHighlight: service.reviewHighlight,
-    pricing: service.pricing,
-    featured: service.featured,
-    badges: service.badges,
-    serviceAreas: service.serviceAreas,
-  }));
+    // Map to ServiceCard (subset of ServiceFunnel)
+    return paginated.map((service) => ({
+      id: service.id,
+      name: service.name,
+      vendor: service.vendor,
+      tagline: service.tagline,
+      category: service.category,
+      rating: service.rating,
+      reviews: service.reviews,
+      reviewHighlight: service.reviewHighlight,
+      pricing: service.pricing,
+      featured: service.featured,
+      badges: service.badges,
+      serviceAreas: service.serviceAreas,
+    }));
+  });
 }
 
 export async function getServiceById(id: string): Promise<ServiceFunnel | null> {

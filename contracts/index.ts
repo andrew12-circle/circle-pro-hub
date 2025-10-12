@@ -5,4 +5,6 @@ export * from "./forms/vendor-intake";
 export * from "./affiliates/core";
 export * from "./content/legal";
 export * from "./account/favorites";
+export * from "./account/wallet";
+export * from "./cart/pricing-selection";
 export * from "./share/share";
