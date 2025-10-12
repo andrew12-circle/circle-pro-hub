@@ -1,0 +1,238 @@
+[
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440001",
+    "name": "Professional Home Inspection",
+    "vendor": {
+      "id": "660e8400-e29b-41d4-a716-446655440001",
+      "name": "HomeSafe Inspections",
+      "logo": "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=100&h=100&fit=crop",
+      "verified": true
+    },
+    "tagline": "Comprehensive home inspection with detailed report, thermal imaging, and pest inspection. Same-day scheduling available.",
+    "category": "Home Services",
+    "rating": 4.8,
+    "reviews": 127,
+    "reviewHighlight": "Very thorough inspection, found issues we never would have noticed. Report was detailed and easy to understand.",
+    "pricing": {
+      "retail": {
+        "amount": 450,
+        "currency": "USD"
+      },
+      "pro": {
+        "amount": 315,
+        "currency": "USD"
+      },
+      "proPctSavings": 30,
+      "copay": {
+        "amount": 50,
+        "currency": "USD"
+      },
+      "copayWithVendor": {
+        "amount": 365,
+        "currency": "USD"
+      }
+    },
+    "featured": true,
+    "badges": ["Same-Day", "Verified", "Top Rated"],
+    "packages": [
+      {
+        "id": "pkg-basic",
+        "name": "Basic Inspection",
+        "description": "Visual inspection of major systems including structure, roof, HVAC, plumbing, and electrical. Includes detailed photo report.",
+        "pricing": {
+          "retail": {
+            "amount": 450,
+            "currency": "USD"
+          },
+          "pro": {
+            "amount": 315,
+            "currency": "USD"
+          },
+          "proPctSavings": 30
+        }
+      },
+      {
+        "id": "pkg-premium",
+        "name": "Premium Inspection",
+        "description": "Everything in Basic plus thermal imaging, radon testing, and pest inspection. Priority scheduling within 24 hours.",
+        "pricing": {
+          "retail": {
+            "amount": 750,
+            "currency": "USD"
+          },
+          "pro": {
+            "amount": 525,
+            "currency": "USD"
+          },
+          "proPctSavings": 30
+        }
+      },
+      {
+        "id": "pkg-platinum",
+        "name": "Platinum Inspection",
+        "description": "Complete Premium package plus pool/spa inspection, septic system evaluation, and well water testing. Same-day service guaranteed.",
+        "pricing": {
+          "retail": {
+            "amount": 1200,
+            "currency": "USD"
+          },
+          "pro": {
+            "amount": 840,
+            "currency": "USD"
+          },
+          "proPctSavings": 30
+        }
+      }
+    ],
+    "faq": [
+      {
+        "question": "How long does a typical inspection take?",
+        "answer": "A standard home inspection takes 2-4 hours depending on the size and age of the property. We'll provide you with an estimated timeframe when you book."
+      },
+      {
+        "question": "When will I receive the inspection report?",
+        "answer": "You'll receive a comprehensive digital report within 24 hours of the inspection. The report includes photos, descriptions of issues found, and recommendations for repairs."
+      },
+      {
+        "question": "Can I attend the inspection?",
+        "answer": "Absolutely! We encourage buyers to attend so we can walk you through our findings and answer questions in real-time."
+      },
+      {
+        "question": "What's included in the thermal imaging?",
+        "answer": "Thermal imaging helps identify moisture intrusion, insulation gaps, electrical hot spots, and HVAC efficiency issues that aren't visible to the naked eye."
+      }
+    ],
+    "media": {
+      "images": [
+        "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&h=600&fit=crop"
+      ],
+      "videos": []
+    },
+    "compliance": {
+      "disclaimer": "This inspection service is provided by an independent third-party vendor. Pricing and availability subject to vendor terms."
+    }
+  },
+  {
+    "id": "550e8400-e29b-41d4-a716-446655440002",
+    "name": "Title Insurance & Escrow",
+    "vendor": {
+      "id": "660e8400-e29b-41d4-a716-446655440002",
+      "name": "SecureTitle Solutions",
+      "logo": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=100&h=100&fit=crop",
+      "verified": true
+    },
+    "tagline": "Comprehensive title search and insurance with digital closing. Fast processing, competitive rates, and nationwide coverage.",
+    "category": "Real Estate Services",
+    "rating": 4.9,
+    "reviews": 243,
+    "reviewHighlight": "Smooth closing process with excellent communication. Digital signing made everything so convenient.",
+    "pricing": {
+      "retail": {
+        "amount": 1200,
+        "currency": "USD"
+      },
+      "pro": {
+        "amount": 900,
+        "currency": "USD"
+      },
+      "proPctSavings": 25,
+      "copay": {
+        "amount": 150,
+        "currency": "USD"
+      },
+      "copayWithVendor": {
+        "amount": 1050,
+        "currency": "USD"
+      }
+    },
+    "featured": true,
+    "badges": ["Fast Processing", "Digital Closing", "Nationwide"],
+    "packages": [
+      {
+        "id": "pkg-owner",
+        "name": "Owner's Policy",
+        "description": "Standard owner's title insurance policy protecting your ownership rights. One-time premium paid at closing.",
+        "pricing": {
+          "retail": {
+            "amount": 1200,
+            "currency": "USD"
+          },
+          "pro": {
+            "amount": 900,
+            "currency": "USD"
+          },
+          "proPctSavings": 25
+        }
+      },
+      {
+        "id": "pkg-lender",
+        "name": "Lender's Policy",
+        "description": "Required by most lenders to protect their investment. Premium based on loan amount.",
+        "pricing": {
+          "retail": {
+            "amount": 800,
+            "currency": "USD"
+          },
+          "pro": {
+            "amount": 600,
+            "currency": "USD"
+          },
+          "proPctSavings": 25
+        }
+      },
+      {
+        "id": "pkg-bundle",
+        "name": "Complete Protection Bundle",
+        "description": "Both Owner's and Lender's policies bundled for maximum savings. Includes enhanced coverage and digital escrow management.",
+        "pricing": {
+          "retail": {
+            "amount": 1800,
+            "currency": "USD"
+          },
+          "pro": {
+            "amount": 1350,
+            "currency": "USD"
+          },
+          "proPctSavings": 25
+        }
+      }
+    ],
+    "faq": [
+      {
+        "question": "What does title insurance protect against?",
+        "answer": "Title insurance protects against ownership disputes, unpaid liens, errors in public records, fraud, forgery, and undisclosed heirs that could affect your property ownership."
+      },
+      {
+        "question": "How long does the title search take?",
+        "answer": "Most title searches are completed within 3-5 business days. We'll notify you immediately if any issues are discovered that need resolution."
+      },
+      {
+        "question": "Do I really need both owner's and lender's policies?",
+        "answer": "Lender's policy is typically required by your mortgage company. Owner's policy is optional but highly recommended to protect your investment for as long as you own the property."
+      },
+      {
+        "question": "Can I do digital closing?",
+        "answer": "Yes! We offer fully digital closing with e-signatures for most transactions. We can also arrange mobile notary or in-office closing if preferred."
+      },
+      {
+        "question": "What if issues are found during the title search?",
+        "answer": "We work to resolve title defects before closing. Most issues like unpaid taxes or liens can be cleared, but we'll keep you informed throughout the process."
+      }
+    ],
+    "media": {
+      "images": [
+        "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&h=600&fit=crop",
+        "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=600&fit=crop"
+      ],
+      "videos": []
+    },
+    "compliance": {
+      "respa": "This is a settlement service. Prices quoted are estimates and may vary based on property value and location.",
+      "disclaimer": "Title insurance rates are regulated by state insurance departments. Final rates may vary by state."
+    }
+  }
+]

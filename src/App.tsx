@@ -5,6 +5,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Marketplace from "./pages/Marketplace";
+import Services from "./pages/Services";
+import ServiceDetail from "./pages/ServiceDetail";
 import Saved from "./pages/Saved";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
@@ -22,6 +24,8 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/services" element={<Services />} />
+          <Route path="/services/:id" element={<ServiceDetail />} />
           <Route path="/saved" element={<Saved />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/admin" element={<Admin />} />
