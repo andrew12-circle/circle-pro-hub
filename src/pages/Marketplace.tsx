@@ -8,7 +8,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { useSearchParams } from "react-router-dom";
-import circleNetworkLogo from "@/assets/circle-network-logo.png";
 import {
   Select,
   SelectContent,
@@ -173,11 +172,9 @@ const Marketplace = () => {
         {/* Logo */}
         <div className="aspect-[4/3] bg-gradient-to-br from-background to-muted/30 flex items-center justify-center border-b">
           <div className="text-center">
-            <img 
-              src={circleNetworkLogo} 
-              alt="Circle Network" 
-              className="h-24 w-24 mx-auto mb-2 object-contain"
-            />
+            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-2">
+              <span className="text-2xl font-bold text-primary">{vendor.logo}</span>
+            </div>
             <div className="text-lg font-bold">{vendor.name}</div>
           </div>
         </div>
