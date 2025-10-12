@@ -10,7 +10,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Crown, User as UserIcon, Mail, LogOut } from "lucide-react";
+import { MapPin, Crown, User as UserIcon, Mail, LogOut, Upload, Camera } from "lucide-react";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -19,10 +19,12 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isPro, setIsPro] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [profile, setProfile] = useState({
     full_name: "",
     location: "",
     points: 0,
+    avatar_url: "",
   });
 
   useEffect(() => {
@@ -48,6 +50,7 @@ const Profile = () => {
           full_name: profileData.full_name || "",
           location: profileData.location || "",
           points: profileData.points || 0,
+          avatar_url: profileData.avatar_url || "",
         });
       }
 
@@ -65,6 +68,82 @@ const Profile = () => {
 
     checkUser();
   }, [navigate]);
+
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!user || !event.target.files || event.target.files.length === 0) return;
+
+    const file = event.target.files[0];
+    
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid File",
+        description: "Please upload an image file (JPG, PNG, etc.)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File Too Large",
+        description: "Please upload an image smaller than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      // Delete old avatar if exists
+      if (profile.avatar_url) {
+        const oldPath = profile.avatar_url.split('/').pop();
+        if (oldPath) {
+          await supabase.storage.from('avatars').remove([`${user.id}/${oldPath}`]);
+        }
+      }
+
+      // Upload new avatar
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      // Update profile with new avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      setProfile({ ...profile, avatar_url: publicUrl });
+
+      toast({
+        title: "Success",
+        description: "Profile picture updated successfully!",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Upload Failed",
+        description: error.message || "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!user) return;
@@ -128,12 +207,32 @@ const Profile = () => {
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center gap-6">
-                <Avatar className={`h-24 w-24 ${isPro ? 'ring-4 ring-primary ring-offset-4' : ''}`}>
-                  <AvatarImage src={user?.user_metadata?.avatar_url} alt={profile.full_name} />
-                  <AvatarFallback className="text-2xl">
-                    <UserIcon className="h-12 w-12" />
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className={`h-24 w-24 ${isPro ? 'ring-4 ring-primary ring-offset-4' : ''}`}>
+                    <AvatarImage src={profile.avatar_url} alt={profile.full_name} />
+                    <AvatarFallback className="text-2xl">
+                      <UserIcon className="h-12 w-12" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <label 
+                    htmlFor="avatar-upload" 
+                    className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center cursor-pointer hover:bg-primary/90 transition-colors"
+                  >
+                    {uploading ? (
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                    ) : (
+                      <Camera className="h-4 w-4" />
+                    )}
+                  </label>
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                </div>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <h3 className="text-xl font-semibold">{profile.full_name || "No name set"}</h3>
