@@ -3,6 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/lib/cartStore";
+import { RequireAuth, RequireAuthAndRole } from "@/lib/guard";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Marketplace from "./pages/Marketplace";
@@ -34,25 +35,33 @@ const App = () => {
           <Toaster />
           <Sonner />
           <Routes>
+            {/* Public Routes */}
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/services" element={<Services />} />
             <Route path="/services/:id" element={<ServiceDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/account/wallet" element={<Wallet />} />
             <Route path="/pricing" element={<Pricing />} />
-            <Route path="/saved" element={<Saved />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/admin" element={<Admin />} />
             <Route path="/legal" element={<Legal />} />
             <Route path="/support" element={<Support />} />
-            <Route path="/partners/start" element={<Start />} />
-            <Route path="/partners/apply/service" element={<ApplyService />} />
-            <Route path="/partners/apply/copartner" element={<ApplyCoPartner />} />
             <Route path="/s/:id" element={<Share />} />
-            <Route path="/concierge/book" element={<Book />} />
-            <Route path="/admin/bookings" element={<AdminBookings />} />
+            
+            {/* Auth-Protected Routes */}
+            <Route path="/cart" element={<RequireAuth><Cart /></RequireAuth>} />
+            <Route path="/account/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
+            <Route path="/saved" element={<RequireAuth><Saved /></RequireAuth>} />
+            <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+            <Route path="/concierge/book" element={<RequireAuth><Book /></RequireAuth>} />
+            
+            {/* Partner Routes (Auth Required) */}
+            <Route path="/partners/start" element={<RequireAuth><Start /></RequireAuth>} />
+            <Route path="/partners/apply/service" element={<RequireAuth><ApplyService /></RequireAuth>} />
+            <Route path="/partners/apply/copartner" element={<RequireAuth><ApplyCoPartner /></RequireAuth>} />
+            
+            {/* Admin Routes (Auth + Admin Role Required) */}
+            <Route path="/admin" element={<RequireAuthAndRole role="admin"><Admin /></RequireAuthAndRole>} />
+            <Route path="/admin/bookings" element={<RequireAuthAndRole role="admin"><AdminBookings /></RequireAuthAndRole>} />
+            
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

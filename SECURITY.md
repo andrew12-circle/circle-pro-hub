@@ -61,12 +61,58 @@ npm run depcheck       # Find unused dependencies
 - ✅ ALWAYS use `VITE_SUPABASE_ANON_KEY` for client operations
 - ✅ Keep dependencies up to date and audit regularly
 
-## Remaining Phases
+## Phase 2: Auth Hardening ✅
 
-### Phase 2: Auth Hardening (TODO)
-- [ ] Create `RequireAuth` and `RequireRole` wrapper components
-- [ ] Protect admin routes with role guards
-- [ ] Hide sensitive UI elements conditionally
+### Auth Guards
+
+**Implementation:**
+- `src/lib/guard.tsx` provides `RequireAuth`, `RequireRole`, and `RequireAuthAndRole` wrapper components
+- Protected routes are wrapped with appropriate guards in `src/App.tsx`
+
+**Guard Components:**
+
+1. **`RequireAuth`**: Requires user authentication
+   - Redirects to `/auth` if not authenticated
+   - Shows loading state while checking auth
+   - Example: `<RequireAuth><Cart /></RequireAuth>`
+
+2. **`RequireRole`**: Requires specific role (admin or pro)
+   - Uses `useAdminRole` hook for admin checks
+   - Uses `useProMember` hook for pro checks
+   - Redirects to home if role not satisfied (for admin)
+   - Example: `<RequireRole role="admin"><Admin /></RequireRole>`
+
+3. **`RequireAuthAndRole`**: Combines both guards
+   - Requires authentication AND specific role
+   - Example: `<RequireAuthAndRole role="admin"><Admin /></RequireAuthAndRole>`
+
+**Protected Routes:**
+
+*Auth-Protected (RequireAuth):*
+- `/cart` - Shopping cart
+- `/account/wallet` - User wallet
+- `/saved` - Saved items
+- `/profile` - User profile
+- `/concierge/book` - Concierge booking
+- `/partners/*` - All partner routes
+
+*Admin-Only (RequireAuthAndRole):*
+- `/admin` - Admin dashboard
+- `/admin/bookings` - Admin bookings management
+
+**UI Conditional Rendering:**
+- Admin shield icon in navbar only visible to admin users
+- Admin links hidden from non-admin users
+- Pro badges shown only to pro members
+
+**Security Rules:**
+- ❌ NEVER check roles using localStorage or sessionStorage
+- ❌ NEVER hardcode credentials in client code
+- ✅ ALWAYS use server-side role validation via `user_roles` table
+- ✅ ALWAYS use `has_role()` RPC function for role checks
+- ✅ Roles stored in separate `user_roles` table (prevents privilege escalation)
+
+### Remaining Phases
 
 ### Phase 3: Error Handling (TODO)
 - [ ] Add React Error Boundaries

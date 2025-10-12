@@ -2,13 +2,14 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShoppingCart, User as UserIcon, Heart, Crown, Home, Menu } from "lucide-react";
+import { Search, ShoppingCart, User as UserIcon, Heart, Crown, Home, Menu, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 import circleNetworkLogo from "@/assets/circle-network-logo.png";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { LocationSelector } from "./LocationSelector";
 import { useCart } from "@/lib/cartStore";
+import { useAdminRole } from "@/hooks/use-admin-role";
 
 interface UserProfile {
   full_name: string | null;
@@ -29,6 +30,7 @@ export const Navbar = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isPro, setIsPro] = useState(false);
   const { itemCount } = useCart();
+  const { isAdmin } = useAdminRole();
   const isMarketplace = location.pathname === "/marketplace";
 
   // Check authentication state
@@ -133,6 +135,15 @@ export const Navbar = () => {
           <div className="hidden md:flex items-center gap-3">
             {user ? (
               <>
+                {/* Admin Link - Only visible to admins */}
+                {isAdmin && (
+                  <Button variant="ghost" size="icon" asChild>
+                    <Link to="/admin">
+                      <Shield className="h-5 w-5" />
+                    </Link>
+                  </Button>
+                )}
+
                 {/* Location Selector */}
                 <LocationSelector />
 
@@ -218,6 +229,16 @@ export const Navbar = () => {
           >
             <Home className="h-6 w-6" />
           </Link>
+
+          {/* Admin Link - Mobile - Only visible to admins */}
+          {isAdmin && (
+            <Link 
+              to="/admin" 
+              className={`flex items-center justify-center p-3 ${location.pathname === '/admin' ? 'text-primary' : 'text-muted-foreground'}`}
+            >
+              <Shield className="h-6 w-6" />
+            </Link>
+          )}
 
           <Link 
             to="/profile" 
