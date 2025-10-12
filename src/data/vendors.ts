@@ -28,7 +28,7 @@ export async function getAllPartners(): Promise<DomainVendorPartner[]> {
 }
 
 export async function getEligiblePartnersForService(
-  service: Pick<ServiceCard, 'id' | 'vendor'>,
+  service: Pick<ServiceCard, 'id' | 'cityScope'>,
   cityKey: string,
   agent: AgentProfile
 ): Promise<DomainVendorPartner[]> {
@@ -68,7 +68,7 @@ export async function getEligiblePartners(params: {
 
     // 3. Call new getEligiblePartnersForService
     const eligible = await getEligiblePartnersForService(
-      { id: service.id, vendor: service.vendor },
+      { id: service.id, cityScope: service.cityScope },
       params.city || '',
       agentProfile
     );

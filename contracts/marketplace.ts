@@ -29,6 +29,7 @@ export const ServiceCardSchema = z.object({
   featured: z.boolean().default(false),
   badges: z.array(z.string()).default([]),
   serviceAreas: z.array(z.string()).default([]),
+  cityScope: z.enum(['any', 'local']).default('any'),
 });
 
 export const ServiceFunnelSchema = ServiceCardSchema.extend({

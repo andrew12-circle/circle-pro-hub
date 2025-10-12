@@ -24,37 +24,37 @@ export type VendorPartner = {
   visibility?: 'public' | 'invite-only';
 };
 
+const norm = (s?: string) => (s || '').trim().toLowerCase();
+
 /**
  * Determine which partners are eligible for co-pay on a given service and user context.
  * Rule: copay.enabled ∧ market match ∧ deals >= minDeals ∧ service ∈ allowed ∧ service ∉ prohibited
  */
 export function eligiblePartners(
   partners: VendorPartner[],
-  service: Pick<ServiceCard, 'id' | 'vendor'>,
+  service: Pick<ServiceCard, 'id' | 'cityScope'>,
   cityKey: string, // normalized city/market key, e.g., 'franklin-tn'
   agent: AgentProfile
 ): VendorPartner[] {
   const deals = agent.dealsLast12m ?? 0;
+  const city = norm(cityKey);
 
   return partners.filter((p) => {
     if (!p.copayPolicy?.enabled) return false;
 
-    // Market rule: partner must include cityKey
-    const marketOk = p.markets?.map(normKey).includes(normKey(cityKey));
+    // Market rule: 'any' matches everywhere; local-only services require city match
+    const markets = (p.markets || []).map(norm);
+    const marketOk =
+      markets.includes('any') || (service.cityScope === 'any' ? true : markets.includes(city));
     if (!marketOk) return false;
 
     // Production threshold
     if (typeof p.minAgentDealsPerYear === 'number' && deals < p.minAgentDealsPerYear) return false;
 
     // Allowlist / blocklist
-    if (p.allowedServiceIds && p.allowedServiceIds.length > 0 && !p.allowedServiceIds.includes(service.id))
-      return false;
-    if (p.prohibitedServiceIds && p.prohibitedServiceIds.includes(service.id)) return false;
+    if (p.allowedServiceIds?.length && !p.allowedServiceIds.includes(service.id)) return false;
+    if (p.prohibitedServiceIds?.includes(service.id)) return false;
 
     return true;
   });
-}
-
-function normKey(s?: string) {
-  return (s || '').trim().toLowerCase();
 }

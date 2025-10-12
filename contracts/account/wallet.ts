@@ -17,3 +17,6 @@ export const PointsTransactionSchema = z.object({
 
 export type PointsBalance = z.infer<typeof PointsBalanceSchema>;
 export type PointsTransaction = z.infer<typeof PointsTransactionSchema>;
+
+// Alias for compatibility with cart and modal components
+export type Wallet = PointsBalance;

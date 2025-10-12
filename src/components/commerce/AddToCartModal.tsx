@@ -4,43 +4,34 @@ import * as React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Shield, Star, ArrowRight } from 'lucide-react';
 import type { ServiceCard } from '../../../contracts/marketplace';
-import type { PricingSelection, PricingMode } from '../../../contracts/cart/pricing-selection';
-import type { VendorPartner } from '../../../contracts/affiliates/partner';
-import type { PointsBalance } from '@/data/wallet';
+import type { PricingSelection } from '../../../contracts/cart/pricing-selection';
+import type { VendorPartner } from '@/lib/vendor_rules';
+import type { Wallet } from '../../../contracts/account/wallet';
+
+type Mode = 'retail' | 'pro' | 'copay' | 'points';
 
 type Props = {
   service: ServiceCard;
   userIsPro: boolean;
-  wallet?: PointsBalance | null;
-  /** Optional pre-filtered partners (use lib/eligiblePartners upstream). */
+  wallet?: Wallet | null;
   eligiblePartners?: VendorPartner[];
-  /** Called when user confirms a pricing mode (push to your cart store here). */
+  /** Called when user confirms. */
   onConfirm: (selection: PricingSelection) => void;
-  /** Optional trigger (e.g., "Add to cart" button). If omitted, render a default trigger. */
+  /** Optional trigger (e.g., "Add to cart" button). */
   trigger?: React.ReactNode;
 };
 
-export function AddToCartModal({
-  service,
-  userIsPro,
-  wallet,
-  eligiblePartners = [],
-  onConfirm,
-  trigger,
-}: Props) {
+export function AddToCartModal({ service, userIsPro, wallet, eligiblePartners = [], onConfirm, trigger }: Props) {
   const [open, setOpen] = React.useState(false);
-  const [mode, setMode] = React.useState<PricingMode>('retail');
+  const [mode, setMode] = React.useState<Mode>('retail');
   const [selectedPartnerId, setSelectedPartnerId] = React.useState<string | undefined>(undefined);
   const [pointsToUse, setPointsToUse] = React.useState<number>(0);
 
-  const copayAvailable = userIsPro && eligiblePartners.length > 0 && !!service.pricing.copay;
+  const copayAvailable = userIsPro && !!service.pricing.copay && eligiblePartners.length > 0;
   const proAvailable = userIsPro && !!service.pricing.pro;
   const pointsAvailable = userIsPro && (wallet?.points ?? 0) > 0;
 
-  // Ensure invalid combos get reset when toggling modes or losing eligibility
   React.useEffect(() => {
     if (mode === 'copay' && !copayAvailable) {
       setMode(proAvailable ? 'pro' : 'retail');
@@ -64,8 +55,8 @@ export function AddToCartModal({
       copayPartnerShare: mode === 'copay' ? service.pricing.copayWithVendor : undefined,
       userShare: mode === 'copay' ? service.pricing.copay : undefined,
     };
+    
     onConfirm(selection);
-    // close + reset light state
     setOpen(false);
     setSelectedPartnerId(undefined);
   }
@@ -81,38 +72,13 @@ export function AddToCartModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Modes */}
           <div className="grid grid-cols-2 gap-3">
-            <ModeButton
-              label="Retail"
-              active={mode === 'retail'}
-              onClick={() => setMode('retail')}
-              helper="Pay standard price"
-            />
-            <ModeButton
-              label="Pro"
-              active={mode === 'pro'}
-              onClick={() => setMode('pro')}
-              disabled={!proAvailable}
-              helper={proAvailable ? 'Member savings' : 'Requires Pro'}
-            />
-            <ModeButton
-              label="Co-Pay"
-              active={mode === 'copay'}
-              onClick={() => setMode('copay')}
-              disabled={!copayAvailable}
-              helper={copayAvailable ? 'Get vendor help' : 'Not available'}
-            />
-            <ModeButton
-              label="Use Points"
-              active={mode === 'points'}
-              onClick={() => setMode('points')}
-              disabled={!pointsAvailable}
-              helper={pointsAvailable ? 'Spend Circle Points' : 'No points available'}
-            />
+            <ModeButton label="Retail" helper="Pay standard price" active={mode==='retail'} onClick={()=>setMode('retail')} />
+            <ModeButton label="Pro" helper={proAvailable?'Member savings':'Requires Pro'} active={mode==='pro'} disabled={!proAvailable} onClick={()=>setMode('pro')} />
+            <ModeButton label="Co-Pay" helper={copayAvailable?'Get vendor help':'Not available'} active={mode==='copay'} disabled={!copayAvailable} onClick={()=>setMode('copay')} />
+            <ModeButton label="Use Points" helper={pointsAvailable?'Spend Circle Points':'No points'} active={mode==='points'} disabled={!pointsAvailable} onClick={()=>setMode('points')} />
           </div>
 
-          {/* Co-Pay partner selector */}
           {mode === 'copay' && (
             <div className="space-y-2">
               <div className="text-sm font-medium">Select a vendor partner</div>
@@ -123,50 +89,16 @@ export function AddToCartModal({
                   {eligiblePartners.map((p) => (
                     <Card
                       key={p.id}
-                      className={`cursor-pointer p-3 border ${
-                        selectedPartnerId === p.id ? 'ring-2 ring-primary' : 'hover:border-primary/50'
-                      }`}
+                      className={`cursor-pointer p-3 border ${selectedPartnerId===p.id ? 'ring-2 ring-primary' : 'hover:border-foreground/20'}`}
                       onClick={() => setSelectedPartnerId(p.id)}
                     >
-                      <div className="flex items-start gap-2">
-                        <img
-                          src={p.logo}
-                          alt={p.name}
-                          className="w-10 h-10 rounded object-cover flex-shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1 mb-1">
-                            <div className="font-semibold text-sm truncate">{p.name}</div>
-                            {p.verified && (
-                              <Shield className="h-3 w-3 text-primary flex-shrink-0" />
-                            )}
-                          </div>
-                          <div className="text-xs text-muted-foreground line-clamp-1">
-                            {p.markets.slice(0, 2).join(', ')}
-                            {p.markets.length > 2 && '…'}
-                          </div>
-                          {p.rating && (
-                            <div className="flex items-center gap-1 mt-1">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              <span className="text-xs font-medium">{p.rating}</span>
-                              {p.reviews && (
-                                <span className="text-xs text-muted-foreground">({p.reviews})</span>
-                              )}
-                            </div>
-                          )}
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // TODO: Open partner preview sheet
-                          }}
-                        >
-                          <ArrowRight className="h-3 w-3" />
-                        </Button>
+                      <div className="text-sm font-medium">{p.name}</div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        {p.markets.slice(0,2).join(', ')}{p.markets.length>2 && '…'}
                       </div>
+                      {p.copayPolicy?.sharePct ? (
+                        <div className="mt-2 text-xs">Covers up to {p.copayPolicy.sharePct}%</div>
+                      ) : null}
                     </Card>
                   ))}
                 </div>
@@ -174,7 +106,6 @@ export function AddToCartModal({
             </div>
           )}
 
-          {/* Points selector */}
           {mode === 'points' && (
             <div className="space-y-2">
               <div className="text-sm font-medium">Use Circle Points</div>
@@ -187,16 +118,14 @@ export function AddToCartModal({
                 max={wallet?.points ?? 0}
                 value={pointsToUse}
                 onChange={(e) => setPointsToUse(safeInt(e.target.value))}
-                className="w-32 rounded-md border px-2 py-1 text-sm"
+                className="w-32 rounded-md border border-input bg-background px-2 py-1 text-sm"
               />
             </div>
           )}
         </div>
 
         <DialogFooter className="mt-4">
-          <Button variant="ghost" onClick={() => setOpen(false)}>
-            Cancel
-          </Button>
+          <Button variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
           <Button
             onClick={confirm}
             disabled={
@@ -213,25 +142,15 @@ export function AddToCartModal({
 }
 
 function ModeButton({
-  label,
-  helper,
-  active,
-  disabled,
-  onClick,
-}: {
-  label: string;
-  helper?: string;
-  active?: boolean;
-  disabled?: boolean;
-  onClick: () => void;
-}) {
+  label, helper, active, disabled, onClick,
+}: { label: string; helper?: string; active?: boolean; disabled?: boolean; onClick: () => void }) {
   return (
     <button
       type="button"
       disabled={disabled}
       onClick={onClick}
       className={`text-left rounded-xl border p-3 transition ${
-        active ? 'border-primary/60 bg-primary/[0.03]' : 'border-border hover:border-primary/25'
+        active ? 'border-foreground/60 bg-accent' : 'border-border hover:border-foreground/25'
       } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
       <div className="text-sm font-medium">{label}</div>
@@ -240,10 +159,5 @@ function ModeButton({
   );
 }
 
-function clamp(n: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, n));
-}
-function safeInt(v: string) {
-  const n = Number(v);
-  return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0;
-}
+function clamp(n: number, min: number, max: number) { return Math.max(min, Math.min(max, n)); }
+function safeInt(v: string) { const n = Number(v); return Number.isFinite(n) ? Math.max(0, Math.floor(n)) : 0; }

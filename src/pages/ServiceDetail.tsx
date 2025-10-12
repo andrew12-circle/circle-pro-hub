@@ -10,7 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Star, Shield, Heart, Share2, ArrowLeft, ShoppingCart, MessageCircle, Phone, Check } from "lucide-react";
 import { getServiceById } from "@/data/services";
-import { getEligiblePartners } from "@/data/vendors";
+import { getEligiblePartnersForService } from "@/data/vendors";
 import { getBalance } from "@/data/wallet";
 import { ServiceCard, ServiceFunnel } from "../../contracts/marketplace";
 import { AddToCartModal } from "@/components/commerce/AddToCartModal";
@@ -35,7 +35,7 @@ const ServiceDetail = () => {
   const [loading, setLoading] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [shareButtonState, setShareButtonState] = useState<"idle" | "copied">("idle");
-  const [eligiblePartners, setEligiblePartners] = useState<VendorPartner[]>([]);
+  const [eligiblePartners, setEligiblePartners] = useState<any[]>([]);
   const [wallet, setWallet] = useState<PointsBalance | null>(null);
 
   useEffect(() => {
@@ -68,11 +68,11 @@ const ServiceDetail = () => {
         const { data: { session } } = await supabase.auth.getSession();
         
         // Load eligible partners
-        const partners = await getEligiblePartners({
-          serviceId: id,
-          city: userLocation?.city,
-          agentDealsPerYear: 10, // TODO: Get from user profile
-        });
+        const partners = await getEligiblePartnersForService(
+          { id: service.id, cityScope: service.cityScope },
+          userLocation?.city || 'franklin-tn',
+          { dealsLast12m: 10 } // TODO: Get from user profile
+        );
         setEligiblePartners(partners);
 
         // Load wallet balance
