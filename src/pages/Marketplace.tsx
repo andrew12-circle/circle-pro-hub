@@ -353,7 +353,7 @@ const Marketplace = () => {
                 </div>
 
                 {/* Category Icons - Compact */}
-                <div className="flex flex-wrap items-center justify-center gap-6">
+                <div className="hidden md:flex flex-wrap items-center justify-center gap-6">
                   {[
                     { icon: "🏠", label: "CRM", color: "bg-blue-100" },
                     { icon: "📊", label: "Marketing", color: "bg-cyan-100" },
