@@ -2,4 +2,9 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 npm run typecheck
+# Scan for accidentally committed secrets
+if git grep -i 'service_role' -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.json' ':!*.lock' ':!node_modules'; then
+  echo "Error: Found 'service_role' in code - never commit service_role keys!"
+  exit 1
+fi
 npx lint-staged

@@ -4,6 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 type LegalSection = {
   id: string;
@@ -85,7 +86,10 @@ const Legal = () => {
   };
 
   const renderMarkdown = (content: string) => {
-    return content.split("\n").map((line, index) => {
+    // Sanitize the entire content first to prevent XSS
+    const safeContent = sanitizeHtml(content);
+    
+    return safeContent.split("\n").map((line, index) => {
       if (line.startsWith("## ")) {
         return <h3 key={index} className="text-xl font-semibold mt-6 mb-3">{line.replace("## ", "")}</h3>;
       } else if (line.startsWith("### ")) {
