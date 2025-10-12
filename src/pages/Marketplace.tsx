@@ -56,58 +56,60 @@ const Marketplace = () => {
         </div>
       </section>
 
-      <div className="container px-4 py-8">
-        <div className="flex gap-8">
-          {/* Mobile Filter Button */}
-          <div className="lg:hidden fixed bottom-4 right-4 z-40">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button size="lg" className="rounded-full shadow-lg">
-                  <SlidersHorizontal className="h-5 w-5 mr-2" />
-                  Filters
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-80 overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
-                  <SheetDescription>
-                    Refine your search results
-                  </SheetDescription>
-                </SheetHeader>
-                <FilterContent
-                  priceRange={priceRange}
-                  setPriceRange={setPriceRange}
-                  minRating={minRating}
-                  setMinRating={setMinRating}
-                  verifiedOnly={verifiedOnly}
-                  setVerifiedOnly={setVerifiedOnly}
-                />
-              </SheetContent>
-            </Sheet>
-          </div>
-
-          {/* Desktop Sidebar Filter */}
-          <aside className="hidden lg:block w-64 flex-shrink-0">
-            <div className="sticky top-20 space-y-6">
-              <div>
-                <h3 className="font-semibold text-lg mb-4">Filters</h3>
-                <FilterContent
-                  priceRange={priceRange}
-                  setPriceRange={setPriceRange}
-                  minRating={minRating}
-                  setMinRating={setMinRating}
-                  verifiedOnly={verifiedOnly}
-                  setVerifiedOnly={setVerifiedOnly}
-                />
-              </div>
+      <div className="w-full">
+        <div className="max-w-screen-2xl mx-auto px-4 lg:px-8 py-8">
+          <div className="flex gap-12">
+            {/* Mobile Filter Button */}
+            <div className="lg:hidden fixed bottom-4 right-4 z-40">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button size="lg" className="rounded-full shadow-lg">
+                    <SlidersHorizontal className="h-5 w-5 mr-2" />
+                    Filters
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80 overflow-y-auto">
+                  <SheetHeader>
+                    <SheetTitle>Filters</SheetTitle>
+                    <SheetDescription>
+                      Refine your search results
+                    </SheetDescription>
+                  </SheetHeader>
+                  <FilterContent
+                    priceRange={priceRange}
+                    setPriceRange={setPriceRange}
+                    minRating={minRating}
+                    setMinRating={setMinRating}
+                    verifiedOnly={verifiedOnly}
+                    setVerifiedOnly={setVerifiedOnly}
+                  />
+                </SheetContent>
+              </Sheet>
             </div>
-          </aside>
 
-          {/* Main Content */}
-          <main className="flex-1 space-y-12">
-            <CategoryGrid />
-            <FeaturedVendors onServiceClick={setSelectedServiceId} />
-          </main>
+            {/* Desktop Sidebar Filter */}
+            <aside className="hidden lg:block w-72 flex-shrink-0">
+              <div className="sticky top-20 space-y-6">
+                <div>
+                  <h3 className="font-semibold text-lg mb-4">Filters</h3>
+                  <FilterContent
+                    priceRange={priceRange}
+                    setPriceRange={setPriceRange}
+                    minRating={minRating}
+                    setMinRating={setMinRating}
+                    verifiedOnly={verifiedOnly}
+                    setVerifiedOnly={setVerifiedOnly}
+                  />
+                </div>
+              </div>
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1 min-w-0 space-y-16">
+              <CategoryGrid />
+              <FeaturedVendors onServiceClick={setSelectedServiceId} />
+            </main>
+          </div>
         </div>
       </div>
 
