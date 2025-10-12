@@ -20,6 +20,7 @@ import Support from "./pages/Support";
 import Start from "./pages/partners/Start";
 import ApplyService from "./pages/partners/ApplyService";
 import ApplyCoPartner from "./pages/partners/ApplyCoPartner";
+import Share from "./pages/Share";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const App = () => {
             <Route path="/partners/start" element={<Start />} />
             <Route path="/partners/apply/service" element={<ApplyService />} />
             <Route path="/partners/apply/copartner" element={<ApplyCoPartner />} />
+            <Route path="/s/:id" element={<Share />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

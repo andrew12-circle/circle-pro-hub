@@ -8,21 +8,25 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Star, Shield, Heart, Share2, ArrowLeft, ShoppingCart, MessageCircle, Phone } from "lucide-react";
+import { Star, Shield, Heart, Share2, ArrowLeft, ShoppingCart, MessageCircle, Phone, Check } from "lucide-react";
 import { getServiceById } from "@/data/services";
 import { ServiceFunnel } from "../../contracts/marketplace";
 import { AddToCartModal } from "@/components/commerce/AddToCartModal";
 import { ProUpsellBanner } from "@/components/commerce/ProUpsellBanner";
 import { useProMember } from "@/hooks/use-pro-member";
+import { createShareLink } from "@/data/share";
+import { useToast } from "@/hooks/use-toast";
 
 const ServiceDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { isPro, loading: proLoading } = useProMember();
   const [service, setService] = useState<ServiceFunnel | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [cartModalOpen, setCartModalOpen] = useState(false);
+  const [shareButtonState, setShareButtonState] = useState<"idle" | "copied">("idle");
 
   useEffect(() => {
     const loadService = async () => {
@@ -47,6 +51,32 @@ const ServiceDetail = () => {
 
   const formatPrice = (amount: number): string => {
     return `$${amount.toLocaleString()}`;
+  };
+
+  const handleShare = async () => {
+    if (!id) return;
+    
+    try {
+      const shortId = await createShareLink(id);
+      const shareUrl = `${window.location.origin}/s/${shortId}`;
+      
+      await navigator.clipboard.writeText(shareUrl);
+      setShareButtonState("copied");
+      
+      toast({
+        title: "Link Copied!",
+        description: "Share this service with others",
+      });
+      
+      setTimeout(() => setShareButtonState("idle"), 2000);
+    } catch (error) {
+      console.error("Failed to create share link:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create share link",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -125,8 +155,17 @@ const ServiceDetail = () => {
               <Button variant="outline" size="icon">
                 <Heart className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon">
-                <Share2 className="h-4 w-4" />
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={handleShare}
+                disabled={shareButtonState === "copied"}
+              >
+                {shareButtonState === "copied" ? (
+                  <Check className="h-4 w-4 text-green-600" />
+                ) : (
+                  <Share2 className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>

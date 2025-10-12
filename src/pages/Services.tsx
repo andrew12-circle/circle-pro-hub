@@ -6,16 +6,20 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Star, MapPin, Shield, Heart, Share2 } from "lucide-react";
+import { Star, MapPin, Shield, Heart, Share2, Check } from "lucide-react";
 import { getServices } from "@/data/services";
 import { ServiceCard } from "../../contracts/marketplace";
 import { useLocation } from "@/hooks/use-location";
+import { createShareLink } from "@/data/share";
+import { useToast } from "@/hooks/use-toast";
 
 const Services = () => {
   const [searchParams] = useSearchParams();
   const { location: userLocation } = useLocation();
+  const { toast } = useToast();
   const [services, setServices] = useState<ServiceCard[]>([]);
   const [loading, setLoading] = useState(true);
+  const [shareButtonStates, setShareButtonStates] = useState<Record<string, "idle" | "copied">>({});
 
   useEffect(() => {
     const loadServices = async () => {
@@ -43,6 +47,35 @@ const Services = () => {
 
   const formatPrice = (amount: number): string => {
     return `$${amount.toLocaleString()}`;
+  };
+
+  const handleShare = async (serviceId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    try {
+      const shortId = await createShareLink(serviceId);
+      const shareUrl = `${window.location.origin}/s/${shortId}`;
+      
+      await navigator.clipboard.writeText(shareUrl);
+      setShareButtonStates((prev) => ({ ...prev, [serviceId]: "copied" }));
+      
+      toast({
+        title: "Link Copied!",
+        description: "Share this service with others",
+      });
+      
+      setTimeout(() => {
+        setShareButtonStates((prev) => ({ ...prev, [serviceId]: "idle" }));
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to create share link:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create share link",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -113,8 +146,18 @@ const Services = () => {
                     <Button variant="ghost" size="icon" className="h-8 w-8">
                       <Heart className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                      <Share2 className="h-4 w-4" />
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8"
+                      onClick={(e) => handleShare(service.id, e)}
+                      disabled={shareButtonStates[service.id] === "copied"}
+                    >
+                      {shareButtonStates[service.id] === "copied" ? (
+                        <Check className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <Share2 className="h-4 w-4" />
+                      )}
                     </Button>
                   </div>
                 </div>
