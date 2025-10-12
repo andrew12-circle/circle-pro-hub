@@ -6,7 +6,7 @@ export const Footer = () => {
   return (
     <footer className="w-full border-t bg-muted/30">
       {/* Business Partner CTA Section */}
-      <section className="w-full py-12 bg-background">
+      <section className="w-full py-12 bg-muted/30">
         <div className="container px-4 mx-auto">
           <div className="max-w-4xl mx-auto text-center space-y-4">
             <h2 className="text-2xl md:text-3xl font-bold">Are You a Business Partner?</h2>
