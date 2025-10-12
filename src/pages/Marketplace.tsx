@@ -430,8 +430,8 @@ const Marketplace = () => {
               </SelectContent>
             </Select>
             
-            {/* Quick Toggles */}
-            <div className="flex items-center gap-2">
+            {/* Quick Toggles - Hidden on mobile */}
+            <div className="hidden md:flex items-center gap-2">
               <Checkbox 
                 id="verified-filter" 
                 checked={verifiedOnly} 
@@ -442,7 +442,7 @@ const Marketplace = () => {
               </Label>
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-2">
               <Checkbox 
                 id="top-rated" 
                 checked={topRated} 
@@ -463,6 +463,31 @@ const Marketplace = () => {
               </PopoverTrigger>
               <PopoverContent className="w-80" align="start">
                 <div className="space-y-6">
+                  {/* Mobile-only Quick Toggles */}
+                  <div className="md:hidden space-y-3 pb-6 border-b">
+                    <div className="flex items-center gap-2">
+                      <Checkbox 
+                        id="verified-filter-mobile" 
+                        checked={verifiedOnly} 
+                        onCheckedChange={(checked) => setVerifiedOnly(checked as boolean)}
+                      />
+                      <Label htmlFor="verified-filter-mobile" className="text-sm cursor-pointer">
+                        Verified only
+                      </Label>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Checkbox 
+                        id="top-rated-mobile" 
+                        checked={topRated} 
+                        onCheckedChange={(checked) => setTopRated(checked as boolean)}
+                      />
+                      <Label htmlFor="top-rated-mobile" className="text-sm cursor-pointer">
+                        Top rated (4.5+)
+                      </Label>
+                    </div>
+                  </div>
+
                   <div>
                     <h4 className="font-medium mb-4">Price Range</h4>
                     <div className="space-y-2">
