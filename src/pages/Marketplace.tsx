@@ -398,7 +398,7 @@ const Marketplace = () => {
 
       {/* Horizontal Sticky Filter Bar */}
       <div className="sticky top-[64px] z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b">
-        <div className="w-full px-4 lg:px-8 py-4">
+        <div className="w-full px-4 lg:px-8 py-2 md:py-4">
           <div className="flex items-center gap-3 flex-wrap">
             <span className="text-sm font-medium text-muted-foreground">Filters:</span>
             
