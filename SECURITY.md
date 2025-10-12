@@ -114,10 +114,74 @@ npm run depcheck       # Find unused dependencies
 
 ### Remaining Phases
 
-### Phase 3: Error Handling (TODO)
-- [ ] Add React Error Boundaries
-- [ ] Optional Sentry integration
-- [ ] UX event logging
+## Phase 3: Error Handling ✅
+
+### Error Boundaries
+
+**Implementation:**
+- `src/components/ErrorBoundary.tsx` - Class component that catches React errors
+- Wrapped entire app in `src/main.tsx`
+- Prevents entire app from crashing when component errors occur
+
+**Error Boundary Features:**
+
+1. **Catches JavaScript errors anywhere in component tree**
+   - Uses `componentDidCatch` lifecycle method
+   - Logs errors to console in development
+   - Shows user-friendly error UI
+
+2. **Graceful degradation**
+   - Shows error card with recovery options
+   - "Go to Home" button - resets state and redirects
+   - "Reload Page" button - full page reload
+   - Error details visible in dev mode only
+
+3. **Extensible for error tracking**
+   - Ready for Sentry integration via `VITE_SENTRY_DSN` env var
+   - Optional `onError` callback prop
+   - Structured error logging
+
+**Usage:**
+```tsx
+// App-level (already implemented in main.tsx)
+<ErrorBoundary>
+  <App />
+</ErrorBoundary>
+
+// Route-level (for critical paths)
+<ErrorBoundary fallback={<CustomErrorUI />}>
+  <CriticalComponent />
+</ErrorBoundary>
+```
+
+### UX Event Logging
+
+**Implementation:**
+- `src/lib/analytics.ts` - Lightweight event logging utilities
+- Integrated into key user flows
+
+**Logged Events:**
+- `PricingModeChosen` - When user selects pricing mode in AddToCartModal
+- `CartItemAdded` - When item added to cart
+- `CartItemRemoved` - When item removed from cart (TODO: implement)
+- `VendorPartnerSelected` - When user selects co-pay partner
+- `BookingCreated` - When booking is created (TODO: implement)
+- `ServiceViewed` - Service detail page views (TODO: implement)
+- `SearchPerformed` - Search queries (TODO: implement)
+- `ShareLinkCreated` - Share link generation (TODO: implement)
+- `ProUpgradeClicked` - Pro upgrade CTA clicks (TODO: implement)
+
+**Logging Functions:**
+```typescript
+logUXEvent({ type: 'PricingModeChosen', mode: 'copay', serviceId: '123' });
+logPerformanceMetric({ name: 'page-load', value: 1234, unit: 'ms' });
+logError(new Error('API failed'), { endpoint: '/api/services' });
+```
+
+**Future Integration:**
+- Ready for analytics service integration (Google Analytics, Mixpanel, etc.)
+- Ready for Sentry error tracking
+- Console logs in development, silent in production by default
 
 ### Phase 4: Storage & Uploads (TODO)
 - [ ] Implement presigned upload flow
@@ -142,7 +206,7 @@ Before deploying to production:
 - [ ] CSP headers are properly configured
 - [ ] RLS policies are enabled on all Supabase tables
 - [ ] Auth guards protect sensitive routes
-- [ ] Error boundaries catch React errors
+- [x] Error boundaries catch React errors
 - [ ] Dependencies are audited and up to date
 - [ ] Secrets are managed via environment variables
 - [ ] File uploads use presigned URLs only

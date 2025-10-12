@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { logUXEvent } from '@/lib/analytics';
 import type { ServiceCard } from '../../../contracts/marketplace';
 import type { PricingSelection } from '../../../contracts/cart/pricing-selection';
 import type { VendorPartner } from '@/lib/vendor_rules';
@@ -55,6 +56,14 @@ export function AddToCartModal({ service, userIsPro, wallet, eligiblePartners = 
       copayPartnerShare: mode === 'copay' ? service.pricing.copayWithVendor : undefined,
       userShare: mode === 'copay' ? service.pricing.copay : undefined,
     };
+    
+    // Log UX events
+    logUXEvent({ type: 'PricingModeChosen', mode, serviceId: service.id });
+    logUXEvent({ type: 'CartItemAdded', serviceId: service.id, mode });
+    
+    if (mode === 'copay' && selectedPartnerId) {
+      logUXEvent({ type: 'VendorPartnerSelected', partnerId: selectedPartnerId, serviceId: service.id });
+    }
     
     onConfirm(selection);
     setOpen(false);
