@@ -14,7 +14,7 @@ const Home = () => {
       <Navbar />
       <main className="flex-1">
         <HeroSection />
-        <CategoryGrid featured />
+        <CategoryGrid />
         <FeaturedVendors onServiceClick={setSelectedServiceId} featured />
       </main>
       <Footer />
