@@ -17,6 +17,9 @@ import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import Legal from "./pages/Legal";
 import Support from "./pages/Support";
+import Start from "./pages/partners/Start";
+import ApplyService from "./pages/partners/ApplyService";
+import ApplyCoPartner from "./pages/partners/ApplyCoPartner";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +44,9 @@ const App = () => {
             <Route path="/admin" element={<Admin />} />
             <Route path="/legal" element={<Legal />} />
             <Route path="/support" element={<Support />} />
+            <Route path="/partners/start" element={<Start />} />
+            <Route path="/partners/apply/service" element={<ApplyService />} />
+            <Route path="/partners/apply/copartner" element={<ApplyCoPartner />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
