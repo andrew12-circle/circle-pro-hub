@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npm run typecheck
+npm run typecheck && npm run lint
 
 # Security check: prevent committing service role keys
 echo "🔒 Running security checks..."
