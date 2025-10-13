@@ -1,10 +1,31 @@
-export const featureFlags = {
-  wallet: import.meta.env.VITE_FEATURE_WALLET === "true",
-  copay: import.meta.env.VITE_FEATURE_COPAY === "true",
-  affiliate: import.meta.env.VITE_FEATURE_AFFILIATE === "true",
-  share: import.meta.env.VITE_FEATURE_SHARE === "true",
-  degraded_mode: import.meta.env.VITE_FEATURE_DEGRADED_MODE === "true",
-} as const;
+type Flags = {
+  wallet: boolean;
+  copay: boolean;
+  affiliate: boolean;
+  share: boolean;
+  degraded_mode: boolean;
+};
+
+const defaults: Flags = {
+  wallet: true,
+  copay: true,
+  affiliate: true,
+  share: true,
+  degraded_mode: false,
+};
+
+function parseEnv(): Partial<Flags> {
+  try {
+    const raw = import.meta.env.VITE_FLAGS as string | undefined;
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return typeof parsed === 'object' && parsed ? parsed as Partial<Flags> : {};
+  } catch {
+    return {};
+  }
+}
+
+export const featureFlags: Flags = { ...defaults, ...parseEnv() };
 
 export function isFeatureEnabled(feature: keyof typeof featureFlags): boolean {
   return featureFlags[feature];

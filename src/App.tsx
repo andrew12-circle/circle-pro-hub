@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/lib/cartStore";
 import { RequireAuth, RequireAuthAndRole } from "@/lib/guard";
-import { DegradedBanner } from "@/components/DegradedBanner";
+import DegradedBanner from "@/components/system/DegradedBanner";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Marketplace from "./pages/Marketplace";
