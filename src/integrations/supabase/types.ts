@@ -22,6 +22,7 @@ export type Database = {
           id: string
           location: string | null
           points: number | null
+          stripe_customer_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           id: string
           location?: string | null
           points?: number | null
+          stripe_customer_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           id?: string
           location?: string | null
           points?: number | null
+          stripe_customer_id?: string | null
           updated_at?: string | null
         }
         Relationships: []

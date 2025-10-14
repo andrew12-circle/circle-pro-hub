@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -9,12 +9,18 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Check } from "lucide-react";
 import { PricingPageConfig } from "../../contracts/ui/pricing-page";
 import { useProMember } from "@/hooks/use-pro-member";
+import { createCheckoutSession } from "@/data/stripe";
+import { getCurrentSession } from "@/data/auth";
+import { useToast } from "@/hooks/use-toast";
 
 const Pricing = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
   const { isPro, loading: proLoading } = useProMember();
   const [config, setConfig] = useState<PricingPageConfig | null>(null);
   const [loading, setLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   useEffect(() => {
     const loadPricingConfig = async () => {
@@ -30,7 +36,15 @@ const Pricing = () => {
     };
 
     loadPricingConfig();
-  }, []);
+
+    // Show toast if user canceled checkout
+    if (searchParams.get('canceled') === 'true') {
+      toast({
+        title: "Checkout Canceled",
+        description: "You can try again whenever you're ready.",
+      });
+    }
+  }, [searchParams, toast]);
 
   const formatPrice = (amount: number | null, currency: string = "USD"): string => {
     if (amount === null) return "Custom";
@@ -56,6 +70,40 @@ const Pricing = () => {
         return "";
       default:
         return "";
+    }
+  };
+
+  const handleUpgradeClick = async (tier: any) => {
+    // Check if user is authenticated
+    const session = await getCurrentSession();
+    if (!session) {
+      navigate('/auth?upgrade=pro');
+      return;
+    }
+
+    // If Pro tier, trigger Stripe checkout
+    if (tier.id === "pro") {
+      try {
+        setCheckoutLoading(true);
+        const proPriceId = import.meta.env.VITE_STRIPE_PRICE_PRO || "price_1234"; // Fallback
+        const { url } = await createCheckoutSession(proPriceId);
+        window.location.href = url;
+      } catch (error) {
+        toast({
+          title: "Checkout Error",
+          description: "Failed to start checkout. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setCheckoutLoading(false);
+      }
+    } else {
+      // Other tiers - navigate as before
+      if (tier.cta.href.startsWith("mailto:")) {
+        window.location.href = tier.cta.href;
+      } else {
+        navigate(tier.cta.href);
+      }
     }
   };
 
@@ -165,16 +213,12 @@ const Pricing = () => {
                     className="w-full"
                     variant={tier.highlighted ? "default" : "outline"}
                     size="lg"
-                    onClick={() => {
-                      if (tier.cta.href.startsWith("mailto:")) {
-                        window.location.href = tier.cta.href;
-                      } else {
-                        navigate(tier.cta.href);
-                      }
-                    }}
-                    disabled={isPro && tier.id === "pro"}
+                    onClick={() => handleUpgradeClick(tier)}
+                    disabled={(isPro && tier.id === "pro") || checkoutLoading}
                   >
-                    {tier.cta.text}
+                    {checkoutLoading && tier.id === "pro" 
+                      ? "Starting checkout..." 
+                      : tier.cta.text}
                   </Button>
                 </CardFooter>
               </Card>

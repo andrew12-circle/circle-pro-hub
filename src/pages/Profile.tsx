@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +16,7 @@ import { MapPin, Crown, User as UserIcon, Mail, LogOut, Camera } from "lucide-re
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -75,7 +76,17 @@ const Profile = () => {
     };
 
     checkUser();
-  }, [navigate]);
+
+    // Show upgrade success toast
+    if (searchParams.get('upgrade') === 'success') {
+      setTimeout(() => {
+        toast({
+          title: "Welcome to Pro!",
+          description: "Your Pro benefits are now active. Enjoy exclusive features!",
+        });
+      }, 500);
+    }
+  }, [navigate, searchParams, toast]);
 
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
@@ -428,7 +439,7 @@ const Profile = () => {
                     <span>Early access to new features</span>
                   </li>
                 </ul>
-                <Button>Upgrade to PRO</Button>
+                <Button onClick={() => navigate('/pricing')}>Upgrade to PRO</Button>
               </CardContent>
             </Card>
           )}

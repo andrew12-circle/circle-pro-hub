@@ -4,7 +4,7 @@
  */
 
 import { supabase } from "@/integrations/supabase/client";
-import type { CheckoutSessionResponse } from "@/contracts/stripe";
+import type { CheckoutSessionResponse } from "../../contracts/stripe";
 
 export async function createCheckoutSession(
   priceId: string

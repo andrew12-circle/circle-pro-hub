@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, User, Lock, Eye, EyeOff, Check } from "lucide-react";
 import logo from "@/assets/circle-network-logo.png";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import * as authService from "@/data/auth";
+import { auth } from "@/adapters/auth";
 
 const signUpSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -34,23 +35,32 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    authService.getCurrentSession().then((session) => {
       if (session) {
         navigate("/");
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { unsubscribe } = auth.onAuthStateChange((session) => {
       if (session) {
         navigate("/");
       }
     });
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    return () => unsubscribe();
+
+    // Check if coming from pricing page
+    if (searchParams.get('upgrade') === 'pro') {
+      toast({
+        title: "Sign in to upgrade",
+        description: "Create an account or sign in to upgrade to Pro.",
+      });
+    }
+  }, [navigate, searchParams, toast]);
 
   const passwordRequirements = [
     { text: "At least 8 characters", met: password.length >= 8 },
@@ -76,25 +86,14 @@ const Auth = () => {
           return;
         }
 
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
+        const result = await authService.signIn({ email, password });
 
-        if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            toast({
-              title: "Sign In Failed",
-              description: "Invalid email or password. Please try again.",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Sign In Failed",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
+        if (result.error) {
+          toast({
+            title: "Sign In Failed",
+            description: result.error,
+            variant: "destructive",
+          });
           return;
         }
 
@@ -114,31 +113,18 @@ const Auth = () => {
           return;
         }
 
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/`,
-            data: {
-              full_name: fullName,
-            },
-          },
+        const result = await authService.signUp({ 
+          email, 
+          password, 
+          fullName 
         });
 
-        if (error) {
-          if (error.message.includes("already registered")) {
-            toast({
-              title: "Account Exists",
-              description: "This email is already registered. Please sign in instead.",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Sign Up Failed",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
+        if (result.error) {
+          toast({
+            title: "Sign Up Failed",
+            description: result.error,
+            variant: "destructive",
+          });
           return;
         }
 
@@ -162,20 +148,7 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/`,
-        },
-      });
-
-      if (error) {
-        toast({
-          title: "Google Sign In Failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      }
+      await authService.signInWithOAuth("google");
     } catch (error) {
       toast({
         title: "Error",

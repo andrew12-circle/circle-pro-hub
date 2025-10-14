@@ -1,8 +1,9 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useAdminRole } from '@/hooks/use-admin-role';
 import { useProMember } from '@/hooks/use-pro-member';
+import { getCurrentSession } from '@/data/auth';
+import { auth } from '@/adapters/auth';
 
 type RequireAuthProps = {
   children: ReactNode;
@@ -20,7 +21,7 @@ export function RequireAuth({ children, redirectTo = '/auth' }: RequireAuthProps
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const session = await getCurrentSession();
       setIsAuthenticated(!!session);
       setIsChecking(false);
 
@@ -31,14 +32,14 @@ export function RequireAuth({ children, redirectTo = '/auth' }: RequireAuthProps
 
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { unsubscribe } = auth.onAuthStateChange((session) => {
       setIsAuthenticated(!!session);
       if (!session) {
         navigate(redirectTo, { replace: true });
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => unsubscribe();
   }, [navigate, redirectTo]);
 
   if (isChecking) {

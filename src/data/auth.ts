@@ -4,12 +4,13 @@
  */
 
 import { auth } from "@/adapters/auth";
-import type { SignUpRequest, SignInRequest, OAuthProvider, AuthResult } from "@/contracts/auth";
+import type { SignUpRequest, SignInRequest, OAuthProvider, AuthResult } from "../../contracts/auth";
 import type { Session, User } from "@supabase/supabase-js";
 
 export async function signUp(credentials: SignUpRequest): Promise<AuthResult> {
   try {
-    const result = await auth.signUp(credentials);
+    const { email, password, fullName } = credentials;
+    const result = await auth.signUp({ email, password, fullName });
     
     if (result.error) {
       return {
@@ -39,7 +40,8 @@ export async function signUp(credentials: SignUpRequest): Promise<AuthResult> {
 
 export async function signIn(credentials: SignInRequest): Promise<AuthResult> {
   try {
-    const result = await auth.signIn(credentials);
+    const { email, password } = credentials;
+    const result = await auth.signIn({ email, password });
     
     if (result.error) {
       return {
@@ -79,9 +81,8 @@ export async function getCurrentSession(): Promise<Session | null> {
   return await auth.getCurrentSession();
 }
 
-export async function getCurrentUser(): Promise<User | null> {
-  const user = await auth.getCurrentUser();
-  return user;
+export async function getCurrentUser() {
+  return await auth.getCurrentUser();
 }
 
 export async function refreshSession(): Promise<Session | null> {
