@@ -2,3 +2,6 @@ project_id = "mizcmnpoucnywqsadejk"
 
 [functions.stripe-webhook]
 verify_jwt = false
+
+[functions.stripe-create-portal-session]
+verify_jwt = true

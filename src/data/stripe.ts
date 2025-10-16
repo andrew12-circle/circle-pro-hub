@@ -4,7 +4,7 @@
  */
 
 import { supabase } from "@/integrations/supabase/client";
-import type { CheckoutSessionResponse } from "../../contracts/stripe";
+import type { CheckoutSessionResponse, CustomerPortalSessionResponse } from "../../contracts/stripe";
 
 export async function createCheckoutSession(
   priceId: string
@@ -25,4 +25,21 @@ export async function createCheckoutSession(
   }
 
   return data as CheckoutSessionResponse;
+}
+
+export async function createCustomerPortalSession(): Promise<CustomerPortalSessionResponse> {
+  const { data, error } = await supabase.functions.invoke(
+    "stripe-create-portal-session",
+    {
+      body: {
+        returnUrl: `${window.location.origin}/profile`,
+      },
+    }
+  );
+
+  if (error) {
+    throw new Error(error.message || "Failed to create portal session");
+  }
+
+  return data as CustomerPortalSessionResponse;
 }

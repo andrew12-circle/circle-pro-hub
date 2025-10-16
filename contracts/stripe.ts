@@ -39,3 +39,17 @@ export const StripeWebhookEventSchema = z.object({
 });
 
 export type StripeWebhookEvent = z.infer<typeof StripeWebhookEventSchema>;
+
+// Customer portal session request
+export const CustomerPortalSessionRequestSchema = z.object({
+  returnUrl: z.string().url(),
+});
+
+export type CustomerPortalSessionRequest = z.infer<typeof CustomerPortalSessionRequestSchema>;
+
+// Customer portal session response
+export const CustomerPortalSessionResponseSchema = z.object({
+  url: z.string().url(),
+});
+
+export type CustomerPortalSessionResponse = z.infer<typeof CustomerPortalSessionResponseSchema>;

@@ -11,7 +11,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import { useToast } from "@/hooks/use-toast";
-import { MapPin, Crown, User as UserIcon, Mail, LogOut, Camera } from "lucide-react";
+import { MapPin, Crown, User as UserIcon, Mail, LogOut, Camera, CreditCard } from "lucide-react";
+import { createCustomerPortalSession } from "@/data/stripe";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -29,6 +30,7 @@ const Profile = () => {
     points: 0,
   });
   const [detectingLocation, setDetectingLocation] = useState(false);
+  const [loadingPortal, setLoadingPortal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -258,6 +260,21 @@ const Profile = () => {
     );
   };
 
+  const handleManageSubscription = async () => {
+    setLoadingPortal(true);
+    try {
+      const { url } = await createCustomerPortalSession();
+      window.location.href = url;
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to open subscription management",
+        variant: "destructive",
+      });
+      setLoadingPortal(false);
+    }
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate("/");
@@ -409,6 +426,40 @@ const Profile = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Subscription Management Card */}
+          {isPro && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Subscription Management
+                </CardTitle>
+                <CardDescription>Manage your PRO subscription and billing</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-accent rounded-lg">
+                  <div>
+                    <p className="font-medium">PRO Membership</p>
+                    <p className="text-sm text-muted-foreground">Active subscription</p>
+                  </div>
+                  <Badge className="bg-green-600">
+                    Active
+                  </Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Access the Stripe Customer Portal to update your payment method, view billing history, or cancel your subscription.
+                </p>
+                <Button 
+                  onClick={handleManageSubscription}
+                  disabled={loadingPortal}
+                  className="w-full"
+                >
+                  {loadingPortal ? "Loading..." : "Manage Subscription"}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Pro Membership Card */}
           {!isPro && (
