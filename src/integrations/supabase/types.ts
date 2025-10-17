@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          created_at: string
+          ghl_notified: boolean
+          id: string
+          notes: string | null
+          package_id: string
+          package_name: string
+          scheduled_at: string
+          service_id: string
+          service_name: string
+          status: string
+          updated_at: string
+          user_id: string
+          vendor_calendar_link: string | null
+          vendor_id: string
+          vendor_name: string
+        }
+        Insert: {
+          created_at?: string
+          ghl_notified?: boolean
+          id?: string
+          notes?: string | null
+          package_id: string
+          package_name: string
+          scheduled_at: string
+          service_id: string
+          service_name: string
+          status: string
+          updated_at?: string
+          user_id: string
+          vendor_calendar_link?: string | null
+          vendor_id: string
+          vendor_name: string
+        }
+        Update: {
+          created_at?: string
+          ghl_notified?: boolean
+          id?: string
+          notes?: string | null
+          package_id?: string
+          package_name?: string
+          scheduled_at?: string
+          service_id?: string
+          service_name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          vendor_calendar_link?: string | null
+          vendor_id?: string
+          vendor_name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
