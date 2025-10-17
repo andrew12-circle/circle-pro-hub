@@ -1,5 +1,6 @@
 import Stripe from "https://esm.sh/stripe@17.5.0";
 import { checkRateLimit, getRateLimitHeaders } from "../_shared/rateLimit.ts";
+import { createLogger } from "../_shared/logger.ts";
 
 const allowedOrigin = Deno.env.get("APP_ORIGIN") || "http://localhost:8080";
 const corsHeaders = {
@@ -10,13 +11,18 @@ const corsHeaders = {
 };
 
 Deno.serve(async (req) => {
+  const logger = createLogger("stripe-create-portal-session");
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  logger.info("Customer portal session request started");
+
   try {
     console.log("Starting Stripe Customer Portal session creation");
+    logger.info("Starting portal session creation");
 
     // Get environment variables
     const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
@@ -24,9 +30,11 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     if (!stripeSecretKey) {
+      logger.error("STRIPE_SECRET_KEY not configured");
       throw new Error("STRIPE_SECRET_KEY is not configured");
     }
     if (!supabaseUrl || !supabaseServiceKey) {
+      logger.error("Supabase environment variables not configured");
       throw new Error("Supabase environment variables are not configured");
     }
 
@@ -38,6 +46,7 @@ Deno.serve(async (req) => {
     // Authenticate user
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
+      logger.warn("Missing authorization header");
       throw new Error("No authorization header");
     }
 
@@ -52,6 +61,7 @@ Deno.serve(async (req) => {
     });
 
     if (!userResponse.ok) {
+      logger.error("User authentication failed", { status: userResponse.status });
       console.error("Auth error:", await userResponse.text());
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
@@ -63,7 +73,9 @@ Deno.serve(async (req) => {
     }
 
     const user = await userResponse.json();
+    logger.setUserId(user.id);
     console.log("User authenticated:", user.id);
+    logger.info("User authenticated successfully");
 
     // Rate limit: 10 portal sessions per minute per user
     const rateLimitKey = `stripe:portal:${user.id}`;
@@ -77,6 +89,7 @@ Deno.serve(async (req) => {
 
     if (!rateLimit.allowed) {
       const resetSeconds = Math.ceil((rateLimit.resetAt - Date.now()) / 1000);
+      logger.warn("Rate limit exceeded", { resetSeconds });
       return new Response(
         JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
         {
@@ -92,6 +105,7 @@ Deno.serve(async (req) => {
     }
 
     console.log(`Rate limit check passed for user ${user.id}: ${rateLimit.remaining} remaining`);
+    logger.info("Rate limit check passed", { remaining: rateLimit.remaining });
 
     // Get user's profile to retrieve Stripe customer ID
     const profileResponse = await fetch(
@@ -105,6 +119,7 @@ Deno.serve(async (req) => {
     );
 
     if (!profileResponse.ok) {
+      logger.error("Failed to retrieve profile", { status: profileResponse.status });
       console.error("Profile error:", await profileResponse.text());
       throw new Error("Failed to retrieve user profile");
     }
@@ -113,6 +128,7 @@ Deno.serve(async (req) => {
     const profile = profiles[0];
 
     if (!profile || !profile.stripe_customer_id) {
+      logger.warn("No Stripe customer ID found for user");
       console.error("No Stripe customer ID found for user");
       return new Response(
         JSON.stringify({ error: "No active subscription found" }),
@@ -124,6 +140,9 @@ Deno.serve(async (req) => {
     }
 
     console.log("Stripe customer ID:", profile.stripe_customer_id);
+    logger.info("Retrieved Stripe customer ID", {
+      customerId: profile.stripe_customer_id,
+    });
 
     // Parse request body
     const { returnUrl } = await req.json();
@@ -141,6 +160,10 @@ Deno.serve(async (req) => {
     );
 
     console.log("Portal session created:", session.id);
+    logger.info("Portal session created successfully", {
+      sessionId: session.id,
+      customerId: profile.stripe_customer_id,
+    });
 
     return new Response(
       JSON.stringify({ url: session.url }),
@@ -150,6 +173,10 @@ Deno.serve(async (req) => {
       }
     );
   } catch (error) {
+    logger.error("Portal session creation failed", {
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     console.error("Error creating portal session:", error);
     return new Response(
       JSON.stringify({
