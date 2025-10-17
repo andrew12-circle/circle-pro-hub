@@ -1,10 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 
+const allowedOrigin = Deno.env.get("APP_ORIGIN") || "http://localhost:8080";
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": allowedOrigin,
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Credentials": "true",
 };
 
 serve(async (req) => {
@@ -22,7 +24,7 @@ serve(async (req) => {
     }
 
     const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: "2023-10-16",
+      apiVersion: "2024-11-20.acacia",
       httpClient: Stripe.createFetchHttpClient(),
     });
 
@@ -94,22 +96,28 @@ serve(async (req) => {
       });
     }
 
-    // Create checkout session
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
+    // Create checkout session with idempotency key
+    const idempotencyKey = `checkout_${user.id}_${Date.now()}`;
+    const session = await stripe.checkout.sessions.create(
+      {
+        customer: customerId,
+        line_items: [
+          {
+            price: priceId,
+            quantity: 1,
+          },
+        ],
+        mode: "subscription",
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+        metadata: {
+          user_id: user.id,
         },
-      ],
-      mode: "subscription",
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      metadata: {
-        user_id: user.id,
       },
-    });
+      {
+        idempotencyKey,
+      }
+    );
 
     return new Response(
       JSON.stringify({

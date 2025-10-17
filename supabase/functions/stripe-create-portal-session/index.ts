@@ -1,10 +1,11 @@
 import Stripe from "https://esm.sh/stripe@17.5.0";
-import { createClient } from "jsr:@supabase/supabase-js@2";
 
+const allowedOrigin = Deno.env.get("APP_ORIGIN") || "http://localhost:8080";
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": allowedOrigin,
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Credentials": "true",
 };
 
 Deno.serve(async (req) => {
@@ -30,7 +31,7 @@ Deno.serve(async (req) => {
 
     // Initialize Stripe
     const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: "2025-01-27.acacia",
+      apiVersion: "2024-11-20.acacia",
     });
 
     // Authenticate user
@@ -39,15 +40,18 @@ Deno.serve(async (req) => {
       throw new Error("No authorization header");
     }
 
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const token = authHeader.replace("Bearer ", "");
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser(token);
+    
+    // Verify user with Supabase auth
+    const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        apikey: supabaseServiceKey,
+      },
+    });
 
-    if (authError || !user) {
-      console.error("Auth error:", authError);
+    if (!userResponse.ok) {
+      console.error("Auth error:", await userResponse.text());
       return new Response(
         JSON.stringify({ error: "Unauthorized" }),
         {
@@ -57,21 +61,29 @@ Deno.serve(async (req) => {
       );
     }
 
+    const user = await userResponse.json();
     console.log("User authenticated:", user.id);
 
     // Get user's profile to retrieve Stripe customer ID
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("stripe_customer_id")
-      .eq("id", user.id)
-      .single();
+    const profileResponse = await fetch(
+      `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=stripe_customer_id`,
+      {
+        headers: {
+          apikey: supabaseServiceKey,
+          Authorization: `Bearer ${supabaseServiceKey}`,
+        },
+      }
+    );
 
-    if (profileError || !profile) {
-      console.error("Profile error:", profileError);
+    if (!profileResponse.ok) {
+      console.error("Profile error:", await profileResponse.text());
       throw new Error("Failed to retrieve user profile");
     }
 
-    if (!profile.stripe_customer_id) {
+    const profiles = await profileResponse.json();
+    const profile = profiles[0];
+
+    if (!profile || !profile.stripe_customer_id) {
       console.error("No Stripe customer ID found for user");
       return new Response(
         JSON.stringify({ error: "No active subscription found" }),
@@ -87,11 +99,17 @@ Deno.serve(async (req) => {
     // Parse request body
     const { returnUrl } = await req.json();
 
-    // Create Customer Portal session
-    const session = await stripe.billingPortal.sessions.create({
-      customer: profile.stripe_customer_id,
-      return_url: returnUrl,
-    });
+    // Create Customer Portal session with idempotency key
+    const idempotencyKey = `portal_${user.id}_${Date.now()}`;
+    const session = await stripe.billingPortal.sessions.create(
+      {
+        customer: profile.stripe_customer_id,
+        return_url: returnUrl,
+      },
+      {
+        idempotencyKey,
+      }
+    );
 
     console.log("Portal session created:", session.id);
 
