@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.75.0";
 import { checkRateLimit } from "../_shared/rateLimit.ts";
 import { createCachedJsonResponse, handleConditionalRequest } from "../_shared/etag.ts";
 import { createLogger } from "../_shared/logger.ts";
@@ -18,6 +19,11 @@ const corsHeaders = {
 serve(async (req) => {
   const logger = createLogger("services-list");
   const startTime = Date.now();
+  
+  // Initialize Supabase client
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -30,7 +36,13 @@ serve(async (req) => {
     // Rate limiting: 100 requests per minute per IP
     const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
     const rateLimitKey = `services-list:${clientIp}`;
-    const rateLimitResult = await checkRateLimit(rateLimitKey, "60000", "100");
+    const rateLimitResult = await checkRateLimit(
+      supabaseUrl,
+      supabaseServiceKey,
+      rateLimitKey,
+      60000,
+      100
+    );
 
     if (!rateLimitResult.allowed) {
       logger.warn("Rate limit exceeded", { clientIp, resetAt: rateLimitResult.resetAt });
@@ -59,40 +71,81 @@ serve(async (req) => {
 
     logger.info("Query params parsed", { category, search, location, rating, verified });
 
-    // Load services from fixtures
-    // In production, this would query a database or search index
-    const fixturesUrl = `${Deno.env.get("APP_ORIGIN") || "http://localhost:8080"}/fixtures/services.json`;
-    const fixturesResponse = await fetch(fixturesUrl);
-    
-    if (!fixturesResponse.ok) {
-      throw new Error("Failed to load services fixtures");
-    }
+    // Build database query
+    let query = supabase
+      .from("services")
+      .select(`
+        id,
+        name,
+        tagline,
+        category,
+        rating,
+        reviews,
+        review_highlight,
+        pricing,
+        featured,
+        badges,
+        service_areas,
+        city_scope,
+        vendor:vendors!inner (
+          id,
+          name,
+          logo,
+          verified,
+          calendar_link
+        )
+      `)
+      .eq("is_active", true);
 
-    let services = await fixturesResponse.json();
-
-    // Apply filters
+    // Apply filters in SQL
     if (category) {
-      services = services.filter((s: any) => s.category === category);
-    }
-    if (search) {
-      const searchLower = search.toLowerCase();
-      services = services.filter((s: any) => 
-        s.title?.toLowerCase().includes(searchLower) ||
-        s.description?.toLowerCase().includes(searchLower)
-      );
-    }
-    if (location) {
-      services = services.filter((s: any) => s.location === location);
+      query = query.eq("category", category);
     }
     if (rating) {
-      const minRating = parseFloat(rating);
-      services = services.filter((s: any) => s.rating >= minRating);
+      query = query.gte("rating", parseFloat(rating));
     }
-    if (verified === "true") {
-      services = services.filter((s: any) => s.verified === true);
+    if (search) {
+      query = query.or(`name.ilike.%${search}%,tagline.ilike.%${search}%`);
+    }
+    if (location) {
+      query = query.contains("service_areas", [location]);
     }
 
-    logger.info("Services filtered", { count: services.length });
+    // Execute query
+    const { data: dbRows, error } = await query
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (error) {
+      logger.error("Database query failed", { error: error.message });
+      throw new Error(`Database query failed: ${error.message}`);
+    }
+
+    // Transform DB rows to ServiceCard format
+    const services = dbRows.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      tagline: row.tagline,
+      category: row.category,
+      rating: row.rating,
+      reviews: row.reviews,
+      reviewHighlight: row.review_highlight,
+      pricing: row.pricing,
+      featured: row.featured,
+      badges: row.badges || [],
+      serviceAreas: row.service_areas || [],
+      cityScope: row.city_scope,
+      vendor: {
+        id: row.vendor.id,
+        name: row.vendor.name,
+        logo: row.vendor.logo,
+        verified: row.vendor.verified,
+        calendarLink: row.vendor.calendar_link,
+      },
+    }));
+
+    logger.info("Services fetched from database", { count: services.length });
 
     // Check for conditional request (304 Not Modified)
     const conditionalResponse = handleConditionalRequest(req.headers, services);
