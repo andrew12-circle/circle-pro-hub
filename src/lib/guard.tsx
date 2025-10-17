@@ -32,14 +32,14 @@ export function RequireAuth({ children, redirectTo = '/auth' }: RequireAuthProps
 
     checkAuth();
 
-    const { unsubscribe } = auth.onAuthStateChange((session) => {
+    const unsubscribe = auth.onAuthStateChange((session) => {
       setIsAuthenticated(!!session);
       if (!session) {
         navigate(redirectTo, { replace: true });
       }
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, [navigate, redirectTo]);
 
   if (isChecking) {

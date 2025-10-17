@@ -81,10 +81,20 @@ export async function getCurrentSession(): Promise<Session | null> {
   return await auth.getCurrentSession();
 }
 
-export async function getCurrentUser() {
+export async function getCurrentUser(): Promise<User | null> {
   return await auth.getCurrentUser();
 }
 
 export async function refreshSession(): Promise<Session | null> {
   return await auth.refreshSession();
+}
+
+/**
+ * Subscribe to auth state changes
+ * Returns unsubscribe function
+ */
+export function onAuthStateChange(
+  callback: (session: Session | null) => void
+): () => void {
+  return auth.onAuthStateChange(callback);
 }

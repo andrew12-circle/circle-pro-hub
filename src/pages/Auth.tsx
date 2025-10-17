@@ -45,13 +45,13 @@ const Auth = () => {
       }
     });
 
-    const { unsubscribe } = auth.onAuthStateChange((session) => {
+    const unsubscribe = auth.onAuthStateChange((session) => {
       if (session) {
         navigate("/");
       }
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
 
     // Check if coming from pricing page
     if (searchParams.get('upgrade') === 'pro') {
