@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
+import { checkRateLimit, getRateLimitHeaders } from "../_shared/rateLimit.ts";
 
 const allowedOrigin = Deno.env.get("APP_ORIGIN") || "http://localhost:8080";
 const corsHeaders = {
@@ -53,6 +54,34 @@ serve(async (req) => {
     }
 
     const user = await userResponse.json();
+
+    // Rate limit: 5 checkout sessions per minute per user
+    const rateLimitKey = `stripe:checkout:${user.id}`;
+    const rateLimit = await checkRateLimit(
+      supabaseUrl,
+      supabaseServiceKey,
+      rateLimitKey,
+      60000, // 1 minute window
+      5 // max 5 requests
+    );
+
+    if (!rateLimit.allowed) {
+      const resetSeconds = Math.ceil((rateLimit.resetAt - Date.now()) / 1000);
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Retry-After": String(resetSeconds),
+            ...getRateLimitHeaders(rateLimit),
+          },
+        }
+      );
+    }
+
+    console.log(`Rate limit check passed for user ${user.id}: ${rateLimit.remaining} remaining`);
 
     // Get user email from profiles
     const profileResponse = await fetch(

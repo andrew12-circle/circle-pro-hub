@@ -1,4 +1,5 @@
 import Stripe from "https://esm.sh/stripe@17.5.0";
+import { checkRateLimit, getRateLimitHeaders } from "../_shared/rateLimit.ts";
 
 const allowedOrigin = Deno.env.get("APP_ORIGIN") || "http://localhost:8080";
 const corsHeaders = {
@@ -63,6 +64,34 @@ Deno.serve(async (req) => {
 
     const user = await userResponse.json();
     console.log("User authenticated:", user.id);
+
+    // Rate limit: 10 portal sessions per minute per user
+    const rateLimitKey = `stripe:portal:${user.id}`;
+    const rateLimit = await checkRateLimit(
+      supabaseUrl,
+      supabaseServiceKey,
+      rateLimitKey,
+      60000, // 1 minute window
+      10 // max 10 requests
+    );
+
+    if (!rateLimit.allowed) {
+      const resetSeconds = Math.ceil((rateLimit.resetAt - Date.now()) / 1000);
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded. Please try again later." }),
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Retry-After": String(resetSeconds),
+            ...getRateLimitHeaders(rateLimit),
+          },
+        }
+      );
+    }
+
+    console.log(`Rate limit check passed for user ${user.id}: ${rateLimit.remaining} remaining`);
 
     // Get user's profile to retrieve Stripe customer ID
     const profileResponse = await fetch(
