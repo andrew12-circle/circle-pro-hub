@@ -94,16 +94,16 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden rounded-2xl p-0 [&>button]:hidden">
         <div className="overflow-y-auto max-h-[90vh] rounded-2xl">
         {/* Header with gradient - More Condensed */}
-        <div className="relative bg-gradient-to-br from-blue-800 via-blue-900 to-purple-900 text-white p-6 md:p-8">
+        <div className="relative bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground p-6 md:p-8">
           {/* Close button */}
           <div className="absolute top-4 right-4 flex gap-2">
-            <Button variant="ghost" size="icon" className="bg-white/10 hover:bg-white/20 text-white">
+            <Button variant="ghost" size="icon" className="bg-primary-foreground/10 hover:bg-primary-foreground/20">
               <Share2 className="h-5 w-5" />
             </Button>
             <Button 
               variant="ghost" 
               size="icon" 
-              className="bg-white/10 hover:bg-white/20 text-white"
+              className="bg-primary-foreground/10 hover:bg-primary-foreground/20"
               onClick={() => onOpenChange(false)}
             >
               <X className="h-5 w-5" />
@@ -113,7 +113,7 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
           <div className="grid md:grid-cols-2 gap-6 items-start mt-8">
             <div className="space-y-3">
               {service.verified && (
-                <Badge className="bg-emerald-500/20 text-emerald-100 border-emerald-400/30">
+                <Badge className="bg-success/20 text-success-foreground border-success/30">
                   <CheckCircle2 className="h-3 w-3 mr-1" />
                   Verified Pro
                 </Badge>
@@ -123,17 +123,17 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
                 {service.name}
               </h1>
               
-              <p className="text-blue-100 text-base leading-relaxed">
+              <p className="text-primary-foreground/90 text-base leading-relaxed">
                 {service.description}
               </p>
 
               {/* Metrics - More Compact */}
               <div className="grid grid-cols-3 gap-2 pt-2">
                 {service.metrics.map((metric, idx) => (
-                  <div key={idx} className="bg-white/10 backdrop-blur rounded-lg p-2.5 border border-white/20">
+                  <div key={idx} className="bg-primary-foreground/10 backdrop-blur rounded-lg p-2.5 border border-primary-foreground/20">
                     <div className="text-xl font-bold">{metric.value}</div>
-                    <div className="text-[10px] text-blue-100 mt-0.5 leading-tight">{metric.label}</div>
-                    <div className="text-[9px] text-blue-200/70">{metric.description}</div>
+                    <div className="text-[10px] text-primary-foreground/90 mt-0.5 leading-tight">{metric.label}</div>
+                    <div className="text-[9px] text-primary-foreground/70">{metric.description}</div>
                   </div>
                 ))}
               </div>
@@ -224,7 +224,7 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
                     <div className="flex items-center gap-2">
                       <span className="font-bold">${pkg.price}</span>
                       {pkg.discount && (
-                        <Badge variant="outline" className="text-xs text-green-600 border-green-200">
+                        <Badge variant="outline" className="text-xs text-success border-success/30">
                           Save {pkg.discount}%
                         </Badge>
                       )}
@@ -303,7 +303,7 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
                 <div className="space-y-2 mb-4">
                   {pkg.features.map((feature, fidx) => (
                     <div key={fidx} className="flex items-start gap-2 text-sm">
-                      <CheckCircle2 className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle2 className="h-4 w-4 text-success flex-shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </div>
                   ))}
@@ -324,7 +324,7 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
 
           {/* Bottom CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+            <Button size="lg" className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70">
               Sign In to Add to Cart
             </Button>
             <Button size="lg" variant="default">
@@ -334,26 +334,26 @@ export const ServiceDetailModal = ({ open, onOpenChange, serviceId }: ServiceDet
         </div>
 
         {/* Verified Pricing Disclaimer */}
-        <div className="border-t bg-blue-50 dark:bg-blue-950/20 p-8 md:p-12">
+        <div className="border-t bg-info/5 dark:bg-info/10 p-8 md:p-12">
           <div className="flex gap-4">
             <div className="flex-shrink-0">
-              <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
+              <div className="h-10 w-10 rounded-full bg-info flex items-center justify-center text-info-foreground">
                 <CheckCircle2 className="h-6 w-6" />
               </div>
             </div>
             <div className="flex-1">
-              <h4 className="font-semibold text-lg mb-2 text-blue-900 dark:text-blue-100">Verified Pricing Disclaimer</h4>
-              <p className="text-sm text-blue-800 dark:text-blue-200 mb-4">
+              <h4 className="font-semibold text-lg mb-2">Verified Pricing Disclaimer</h4>
+              <p className="text-sm text-muted-foreground mb-4">
                 This service has verified pricing through our verification process. However, pricing is subject to change and vendors may not have updated their information since changes occurred.
               </p>
-              <p className="text-sm text-blue-800 dark:text-blue-200 mb-4">
+              <p className="text-sm text-muted-foreground mb-4">
                 Circle Marketplace cannot guarantee service quality, satisfaction, or discounts as we are a marketplace platform that represents other companies to make shopping easier. Please verify all details directly with the vendor.
               </p>
-              <div className="flex items-center gap-2 text-xs text-blue-700 dark:text-blue-300 mb-4">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground mb-4">
                 <Calendar className="h-4 w-4" />
                 <span>Last updated: Oct 6, 2025</span>
               </div>
-              <p className="text-xs text-blue-700 dark:text-blue-300 mb-4">
+              <p className="text-xs text-muted-foreground mb-4">
                 We make choosing simple. If prices changed since this date, verify directly. You'll finalize billing with the company - we're just a facilitator.
               </p>
               <div className="flex gap-3">

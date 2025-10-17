@@ -181,20 +181,20 @@ export const FeaturedVendors = ({ onServiceClick, featured = false, noContainer 
                       </div>
 
                       {/* Co-pay Section */}
-                      <div className="p-2 bg-green-50 dark:bg-green-950/20 rounded border border-green-200 dark:border-green-800">
-                        <div className="flex items-center gap-1 text-xs font-medium text-green-700 dark:text-green-400 mb-1">
+                      <div className="p-2 bg-copay-muted rounded border border-copay/30">
+                        <div className="flex items-center gap-1 text-xs font-medium text-copay mb-1">
                           <HandshakeIcon className="h-3 w-3" />
                           <span>Co-Pay</span>
                         </div>
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-green-700 dark:text-green-400">From:</span>
-                          <span className="font-bold text-green-700 dark:text-green-400">${vendor.copayWithVendor}/mo</span>
+                          <span className="text-copay">From:</span>
+                          <span className="font-bold text-copay">${vendor.copayWithVendor}/mo</span>
                         </div>
                       </div>
 
                       {/* Discount Badge */}
                       {vendor.discount && (
-                        <Badge className="bg-red-500 text-white hover:bg-red-600 text-xs w-full justify-center">
+                        <Badge className="bg-destructive text-destructive-foreground hover:bg-destructive/90 text-xs w-full justify-center">
                           {vendor.discount}
                         </Badge>
                       )}
@@ -303,22 +303,22 @@ export const FeaturedVendors = ({ onServiceClick, featured = false, noContainer 
                     </div>
 
                     {/* Co-pay Section */}
-                    <div className="p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800 space-y-2">
-                      <div className="flex items-center gap-1 text-sm font-medium text-green-700 dark:text-green-400">
+                    <div className="p-3 bg-copay-muted rounded-lg border border-copay/30 space-y-2">
+                      <div className="flex items-center gap-1 text-sm font-medium text-copay">
                         <HandshakeIcon className="h-4 w-4" />
                         <span>Unlock Co-Pay</span>
                       </div>
-                      <p className="text-xs text-green-600 dark:text-green-500">
+                      <p className="text-xs text-copay/80">
                         We have vendors lined up: Lender's, Title, HOI, Warranty, Moving Etc. click quick apply waiting to help reduce your bill
                       </p>
                       <div className="space-y-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-green-700 dark:text-green-400">With Vendor Help:</span>
-                          <span className="font-bold text-green-700 dark:text-green-400">${vendor.copayWithVendor}/mo</span>
+                          <span className="text-copay">With Vendor Help:</span>
+                          <span className="font-bold text-copay">${vendor.copayWithVendor}/mo</span>
                         </div>
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-green-700 dark:text-green-400">Non Settlement Service Provider:</span>
-                          <span className="font-bold text-green-700 dark:text-green-400">${vendor.copayNonSettlement}/mo</span>
+                          <span className="text-copay">Non Settlement Service Provider:</span>
+                          <span className="font-bold text-copay">${vendor.copayNonSettlement}/mo</span>
                         </div>
                       </div>
                     </div>
@@ -326,7 +326,7 @@ export const FeaturedVendors = ({ onServiceClick, featured = false, noContainer 
                     {/* Discount Badge */}
                     {vendor.discount && (
                       <div className="flex justify-center">
-                        <Badge className="bg-red-500 text-white hover:bg-red-600">
+                        <Badge className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                           {vendor.discount}
                         </Badge>
                       </div>

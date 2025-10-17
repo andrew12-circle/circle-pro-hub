@@ -248,8 +248,8 @@ const Auth = () => {
                     <ul className="space-y-1">
                       {passwordRequirements.map((req, idx) => (
                         <li key={idx} className="flex items-center gap-2 text-xs">
-                          <div className={`h-1 w-1 rounded-full ${req.met ? 'bg-green-500' : 'bg-muted-foreground'}`} />
-                          <span className={req.met ? 'text-green-600' : 'text-muted-foreground'}>{req.text}</span>
+                          <div className={`h-1 w-1 rounded-full ${req.met ? 'bg-success' : 'bg-muted-foreground'}`} />
+                          <span className={req.met ? 'text-success' : 'text-muted-foreground'}>{req.text}</span>
                         </li>
                       ))}
                     </ul>
