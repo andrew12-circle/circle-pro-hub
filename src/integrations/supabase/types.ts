@@ -125,6 +125,86 @@ export type Database = {
         }
         Relationships: []
       }
+      services: {
+        Row: {
+          badges: string[] | null
+          category: string | null
+          city_scope: string | null
+          compliance: Json | null
+          created_at: string
+          faq: Json | null
+          featured: boolean | null
+          id: string
+          is_active: boolean
+          media: Json | null
+          name: string
+          packages: Json | null
+          pricing: Json
+          rating: number | null
+          review_highlight: string | null
+          reviews: number | null
+          service_areas: string[] | null
+          sort_order: number | null
+          tagline: string | null
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          badges?: string[] | null
+          category?: string | null
+          city_scope?: string | null
+          compliance?: Json | null
+          created_at?: string
+          faq?: Json | null
+          featured?: boolean | null
+          id?: string
+          is_active?: boolean
+          media?: Json | null
+          name: string
+          packages?: Json | null
+          pricing: Json
+          rating?: number | null
+          review_highlight?: string | null
+          reviews?: number | null
+          service_areas?: string[] | null
+          sort_order?: number | null
+          tagline?: string | null
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          badges?: string[] | null
+          category?: string | null
+          city_scope?: string | null
+          compliance?: Json | null
+          created_at?: string
+          faq?: Json | null
+          featured?: boolean | null
+          id?: string
+          is_active?: boolean
+          media?: Json | null
+          name?: string
+          packages?: Json | null
+          pricing?: Json
+          rating?: number | null
+          review_highlight?: string | null
+          reviews?: number | null
+          service_areas?: string[] | null
+          sort_order?: number | null
+          tagline?: string | null
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "services_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -140,6 +220,99 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
+        }
+        Relationships: []
+      }
+      vendor_partners: {
+        Row: {
+          allowed_service_ids: string[] | null
+          booking_link: string | null
+          contact_email: string | null
+          copay_policy: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          markets: string[] | null
+          min_agent_deals_per_year: number | null
+          name: string
+          prohibited_service_ids: string[] | null
+          updated_at: string
+          visibility: string | null
+        }
+        Insert: {
+          allowed_service_ids?: string[] | null
+          booking_link?: string | null
+          contact_email?: string | null
+          copay_policy: Json
+          created_at?: string
+          id: string
+          is_active?: boolean
+          markets?: string[] | null
+          min_agent_deals_per_year?: number | null
+          name: string
+          prohibited_service_ids?: string[] | null
+          updated_at?: string
+          visibility?: string | null
+        }
+        Update: {
+          allowed_service_ids?: string[] | null
+          booking_link?: string | null
+          contact_email?: string | null
+          copay_policy?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          markets?: string[] | null
+          min_agent_deals_per_year?: number | null
+          name?: string
+          prohibited_service_ids?: string[] | null
+          updated_at?: string
+          visibility?: string | null
+        }
+        Relationships: []
+      }
+      vendors: {
+        Row: {
+          ad_budget_max: number | null
+          ad_budget_min: number | null
+          budget_currency: string | null
+          calendar_link: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          logo: string | null
+          name: string
+          sort_order: number | null
+          updated_at: string
+          verified: boolean | null
+        }
+        Insert: {
+          ad_budget_max?: number | null
+          ad_budget_min?: number | null
+          budget_currency?: string | null
+          calendar_link?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo?: string | null
+          name: string
+          sort_order?: number | null
+          updated_at?: string
+          verified?: boolean | null
+        }
+        Update: {
+          ad_budget_max?: number | null
+          ad_budget_min?: number | null
+          budget_currency?: string | null
+          calendar_link?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo?: string | null
+          name?: string
+          sort_order?: number | null
+          updated_at?: string
+          verified?: boolean | null
         }
         Relationships: []
       }
