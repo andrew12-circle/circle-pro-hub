@@ -76,10 +76,14 @@ export async function getServices(params?: GetServicesParams): Promise<ServiceCa
           Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         },
       });
-      console.info('[Services] Loaded from BFF edge function:', services.length);
+      if (import.meta.env.DEV) {
+        console.info('[Services] Loaded from BFF edge function:', services.length);
+      }
       return services;
     } catch (error) {
-      console.warn('[Services] BFF edge function failed, falling back:', error);
+      if (import.meta.env.DEV) {
+        console.warn('[Services] BFF edge function failed, falling back:', error);
+      }
     }
   }
   
@@ -88,12 +92,16 @@ export async function getServices(params?: GetServicesParams): Promise<ServiceCa
     try {
       return await fetchJson<ServiceCard[]>(`${API}/api/services${qs}`);
     } catch (error) {
-      console.warn('[Services] External API failed, falling back to fixtures:', error);
+      if (import.meta.env.DEV) {
+        console.warn('[Services] External API failed, falling back to fixtures:', error);
+      }
     }
   }
   
   // Fallback to local fixtures
-  console.info('[Services] Using local fixtures');
+  if (import.meta.env.DEV) {
+    console.info('[Services] Using local fixtures');
+  }
   const response = await fetch('/fixtures/services.json');
   const services = await response.json() as ServiceCard[];
   

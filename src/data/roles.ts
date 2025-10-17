@@ -22,13 +22,17 @@ export async function hasRole(role: AppRole): Promise<boolean> {
     });
 
     if (error) {
-      console.error(`[Roles] Error checking role ${role}:`, error);
+      if (import.meta.env.DEV) {
+        console.error(`[Roles] Error checking role ${role}:`, error);
+      }
       return false;
     }
 
     return !!data;
   } catch (error) {
-    console.error(`[Roles] Exception checking role ${role}:`, error);
+    if (import.meta.env.DEV) {
+      console.error(`[Roles] Exception checking role ${role}:`, error);
+    }
     return false;
   }
 }
@@ -61,13 +65,17 @@ export async function getUserRoles(): Promise<AppRole[]> {
       .eq("user_id", user.id);
 
     if (error) {
-      console.error("[Roles] Error fetching user roles:", error);
+      if (import.meta.env.DEV) {
+        console.error("[Roles] Error fetching user roles:", error);
+      }
       return [];
     }
 
     return (data || []).map((r) => r.role as AppRole);
   } catch (error) {
-    console.error("[Roles] Exception fetching user roles:", error);
+    if (import.meta.env.DEV) {
+      console.error("[Roles] Exception fetching user roles:", error);
+    }
     return [];
   }
 }

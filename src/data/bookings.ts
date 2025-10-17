@@ -21,7 +21,9 @@ export function getMinimumBookableDate(): Date {
  */
 export async function getBookings(userId?: string): Promise<Booking[]> {
   return cache.getOrSet(`bookings:${userId || "all"}`, 60, async () => {
-    console.info("[Bookings] Loading bookings for:", userId || "all");
+    if (import.meta.env.DEV) {
+      console.info("[Bookings] Loading bookings for:", userId || "all");
+    }
     
     let query = supabase
       .from("bookings")
@@ -35,7 +37,9 @@ export async function getBookings(userId?: string): Promise<Booking[]> {
     const { data, error } = await query;
     
     if (error) {
-      console.error("[Bookings] Error loading bookings:", error);
+      if (import.meta.env.DEV) {
+        console.error("[Bookings] Error loading bookings:", error);
+      }
       throw new Error("Failed to load bookings");
     }
     
@@ -69,7 +73,9 @@ export async function createBooking(data: CreateBooking): Promise<Booking> {
     .single();
   
   if (error) {
-    console.error("[Bookings] Error creating booking:", error);
+    if (import.meta.env.DEV) {
+      console.error("[Bookings] Error creating booking:", error);
+    }
     throw new Error("Failed to create booking");
   }
 
@@ -105,7 +111,9 @@ export async function createBooking(data: CreateBooking): Promise<Booking> {
         bookingResult.ghlNotified = true;
       }
     } catch (error) {
-      console.error("[Bookings] Failed to notify GHL:", error);
+      if (import.meta.env.DEV) {
+        console.error("[Bookings] Failed to notify GHL:", error);
+      }
       // Don't fail the booking creation if GHL notification fails
     }
   }
@@ -114,7 +122,9 @@ export async function createBooking(data: CreateBooking): Promise<Booking> {
   await cache.delete(`bookings:${data.userId}`);
   await cache.delete("bookings:all");
 
-  console.info("[Bookings] Created booking:", bookingResult.id, bookingResult.status);
+  if (import.meta.env.DEV) {
+    console.info("[Bookings] Created booking:", bookingResult.id, bookingResult.status);
+  }
 
   return bookingResult;
 }
@@ -130,7 +140,9 @@ export async function getBookingById(id: string): Promise<Booking | null> {
     .maybeSingle();
   
   if (error) {
-    console.error("[Bookings] Error loading booking:", error);
+    if (import.meta.env.DEV) {
+      console.error("[Bookings] Error loading booking:", error);
+    }
     return null;
   }
   
@@ -152,7 +164,9 @@ export async function updateBookingStatus(
     .maybeSingle();
   
   if (error) {
-    console.error("[Bookings] Error updating booking status:", error);
+    if (import.meta.env.DEV) {
+      console.error("[Bookings] Error updating booking status:", error);
+    }
     return null;
   }
   
@@ -164,7 +178,9 @@ export async function updateBookingStatus(
   await cache.delete(`bookings:${booking.userId}`);
   await cache.delete("bookings:all");
 
-  console.info("[Bookings] Updated booking status:", id, status);
+  if (import.meta.env.DEV) {
+    console.info("[Bookings] Updated booking status:", id, status);
+  }
 
   return booking;
 }

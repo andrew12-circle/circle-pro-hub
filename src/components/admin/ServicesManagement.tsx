@@ -19,7 +19,11 @@ export function ServicesManagement() {
         setDraftJson(json);
         setPublishedJson(json);
       })
-      .catch(console.error);
+      .catch((error) => {
+        if (import.meta.env.DEV) {
+          console.error(error);
+        }
+      });
   }, []);
 
   const handleSaveDraft = () => {

@@ -148,7 +148,9 @@ const Book = () => {
 
       navigate("/profile");
     } catch (error) {
-      console.error("Booking failed:", error);
+      if (import.meta.env.DEV) {
+        console.error("Booking failed:", error);
+      }
       toast({
         title: "Booking Failed",
         description: "Failed to create booking. Please try again.",

@@ -37,7 +37,9 @@ export async function getCurrentProfile(): Promise<UserProfile | null> {
       .maybeSingle();
 
     if (error) {
-      console.error("[Profiles] Error fetching profile:", error);
+      if (import.meta.env.DEV) {
+        console.error("[Profiles] Error fetching profile:", error);
+      }
       return null;
     }
 
@@ -53,7 +55,9 @@ export async function getCurrentProfile(): Promise<UserProfile | null> {
       updated_at: new Date(data.updated_at),
     };
   } catch (error) {
-    console.error("[Profiles] Exception fetching profile:", error);
+    if (import.meta.env.DEV) {
+      console.error("[Profiles] Exception fetching profile:", error);
+    }
     return null;
   }
 }
@@ -74,13 +78,17 @@ export async function updateCurrentProfile(
       .eq("id", user.id);
 
     if (error) {
-      console.error("[Profiles] Error updating profile:", error);
+      if (import.meta.env.DEV) {
+        console.error("[Profiles] Error updating profile:", error);
+      }
       return false;
     }
 
     return true;
   } catch (error) {
-    console.error("[Profiles] Exception updating profile:", error);
+    if (import.meta.env.DEV) {
+      console.error("[Profiles] Exception updating profile:", error);
+    }
     return false;
   }
 }
@@ -97,7 +105,9 @@ export async function getProfileById(userId: string): Promise<UserProfile | null
       .maybeSingle();
 
     if (error) {
-      console.error(`[Profiles] Error fetching profile ${userId}:`, error);
+      if (import.meta.env.DEV) {
+        console.error(`[Profiles] Error fetching profile ${userId}:`, error);
+      }
       return null;
     }
 
@@ -113,7 +123,9 @@ export async function getProfileById(userId: string): Promise<UserProfile | null
       updated_at: new Date(data.updated_at),
     };
   } catch (error) {
-    console.error(`[Profiles] Exception fetching profile ${userId}:`, error);
+    if (import.meta.env.DEV) {
+      console.error(`[Profiles] Exception fetching profile ${userId}:`, error);
+    }
     return null;
   }
 }

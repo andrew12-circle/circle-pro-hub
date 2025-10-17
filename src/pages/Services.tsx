@@ -36,7 +36,9 @@ const Services = () => {
         });
         setServices(results);
       } catch (error) {
-        console.error("Failed to load services:", error);
+        if (import.meta.env.DEV) {
+          console.error("Failed to load services:", error);
+        }
       } finally {
         setLoading(false);
       }
@@ -69,7 +71,9 @@ const Services = () => {
         setShareButtonStates((prev) => ({ ...prev, [serviceId]: "idle" }));
       }, 2000);
     } catch (error) {
-      console.error("Failed to create share link:", error);
+      if (import.meta.env.DEV) {
+        console.error("Failed to create share link:", error);
+      }
       toast({
         title: "Error",
         description: "Failed to create share link",

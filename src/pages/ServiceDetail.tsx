@@ -50,7 +50,9 @@ const ServiceDetail = () => {
           setSelectedPackage(result.packages[0].id);
         }
       } catch (error) {
-        console.error("Failed to load service:", error);
+        if (import.meta.env.DEV) {
+          console.error("Failed to load service:", error);
+        }
       } finally {
         setLoading(false);
       }
@@ -81,7 +83,9 @@ const ServiceDetail = () => {
           setWallet(balance);
         }
       } catch (error) {
-        console.error("Failed to load data:", error);
+        if (import.meta.env.DEV) {
+          console.error("Failed to load data:", error);
+        }
       }
     };
 
@@ -109,7 +113,9 @@ const ServiceDetail = () => {
       
       setTimeout(() => setShareButtonState("idle"), 2000);
     } catch (error) {
-      console.error("Failed to create share link:", error);
+      if (import.meta.env.DEV) {
+        console.error("Failed to create share link:", error);
+      }
       toast({
         title: "Error",
         description: "Failed to create share link",

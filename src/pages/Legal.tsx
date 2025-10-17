@@ -51,7 +51,11 @@ const Legal = () => {
         setSections(sectionsList);
         setActiveSection(sectionsList[0].data.slug);
       })
-      .catch(console.error);
+      .catch((error) => {
+        if (import.meta.env.DEV) {
+          console.error(error);
+        }
+      });
   }, []);
 
   useEffect(() => {
