@@ -185,6 +185,56 @@ Deno.serve(async (req) => {
         draft = insertedDraft;
       } else {
         draft = drafts[0];
+        
+        // Transform old schema to new if needed
+        if (draft.card && !draft.card.title && draft.card.name) {
+          console.log('[admin-services] Migrating old card schema to new');
+          draft.card = {
+            title: draft.card.name || "Untitled Service",
+            subtitle: draft.card.tagline || "",
+            badges: draft.card.badges || [],
+            category: draft.card.category || "General",
+            tags: draft.card.tags || [],
+            thumbnail: draft.card.thumbnail || draft.card.image,
+            gallery: draft.card.gallery || [],
+            highlights: draft.card.highlights || [],
+            cta: draft.card.cta || { type: "book", label: "Book Now" },
+            flags: {
+              active: draft.card.active ?? true,
+              verified: draft.card.verified ?? false,
+              affiliate: draft.card.affiliate ?? false,
+              booking: true,
+            },
+            complianceNotes: draft.card.complianceNotes || "",
+          };
+        }
+        
+        // Transform old pricing to new if needed
+        if (draft.pricing && !draft.pricing.tiers && draft.pricing.retail) {
+          console.log('[admin-services] Migrating old pricing schema to new');
+          const retail = draft.pricing.retail.amount || 0;
+          draft.pricing = {
+            currency: draft.pricing.retail.currency || "USD",
+            tiers: [
+              {
+                id: "retail",
+                name: "Retail",
+                price: retail,
+                unit: "service",
+                includes: [],
+                upsells: [],
+                ribbon: "Standard"
+              }
+            ],
+            billing: { terms: "", anchors: [] },
+          };
+        }
+        
+        // Ensure funnel has steps array
+        if (draft.funnel && !draft.funnel.steps) {
+          console.log('[admin-services] Migrating old funnel schema to new');
+          draft.funnel = { steps: [] };
+        }
       }
 
       // Return only what the UI needs

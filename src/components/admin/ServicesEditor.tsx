@@ -35,7 +35,9 @@ export function ServicesEditor({ serviceId, onClose }: ServicesEditorProps) {
   async function loadDraft() {
     setLoading(true);
     try {
+      console.log('[ServicesEditor] Loading draft for service:', serviceId);
       const response = await getServiceDraft(serviceId);
+      console.log('[ServicesEditor] Draft response:', response);
       setServerDraft(response.draft);
       setLocalDraft(response.draft);
       setIsDirty(false);
