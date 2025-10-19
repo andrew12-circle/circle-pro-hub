@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import { ServiceCardEditor } from './ServiceCardEditor';
 import { ServicePricingEditor } from './ServicePricingEditor';
 import { ServiceFunnelEditor } from './ServiceFunnelEditor';
 import { getServiceVersions, publishServiceVersion, rollbackService } from '@/data/admin-services';
+import { getServices } from '@/data/services';
 import { useToast } from '@/hooks/use-toast';
 import { isFeatureEnabled } from '@/lib/featureFlags';
 import { formatDistanceToNow } from 'date-fns';
@@ -29,11 +29,7 @@ export function ServicesManagement() {
   // Fetch services list
   const { data: services, isLoading, error: servicesError } = useQuery({
     queryKey: ['admin', 'services', 'list'],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('services-list');
-      if (error) throw error;
-      return data as any[];
-    }
+    queryFn: () => getServices()
   });
   
   // Show error state if services failed to load
