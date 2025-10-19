@@ -125,6 +125,59 @@ export type Database = {
         }
         Relationships: []
       }
+      service_versions: {
+        Row: {
+          card: Json
+          created_at: string
+          created_by: string | null
+          funnel: Json | null
+          id: string
+          pricing: Json
+          published_at: string | null
+          row_version: number
+          service_id: string
+          state: Database["public"]["Enums"]["service_version_state"]
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          card: Json
+          created_at?: string
+          created_by?: string | null
+          funnel?: Json | null
+          id?: string
+          pricing: Json
+          published_at?: string | null
+          row_version?: number
+          service_id: string
+          state?: Database["public"]["Enums"]["service_version_state"]
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          card?: Json
+          created_at?: string
+          created_by?: string | null
+          funnel?: Json | null
+          id?: string
+          pricing?: Json
+          published_at?: string | null
+          row_version?: number
+          service_id?: string
+          state?: Database["public"]["Enums"]["service_version_state"]
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_versions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           badges: string[] | null
@@ -140,6 +193,7 @@ export type Database = {
           name: string
           packages: Json | null
           pricing: Json
+          published_version_id: string | null
           rating: number | null
           review_highlight: string | null
           reviews: number | null
@@ -163,6 +217,7 @@ export type Database = {
           name: string
           packages?: Json | null
           pricing: Json
+          published_version_id?: string | null
           rating?: number | null
           review_highlight?: string | null
           reviews?: number | null
@@ -186,6 +241,7 @@ export type Database = {
           name?: string
           packages?: Json | null
           pricing?: Json
+          published_version_id?: string | null
           rating?: number | null
           review_highlight?: string | null
           reviews?: number | null
@@ -196,6 +252,13 @@ export type Database = {
           vendor_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "services_published_version_id_fkey"
+            columns: ["published_version_id"]
+            isOneToOne: false
+            referencedRelation: "service_versions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "services_vendor_id_fkey"
             columns: ["vendor_id"]
@@ -339,6 +402,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "pro" | "user"
+      service_version_state:
+        | "draft"
+        | "submitted"
+        | "approved"
+        | "published"
+        | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -467,6 +536,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "pro", "user"],
+      service_version_state: [
+        "draft",
+        "submitted",
+        "approved",
+        "published",
+        "archived",
+      ],
     },
   },
 } as const
