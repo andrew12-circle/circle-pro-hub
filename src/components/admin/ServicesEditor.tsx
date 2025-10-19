@@ -189,7 +189,11 @@ export default function ServicesEditor({ serviceId }: { serviceId: string }) {
 }
 
 function CardForm({ value, onChange, saving }: { value: TCard; onChange: (v: TCard) => void; saving: boolean }) {
-  const [formData, setFormData] = useState(value);
+  const [formData, setFormData] = useState<TCard>(() => ({
+    ...value,
+    flags: value.flags || { active: true, verified: false, affiliate: false, booking: false },
+    cta: value.cta || { type: "book", label: "Book Now", url: "" }
+  }));
 
   return (
     <Card>

@@ -51,6 +51,54 @@ function createCachedJsonResponse(data: any, options: { corsHeaders: Record<stri
   });
 }
 
+// Schema migration helpers
+function migrateCardSchema(oldCard: any): any {
+  if (!oldCard) return null;
+  
+  return {
+    title: oldCard.title || oldCard.name || "",
+    subtitle: oldCard.subtitle || oldCard.tagline || "",
+    badges: oldCard.badges || [],
+    category: oldCard.category || "General",
+    tags: oldCard.tags || [],
+    thumbnail: oldCard.thumbnail || oldCard.image || "",
+    gallery: oldCard.gallery || [],
+    highlights: oldCard.highlights || [],
+    cta: oldCard.cta || { type: "book", label: "Book Now", url: "" },
+    flags: {
+      active: oldCard.flags?.active ?? oldCard.active ?? true,
+      verified: oldCard.flags?.verified ?? oldCard.verified ?? false,
+      affiliate: oldCard.flags?.affiliate ?? false,
+      booking: oldCard.flags?.booking ?? true
+    },
+    complianceNotes: oldCard.complianceNotes || ""
+  };
+}
+
+function migratePricingSchema(oldPricing: any): any {
+  if (!oldPricing || !oldPricing.tiers) {
+    return {
+      currency: "USD",
+      tiers: [{ id: "base", name: "Base", price: 0, unit: "project", includes: [], upsells: [] }],
+      billing: { terms: "", anchors: [] }
+    };
+  }
+  
+  return {
+    ...oldPricing,
+    currency: oldPricing.currency || "USD",
+    tiers: oldPricing.tiers || [],
+    billing: oldPricing.billing || { terms: "", anchors: [] }
+  };
+}
+
+function migrateFunnelSchema(oldFunnel: any): any {
+  if (!oldFunnel || !oldFunnel.steps) {
+    return { steps: [] };
+  }
+  return oldFunnel;
+}
+
 const logger = createLogger('admin-services');
 
 Deno.serve(async (req) => {
@@ -187,6 +235,18 @@ Deno.serve(async (req) => {
             .eq('id', service.published_version_id)
             .single();
           published = data;
+        }
+
+        // Apply schema migrations
+        if (draft) {
+          draft.card = migrateCardSchema(draft.card);
+          draft.pricing = migratePricingSchema(draft.pricing);
+          draft.funnel = migrateFunnelSchema(draft.funnel);
+        }
+        if (published) {
+          published.card = migrateCardSchema(published.card);
+          published.pricing = migratePricingSchema(published.pricing);
+          published.funnel = migrateFunnelSchema(published.funnel);
         }
 
         return { draft, published };
