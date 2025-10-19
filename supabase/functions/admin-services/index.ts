@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
       const result = await logTiming(logger, 'fetch-service-versions', async () => {
         const { data: service, error: serviceError } = await supabase
           .from('services')
-          .select('*, vendor:vendors!inner(*)')
+          .select('*, vendor:vendors (id, name, logo, verified, calendar_link)')
           .eq('id', serviceId)
           .single();
         
