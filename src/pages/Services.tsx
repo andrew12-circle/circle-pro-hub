@@ -24,6 +24,14 @@ const Services = () => {
   useEffect(() => {
     const loadServices = async () => {
       setLoading(true);
+      // Hard timeout: guarantee loading stops after 5.5s
+      const hardTimeout = setTimeout(() => {
+        setLoading(false);
+        if (import.meta.env.DEV) {
+          console.warn('[Services Page] Hard timeout hit - forced loading stop');
+        }
+      }, 5500);
+      
       try {
         const category = searchParams.get("category") || undefined;
         const search = searchParams.get("search") || undefined;
@@ -40,6 +48,7 @@ const Services = () => {
           console.error("Failed to load services:", error);
         }
       } finally {
+        clearTimeout(hardTimeout);
         setLoading(false);
       }
     };

@@ -7,7 +7,7 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const ctrl = new AbortController();
-  const id = setTimeout(() => ctrl.abort(), 12_000);
+  const id = setTimeout(() => ctrl.abort(), 5_000);
   try {
     const res = await fetch(url, {
       credentials: 'include',
@@ -68,21 +68,50 @@ export async function getServices(params?: GetServicesParams): Promise<ServiceCa
     : '';
   
   // Try edge function BFF first (deployed with Lovable Cloud)
+  // Two-strike breaker: try twice with 5s timeout each before falling back
   if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+    const hardTimeout = (ms: number) => new Promise<never>((_, reject) => 
+      setTimeout(() => reject(new Error('Timeout')), ms)
+    );
+    
+    const url = `${SUPABASE_URL}/functions/v1/services-list${qs}`;
+    if (import.meta.env.DEV) {
+      console.info('[Services] Attempting BFF call:', url);
+    }
+    
+    // First attempt
     try {
-      const url = `${SUPABASE_URL}/functions/v1/services-list${qs}`;
-      const services = await fetchJson<ServiceCard[]>(url, {
-        headers: {
-          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-        },
-      });
+      const services = await Promise.race([
+        fetchJson<ServiceCard[]>(url, {
+          headers: { Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+        }),
+        hardTimeout(5000),
+      ]);
       if (import.meta.env.DEV) {
-        console.info('[Services] Loaded from BFF edge function:', services.length);
+        console.info('[Services] ✓ Loaded from BFF edge function:', services.length);
       }
       return services;
     } catch (error) {
       if (import.meta.env.DEV) {
-        console.warn('[Services] BFF edge function failed, falling back:', error);
+        console.warn('[Services] First BFF attempt failed:', error);
+      }
+      
+      // Second attempt (strike two)
+      try {
+        const services = await Promise.race([
+          fetchJson<ServiceCard[]>(url, {
+            headers: { Authorization: `Bearer ${SUPABASE_ANON_KEY}` },
+          }),
+          hardTimeout(5000),
+        ]);
+        if (import.meta.env.DEV) {
+          console.info('[Services] ✓ Second attempt succeeded:', services.length);
+        }
+        return services;
+      } catch (secondError) {
+        if (import.meta.env.DEV) {
+          console.warn('[Services] Second BFF attempt failed, falling back:', secondError);
+        }
       }
     }
   }
@@ -98,9 +127,9 @@ export async function getServices(params?: GetServicesParams): Promise<ServiceCa
     }
   }
   
-  // Fallback to local fixtures
+  // Fallback to local fixtures (last resort)
   if (import.meta.env.DEV) {
-    console.info('[Services] Using local fixtures');
+    console.warn('[Services] ⚠ Using local fixtures fallback');
   }
   const response = await fetch('/fixtures/services.json');
   const services = await response.json() as ServiceCard[];

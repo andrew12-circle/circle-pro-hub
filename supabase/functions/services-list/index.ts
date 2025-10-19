@@ -20,9 +20,24 @@ serve(async (req) => {
   const logger = createLogger("services-list");
   const startTime = Date.now();
   
-  // Initialize Supabase client
-  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+  // Initialize Supabase client with env guards
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  
+  if (!supabaseUrl || !supabaseServiceKey) {
+    logger.error("Missing required environment variables", { 
+      hasUrl: !!supabaseUrl, 
+      hasKey: !!supabaseServiceKey 
+    });
+    return new Response(
+      JSON.stringify({ error: "Server misconfigured - missing environment variables" }),
+      { 
+        status: 503, 
+        headers: { ...corsHeaders, "Content-Type": "application/json" } 
+      }
+    );
+  }
+  
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   // Handle CORS preflight
@@ -87,7 +102,7 @@ serve(async (req) => {
         badges,
         service_areas,
         city_scope,
-        vendor:vendors!inner (
+        vendor:vendors (
           id,
           name,
           logo,
@@ -113,6 +128,7 @@ serve(async (req) => {
     }
 
     // Execute query
+    logger.info("Executing database query...");
     const { data: dbRows, error } = await query
       .order("sort_order", { ascending: true })
       .order("created_at", { ascending: false })
@@ -122,6 +138,8 @@ serve(async (req) => {
       logger.error("Database query failed", { error: error.message });
       throw new Error(`Database query failed: ${error.message}`);
     }
+    
+    logger.info("Query executed successfully", { rowCount: dbRows?.length || 0 });
 
     // Transform DB rows to ServiceCard format
     const services = dbRows.map((row: any) => ({

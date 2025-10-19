@@ -27,7 +27,7 @@ export function ServicesManagement() {
   }
 
   // Fetch services list
-  const { data: services, isLoading } = useQuery({
+  const { data: services, isLoading, error: servicesError } = useQuery({
     queryKey: ['admin', 'services', 'list'],
     queryFn: async () => {
       const { data, error } = await supabase.functions.invoke('services-list');
@@ -35,6 +35,29 @@ export function ServicesManagement() {
       return data as any[];
     }
   });
+  
+  // Show error state if services failed to load
+  if (servicesError) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Services</CardTitle>
+          <CardDescription>Unable to load services</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-destructive">
+            Error: {servicesError instanceof Error ? servicesError.message : 'Failed to load services'}
+          </p>
+          <Button 
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['admin', 'services', 'list'] })}
+            className="mt-4"
+          >
+            Retry
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   // Fetch selected service detail (draft + published)
   const { data: serviceDetail, isLoading: isLoadingDetail } = useQuery({
