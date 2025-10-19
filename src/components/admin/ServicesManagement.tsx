@@ -21,11 +21,22 @@ export function ServicesManagement() {
   // Fetch services list
   const { data: services, isLoading, error: servicesError } = useQuery({
     queryKey: ['admin', 'services', 'list'],
-    queryFn: () => getServices()
+    queryFn: async () => {
+      console.log('[ServicesManagement] Fetching services...');
+      try {
+        const result = await getServices();
+        console.log('[ServicesManagement] ✓ Loaded services:', result?.length);
+        return result;
+      } catch (err) {
+        console.error('[ServicesManagement] ✗ Failed to load services:', err);
+        throw err;
+      }
+    }
   });
   
   // Show error state if services failed to load
   if (servicesError) {
+    console.error('[ServicesManagement] Error state:', servicesError);
     return (
       <Card>
         <CardHeader>
@@ -33,11 +44,17 @@ export function ServicesManagement() {
           <CardDescription>Unable to load services</CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-destructive">
+          <p className="text-sm text-destructive mb-4">
             Error: {servicesError instanceof Error ? servicesError.message : 'Failed to load services'}
           </p>
+          <div className="text-xs text-muted-foreground mb-4">
+            Check the browser console for more details (F12 → Console tab)
+          </div>
           <Button 
-            onClick={() => queryClient.invalidateQueries({ queryKey: ['admin', 'services', 'list'] })}
+            onClick={() => {
+              console.log('[ServicesManagement] Retrying...');
+              queryClient.invalidateQueries({ queryKey: ['admin', 'services', 'list'] });
+            }}
             className="mt-4"
           >
             Retry
