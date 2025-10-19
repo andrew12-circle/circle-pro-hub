@@ -9,7 +9,7 @@ import type { TServiceDraft } from "@/schemas/service";
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 function getAdminServicesUrl(path: string): string {
-  return `${SUPABASE_URL}/functions/v1${path}`;
+  return `${SUPABASE_URL}/functions/v1/admin-services${path}`;
 }
 
 async function getAuthHeaders(): Promise<HeadersInit> {
