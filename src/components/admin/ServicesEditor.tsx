@@ -1,342 +1,344 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import type { TCard, TPricing, TFunnel, TServiceDraft } from "@/schemas/service";
-import { ZCard, ZPricing, ZFunnel } from "@/schemas/service";
-import { useToast } from "@/hooks/use-toast";
-import { getServiceDraft, patchCard, patchPricing, patchFunnel, publishVersion } from "@/data/adminServices";
+/**
+ * MVASE: Minimum Viable Admin Services Editor
+ * One draft per service, one Save button, no autosave
+ */
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { getServiceDraft, saveServiceDraft } from "@/data/adminServices";
+import type { TServiceDraft, TCard, TPricing, TFunnel } from "@/schemas/service";
 
-const DEBOUNCE_MS = 900;
+interface ServicesEditorProps {
+  serviceId: string;
+  onClose: () => void;
+}
 
-export default function ServicesEditor({ serviceId }: { serviceId: string }) {
-  const { toast } = useToast();
-  const [draft, setDraft] = useState<TServiceDraft | null>(null);
-  const [published, setPublished] = useState<TServiceDraft | null>(null);
-  const [saving, setSaving] = useState<null | "card" | "pricing" | "funnel">(null);
-  const [lastSaved, setLastSaved] = useState<number | null>(null);
-  const timer = useRef<number | null>(null);
+export function ServicesEditor({ serviceId, onClose }: ServicesEditorProps) {
+  const [serverDraft, setServerDraft] = useState<TServiceDraft | null>(null);
+  const [localDraft, setLocalDraft] = useState<TServiceDraft | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  // Load draft and published versions
+  // Load draft on mount
   useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const data = await getServiceDraft(serviceId);
-        if (!alive) return;
-        setDraft(data.draft);
-        setPublished(data.published);
-      } catch {
-        toast({ title: "Failed to load service", variant: "destructive" });
-      }
-    })();
-    return () => { alive = false; };
-  }, [serviceId, toast]);
+    loadDraft();
+  }, [serviceId]);
 
-  // Save card (explicit)
-  async function saveCard(next: TCard) {
-    if (!draft) return;
+  async function loadDraft() {
+    setLoading(true);
     try {
-      setSaving("card");
-      const updated = await patchCard(serviceId, next, draft.row_version);
-      setDraft(updated);
-      setLastSaved(Date.now());
-      toast({ title: "Card saved" });
-    } catch (e: any) {
-      if (e?.status === 409) {
-        toast({ title: "Version conflict", description: "Reloading latest version" });
-        const data = await getServiceDraft(serviceId);
-        setDraft(data.draft);
-      } else {
-        toast({ title: "Save failed", variant: "destructive" });
-      }
+      const response = await getServiceDraft(serviceId);
+      setServerDraft(response.draft);
+      setLocalDraft(response.draft);
+      setIsDirty(false);
+    } catch (error) {
+      console.error('[ServicesEditor] Load error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to load draft');
     } finally {
-      setSaving(null);
+      setLoading(false);
     }
   }
 
-  // Save pricing (explicit)
-  async function savePricing(next: TPricing) {
-    if (!draft) return;
+  async function handleSave() {
+    if (!localDraft) return;
+
+    setSaving(true);
     try {
-      setSaving("pricing");
-      const updated = await patchPricing(serviceId, next, draft.row_version);
-      setDraft(updated);
-      setLastSaved(Date.now());
-      toast({ title: "Pricing saved" });
-    } catch (e: any) {
-      if (e?.status === 409) {
-        toast({ title: "Version conflict", description: "Reloading latest version" });
-        const data = await getServiceDraft(serviceId);
-        setDraft(data.draft);
+      const response = await saveServiceDraft(serviceId, localDraft);
+      setServerDraft(response.draft);
+      setLocalDraft(response.draft);
+      setIsDirty(false);
+      toast.success("Saved successfully");
+    } catch (error: any) {
+      console.error('[ServicesEditor] Save error:', error);
+      
+      if (error.status === 409) {
+        toast.error("Version conflict detected. Reloading latest version...");
+        await loadDraft();
       } else {
-        toast({ title: "Save failed", variant: "destructive" });
+        toast.error(error instanceof Error ? error.message : 'Failed to save');
       }
     } finally {
-      setSaving(null);
+      setSaving(false);
     }
   }
 
-  // Save funnel (debounced)
-  function saveFunnelDebounced(next: TFunnel) {
-    if (!draft) return;
-    if (timer.current) window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(async () => {
-      try {
-        setSaving("funnel");
-        const updated = await patchFunnel(serviceId, next, draft.row_version);
-        setDraft(updated);
-        setLastSaved(Date.now());
-      } catch (e: any) {
-        if (e?.status === 409) {
-          toast({ title: "Version conflict", description: "Reloading latest version" });
-          const data = await getServiceDraft(serviceId);
-          setDraft(data.draft);
-        } else {
-          toast({ title: "Save failed", variant: "destructive" });
-        }
-      } finally {
-        setSaving(null);
-      }
-    }, DEBOUNCE_MS) as unknown as number;
+  function updateCard(updates: Partial<TCard>) {
+    if (!localDraft) return;
+    setLocalDraft({
+      ...localDraft,
+      card: { ...localDraft.card, ...updates },
+    });
+    setIsDirty(true);
   }
 
-  const savedMsg = useMemo(() => 
-    lastSaved ? `Saved ${Math.round((Date.now() - lastSaved) / 1000)}s ago` : "", 
-    [lastSaved]
-  );
+  function updatePricing(updates: Partial<TPricing>) {
+    if (!localDraft) return;
+    setLocalDraft({
+      ...localDraft,
+      pricing: { ...localDraft.pricing, ...updates },
+    });
+    setIsDirty(true);
+  }
 
-  if (!draft) {
+  function updateFunnel(updates: Partial<TFunnel>) {
+    if (!localDraft) return;
+    setLocalDraft({
+      ...localDraft,
+      funnel: { ...localDraft.funnel, ...updates },
+    });
+    setIsDirty(true);
+  }
+
+  if (loading) {
     return (
-      <div className="flex items-center justify-center p-12">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex items-center justify-center p-8">
+        <p className="text-muted-foreground">Loading draft...</p>
+      </div>
+    );
+  }
+
+  if (!localDraft) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <p className="text-destructive">Failed to load draft</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <header className="flex items-center justify-between">
-        <div className="text-sm text-muted-foreground">{savedMsg}</div>
-        <div className="space-x-2">
+    <div className="flex flex-col h-full">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold">Edit Service</h2>
+          {isDirty && <span className="text-xs text-muted-foreground">(unsaved changes)</span>}
+        </div>
+        <div className="flex items-center gap-2">
           <Button
-            variant="outline"
-            onClick={() => window.open(`/vendor-preview?service=${serviceId}`, "_blank")}
+            onClick={handleSave}
+            disabled={!isDirty || saving}
+            variant="default"
           >
-            Preview
+            {saving ? "Saving..." : "Save"}
           </Button>
-          <Button
-            onClick={async () => {
-              if (!draft.id) {
-                toast({ title: "Cannot publish: draft ID missing", variant: "destructive" });
-                return;
-              }
-              try {
-                await publishVersion({ id: draft.id });
-                toast({ title: "Published successfully" });
-                const data = await getServiceDraft(serviceId);
-                setDraft(data.draft);
-                setPublished(data.published);
-              } catch {
-                toast({ title: "Publish failed", variant: "destructive" });
-              }
-            }}
-          >
-            Publish
+          <Button onClick={onClose} variant="outline">
+            Close
           </Button>
         </div>
-      </header>
+      </div>
 
-      <Tabs defaultValue="card">
-        <TabsList>
-          <TabsTrigger value="card">Card</TabsTrigger>
-          <TabsTrigger value="pricing">Pricing</TabsTrigger>
-          <TabsTrigger value="funnel">Funnel</TabsTrigger>
-        </TabsList>
+      {/* Tabs */}
+      <div className="flex-1 overflow-auto p-4">
+        <Tabs defaultValue="card" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="card">Card</TabsTrigger>
+            <TabsTrigger value="pricing">Pricing</TabsTrigger>
+            <TabsTrigger value="funnel">Funnel</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="card">
-          <CardForm 
-            value={draft.card} 
-            onChange={v => saveCard(ZCard.parse(v))} 
-            saving={saving === "card"} 
-          />
-        </TabsContent>
+          <TabsContent value="card">
+            <CardEditor value={localDraft.card} onChange={updateCard} />
+          </TabsContent>
 
-        <TabsContent value="pricing">
-          <PricingForm 
-            value={draft.pricing} 
-            onChange={v => savePricing(ZPricing.parse(v))} 
-            saving={saving === "pricing"} 
-          />
-        </TabsContent>
+          <TabsContent value="pricing">
+            <PricingEditor value={localDraft.pricing} onChange={updatePricing} />
+          </TabsContent>
 
-        <TabsContent value="funnel">
-          <FunnelEditor
-            value={draft.funnel}
-            onChange={v => saveFunnelDebounced(ZFunnel.parse(v))}
-            saving={saving === "funnel"}
-            pricingTiers={draft?.pricing?.tiers?.map(t => t.id) ?? []}
-          />
-        </TabsContent>
-      </Tabs>
+          <TabsContent value="funnel">
+            <FunnelEditor value={localDraft.funnel} onChange={updateFunnel} />
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
 
-function CardForm({ value, onChange, saving }: { value: TCard; onChange: (v: TCard) => void; saving: boolean }) {
-  const [formData, setFormData] = useState<TCard>(() => ({
-    ...value,
-    flags: value.flags || { active: true, verified: false, affiliate: false, booking: false },
-    cta: value.cta || { type: "book", label: "Book Now", url: "" }
-  }));
-
+// Card Editor
+function CardEditor({ value, onChange }: { value: TCard; onChange: (v: Partial<TCard>) => void }) {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Service Card</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={e => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Service title"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="subtitle">Subtitle</Label>
-            <Input
-              id="subtitle"
-              value={formData.subtitle || ""}
-              onChange={e => setFormData({ ...formData, subtitle: e.target.value })}
-              placeholder="Optional subtitle"
-            />
-          </div>
+        <div>
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            value={value.title}
+            onChange={(e) => onChange({ title: e.target.value })}
+            maxLength={90}
+          />
         </div>
 
-        <div className="space-y-2">
+        <div>
+          <Label htmlFor="subtitle">Subtitle</Label>
+          <Input
+            id="subtitle"
+            value={value.subtitle || ""}
+            onChange={(e) => onChange({ subtitle: e.target.value })}
+            maxLength={140}
+          />
+        </div>
+
+        <div>
           <Label htmlFor="category">Category</Label>
           <Input
             id="category"
-            value={formData.category}
-            onChange={e => setFormData({ ...formData, category: e.target.value })}
-            placeholder="Service category"
+            value={value.category}
+            onChange={(e) => onChange({ category: e.target.value })}
           />
         </div>
 
-        <div className="flex items-center space-x-2">
-          <Switch
-            id="active"
-            checked={formData.flags.active}
-            onCheckedChange={active => 
-              setFormData({ ...formData, flags: { ...formData.flags, active } })
-            }
+        <div>
+          <Label htmlFor="badges">Badges (comma-separated)</Label>
+          <Input
+            id="badges"
+            value={value.badges?.join(", ") || ""}
+            onChange={(e) => onChange({ badges: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
           />
-          <Label htmlFor="active">Active</Label>
         </div>
 
-        <Button onClick={() => onChange(formData)} disabled={saving}>
-          {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-          Save Card
-        </Button>
+        <div>
+          <Label htmlFor="tags">Tags (comma-separated)</Label>
+          <Input
+            id="tags"
+            value={value.tags?.join(", ") || ""}
+            onChange={(e) => onChange({ tags: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="thumbnail">Thumbnail URL</Label>
+          <Input
+            id="thumbnail"
+            type="url"
+            value={value.thumbnail || ""}
+            onChange={(e) => onChange({ thumbnail: e.target.value })}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Flags</Label>
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={value.flags?.active ?? true}
+              onCheckedChange={(active) => onChange({ flags: { ...value.flags, active } })}
+            />
+            <Label>Active</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={value.flags?.verified ?? false}
+              onCheckedChange={(verified) => onChange({ flags: { ...value.flags, verified } })}
+            />
+            <Label>Verified</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={value.flags?.booking ?? false}
+              onCheckedChange={(booking) => onChange({ flags: { ...value.flags, booking } })}
+            />
+            <Label>Booking Enabled</Label>
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="complianceNotes">Compliance Notes</Label>
+          <Textarea
+            id="complianceNotes"
+            value={value.complianceNotes || ""}
+            onChange={(e) => onChange({ complianceNotes: e.target.value })}
+            maxLength={1000}
+            rows={3}
+          />
+        </div>
       </CardContent>
     </Card>
   );
 }
 
-function PricingForm({ value, onChange, saving }: { value: TPricing; onChange: (v: TPricing) => void; saving: boolean }) {
-  const [formData, setFormData] = useState(value);
-
+// Pricing Editor
+function PricingEditor({ value, onChange }: { value: TPricing; onChange: (v: Partial<TPricing>) => void }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pricing Tiers</CardTitle>
+        <CardTitle>Pricing</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
+        <div>
           <Label htmlFor="currency">Currency</Label>
           <Input
             id="currency"
-            value={formData.currency}
-            onChange={e => setFormData({ ...formData, currency: e.target.value })}
-            placeholder="USD"
+            value={value.currency}
+            onChange={(e) => onChange({ currency: e.target.value })}
+            maxLength={3}
           />
         </div>
 
-        {formData.tiers.map((tier, idx) => (
-          <div key={tier.id} className="p-4 border rounded-lg space-y-3">
-            <div className="grid md:grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>Tier Name</Label>
-                <Input
-                  value={tier.name}
-                  onChange={e => {
-                    const updated = [...formData.tiers];
-                    updated[idx] = { ...tier, name: e.target.value };
-                    setFormData({ ...formData, tiers: updated });
-                  }}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Price</Label>
-                <Input
-                  type="number"
-                  value={tier.price}
-                  onChange={e => {
-                    const updated = [...formData.tiers];
-                    updated[idx] = { ...tier, price: Number(e.target.value) };
-                    setFormData({ ...formData, tiers: updated });
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        ))}
+        <div>
+          <Label>Tiers (JSON)</Label>
+          <Textarea
+            value={JSON.stringify(value.tiers, null, 2)}
+            onChange={(e) => {
+              try {
+                const tiers = JSON.parse(e.target.value);
+                onChange({ tiers });
+              } catch {
+                // Invalid JSON, ignore
+              }
+            }}
+            rows={10}
+            className="font-mono text-sm"
+          />
+        </div>
 
-        <Button onClick={() => onChange(formData)} disabled={saving}>
-          {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-          Save Pricing
-        </Button>
+        <div>
+          <Label htmlFor="billingTerms">Billing Terms</Label>
+          <Textarea
+            id="billingTerms"
+            value={value.billing?.terms || ""}
+            onChange={(e) => onChange({ billing: { ...value.billing, terms: e.target.value } })}
+            maxLength={500}
+            rows={3}
+          />
+        </div>
       </CardContent>
     </Card>
   );
 }
 
-function FunnelEditor({ value, onChange, saving, pricingTiers }: { value: TFunnel; onChange: (v: TFunnel) => void; saving: boolean; pricingTiers: string[] }) {
-  const [jsonValue, setJsonValue] = useState(JSON.stringify(value, null, 2));
-
+// Funnel Editor
+function FunnelEditor({ value, onChange }: { value: TFunnel; onChange: (v: Partial<TFunnel>) => void }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Funnel Configuration</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Auto-saves after {DEBOUNCE_MS / 1000}s of inactivity
-        </p>
+        <CardTitle>Funnel Steps</CardTitle>
       </CardHeader>
       <CardContent>
+        <Label>Steps (JSON)</Label>
         <Textarea
-          value={jsonValue}
-          onChange={e => {
-            setJsonValue(e.target.value);
+          value={JSON.stringify(value.steps, null, 2)}
+          onChange={(e) => {
             try {
-              const parsed = JSON.parse(e.target.value);
-              onChange(parsed);
+              const steps = JSON.parse(e.target.value);
+              onChange({ steps });
             } catch {
-              // Invalid JSON, wait for valid input
+              // Invalid JSON, ignore
             }
           }}
-          className="font-mono min-h-[400px]"
-          placeholder="Funnel JSON configuration"
+          rows={15}
+          className="font-mono text-sm"
         />
-        {saving && <div className="text-xs text-muted-foreground mt-2">Saving...</div>}
       </CardContent>
     </Card>
   );

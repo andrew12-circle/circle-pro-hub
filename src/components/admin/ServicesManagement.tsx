@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Loader2 } from 'lucide-react';
-import ServicesEditor from './ServicesEditor';
+import { ServicesEditor } from './ServicesEditor';
 import { getServices } from '@/data/services';
 import { isFeatureEnabled } from '@/lib/featureFlags';
 
@@ -128,7 +128,10 @@ export function ServicesManagement() {
           
           {selectedServiceId && (
             <div className="mt-6">
-              <ServicesEditor serviceId={selectedServiceId} />
+              <ServicesEditor 
+                serviceId={selectedServiceId} 
+                onClose={() => setSelectedServiceId(null)}
+              />
             </div>
           )}
         </SheetContent>

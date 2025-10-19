@@ -61,7 +61,6 @@ export const ZFunnel = z.object({
 
 /** DRAFT WRAPPER **/
 export const ZServiceDraft = z.object({
-  id: z.string().uuid(),
   row_version: z.number().int().positive(),
   card: ZCard,
   pricing: ZPricing,

@@ -1,99 +1,116 @@
 /**
- * Admin Services data facade - thin layer over admin-services edge function
+ * Admin Services data facade - MVASE (Minimum Viable Admin Services Editor)
+ * Two endpoints only: GET and PUT
  */
+
 import { supabase } from "@/integrations/supabase/client";
+import type { TServiceDraft } from "@/schemas/service";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 
 function getAdminServicesUrl(path: string): string {
-  return `${SUPABASE_URL}/functions/v1/admin-services${path}`;
+  return `${SUPABASE_URL}/functions/v1${path}`;
 }
 
-async function getAuthHeaders(): Promise<Record<string, string>> {
+async function getAuthHeaders(): Promise<HeadersInit> {
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error('Not authenticated');
   
+  if (!session) {
+    throw new Error('Not authenticated');
+  }
+
   return {
     'Authorization': `Bearer ${session.access_token}`,
-    'x-admin': 'true'
+    'Content-Type': 'application/json',
   };
 }
 
-export async function getServiceDraft(serviceId: string) {
-  const headers = await getAuthHeaders();
-  const response = await fetch(getAdminServicesUrl(`/admin/services/${serviceId}`), {
-    headers
-  });
-  if (!response.ok) throw new Error("Failed to load service draft");
-  return response.json();
+export interface ServiceDraftResponse {
+  draft: TServiceDraft;
 }
 
-export async function patchCard(serviceId: string, card: any, row_version: number) {
+/**
+ * GET /admin/services/:id
+ * Returns the current draft (or creates one if none exists)
+ */
+export async function getServiceDraft(serviceId: string): Promise<ServiceDraftResponse> {
   const headers = await getAuthHeaders();
-  const response = await fetch(
-    getAdminServicesUrl(`/admin/services/${serviceId}/card?row_version=${row_version}`),
-    {
-      method: "PATCH",
-      headers: { ...headers, "content-type": "application/json" },
-      body: JSON.stringify(card)
+  
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+  try {
+    const response = await fetch(
+      getAdminServicesUrl(`/admin/services/${serviceId}`),
+      { 
+        headers,
+        signal: controller.signal,
+      }
+    );
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: response.statusText }));
+      throw new Error(error.error || `HTTP ${response.status}`);
     }
-  );
-  if (response.status === 409) {
-    const error: any = new Error("Version conflict");
-    error.status = 409;
+
+    return response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Request timeout (6s)');
+    }
     throw error;
   }
-  if (!response.ok) throw new Error("Failed to save card");
-  return response.json();
 }
 
-export async function patchPricing(serviceId: string, pricing: any, row_version: number) {
+/**
+ * PUT /admin/services/:id
+ * Saves the entire draft (card + pricing + funnel) in one write
+ * Returns 409 on version conflict
+ */
+export async function saveServiceDraft(
+  serviceId: string, 
+  draft: TServiceDraft
+): Promise<ServiceDraftResponse> {
   const headers = await getAuthHeaders();
-  const response = await fetch(
-    getAdminServicesUrl(`/admin/services/${serviceId}/pricing?row_version=${row_version}`),
-    {
-      method: "PATCH",
-      headers: { ...headers, "content-type": "application/json" },
-      body: JSON.stringify(pricing)
+  
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+  try {
+    const response = await fetch(
+      getAdminServicesUrl(`/admin/services/${serviceId}`),
+      {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(draft),
+        signal: controller.signal,
+      }
+    );
+
+    clearTimeout(timeoutId);
+
+    if (response.status === 409) {
+      const conflict = await response.json().catch(() => ({}));
+      const error: any = new Error(conflict.error || 'Version conflict');
+      error.status = 409;
+      error.details = conflict;
+      throw error;
     }
-  );
-  if (response.status === 409) {
-    const error: any = new Error("Version conflict");
-    error.status = 409;
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ error: response.statusText }));
+      throw new Error(error.error || `HTTP ${response.status}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Request timeout (6s)');
+    }
     throw error;
   }
-  if (!response.ok) throw new Error("Failed to save pricing");
-  return response.json();
-}
-
-export async function patchFunnel(serviceId: string, funnel: any, row_version: number) {
-  const headers = await getAuthHeaders();
-  const response = await fetch(
-    getAdminServicesUrl(`/admin/services/${serviceId}/funnel?row_version=${row_version}`),
-    {
-      method: "PATCH",
-      headers: { ...headers, "content-type": "application/json" },
-      body: JSON.stringify(funnel)
-    }
-  );
-  if (response.status === 409) {
-    const error: any = new Error("Version conflict");
-    error.status = 409;
-    throw error;
-  }
-  if (!response.ok) throw new Error("Failed to save funnel");
-  return response.json();
-}
-
-export async function publishVersion(draft: { id: string }) {
-  const headers = await getAuthHeaders();
-  const response = await fetch(
-    getAdminServicesUrl(`/admin/service-versions/${draft.id}/publish`),
-    {
-      method: "POST",
-      headers
-    }
-  );
-  if (!response.ok) throw new Error("Failed to publish version");
-  return response.json();
 }
