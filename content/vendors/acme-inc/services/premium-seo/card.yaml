@@ -1,0 +1,32 @@
+# Service Card Configuration
+# This file defines the service card displayed in marketplace listings
+
+name: Premium SEO Services
+tagline: Dominate local search results with proven SEO strategies
+category: seo
+
+# Visual badges displayed on the card
+badges:
+  - Verified
+  - Top Rated
+
+# Geographic service coverage
+serviceAreas:
+  - Atlanta
+  - Phoenix
+  - Dallas
+  - Miami
+
+# City scope: 'any' for nationwide, 'local' for city-specific
+cityScope: local
+
+# Link to vendor record (replace with actual UUID from vendors table)
+vendorId: "00000000-0000-0000-0000-000000000000"
+
+# Display as featured service
+featured: true
+
+# Rating and social proof
+rating: 4.9
+reviews: 127
+reviewHighlight: "Increased our leads by 300% in 3 months! Best SEO team we've worked with."

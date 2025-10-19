@@ -1,0 +1,20 @@
+# Service Pricing Configuration
+# Defines pricing tiers for this service
+
+# Standard retail price (always required)
+retail:
+  amount: 2500
+  currency: USD
+
+# Pro member pricing (optional)
+pro:
+  amount: 1875
+  currency: USD
+
+# Pro member savings percentage
+proPctSavings: 25
+
+# Co-pay pricing (optional, calculated based on partner eligibility)
+# copay:
+#   amount: 500
+#   currency: USD

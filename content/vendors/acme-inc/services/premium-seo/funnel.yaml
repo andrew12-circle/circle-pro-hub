@@ -1,0 +1,64 @@
+# Service Funnel Configuration
+# Defines packages, FAQ, media, and compliance information
+
+# Service packages (optional tiered offerings)
+packages:
+  - id: basic
+    name: Basic SEO Package
+    description: On-page optimization + local citations
+    pricing:
+      retail:
+        amount: 1200
+        currency: USD
+      pro:
+        amount: 900
+        currency: USD
+
+  - id: standard
+    name: Standard SEO Package
+    description: Basic + content creation + backlink building
+    pricing:
+      retail:
+        amount: 2500
+        currency: USD
+      pro:
+        amount: 1875
+        currency: USD
+
+  - id: premium
+    name: Premium SEO Package
+    description: Standard + monthly reporting + priority support
+    pricing:
+      retail:
+        amount: 4000
+        currency: USD
+      pro:
+        amount: 3000
+        currency: USD
+
+# Frequently asked questions
+faq:
+  - question: How long until I see results?
+    answer: Typically 60-90 days for significant ranking improvements. Local SEO can show faster results in 30-45 days.
+
+  - question: What's included in the monthly service?
+    answer: Keyword research, on-page optimization, content creation, backlink building, local citations, and monthly performance reports.
+
+  - question: Do you guarantee first page rankings?
+    answer: We focus on sustainable, white-hat SEO practices. While we can't guarantee specific rankings, our proven strategies deliver measurable traffic growth.
+
+  - question: Can I cancel anytime?
+    answer: Yes, our contracts are month-to-month with 30-day notice for cancellation.
+
+# Media assets (images, videos)
+media:
+  images:
+    - https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800
+    - https://images.unsplash.com/photo-1432888622747-4eb9a8f2c293?w=800
+  videos:
+    - https://www.youtube.com/watch?v=example
+
+# Compliance and legal disclaimers
+compliance:
+  disclaimer: "Results vary by market conditions and competition. SEO is an ongoing process and requires consistent effort."
+  respa: "This service is compliant with RESPA regulations. No kickbacks or referral fees."

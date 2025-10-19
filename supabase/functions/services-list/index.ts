@@ -95,7 +95,8 @@ serve(async (req) => {
           calendar_link
         )
       `)
-      .eq("is_active", true);
+      .eq("is_active", true)
+      .not("published_version_id", "is", null); // CRITICAL: Only show published services
 
     // Apply filters in SQL
     if (category) {
