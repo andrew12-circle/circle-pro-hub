@@ -180,7 +180,7 @@ export default function ServicesEditor({ serviceId }: { serviceId: string }) {
             value={draft.funnel}
             onChange={v => saveFunnelDebounced(ZFunnel.parse(v))}
             saving={saving === "funnel"}
-            pricingTiers={draft.pricing.tiers.map(t => t.id)}
+            pricingTiers={draft?.pricing?.tiers?.map(t => t.id) ?? []}
           />
         </TabsContent>
       </Tabs>
