@@ -20,6 +20,7 @@ export interface ServiceCard {
     copayWithVendor?: { amount: number; currency: string };
     copayNonSettlement?: { amount: number; currency: string };
   };
+  created_at?: string;
 }
 
 export interface PromotedCard extends ServiceCard {

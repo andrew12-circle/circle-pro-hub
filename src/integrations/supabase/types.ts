@@ -479,6 +479,7 @@ export type Database = {
           badges: string[] | null
           category: string | null
           cover_image: string | null
+          created_at: string | null
           id: string | null
           pricing: Json | null
           rating: number | null
@@ -499,6 +500,7 @@ export type Database = {
           badges: string[] | null
           category: string | null
           cover_image: string | null
+          created_at: string | null
           id: string | null
           is_featured: boolean | null
           pricing: Json | null
