@@ -101,6 +101,73 @@ export type Database = {
         }
         Relationships: []
       }
+      promotions: {
+        Row: {
+          created_at: string | null
+          cta_label: string | null
+          href: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          kind: string
+          service_id: string | null
+          slot: number
+          subtitle: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          cta_label?: string | null
+          href?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          kind?: string
+          service_id?: string | null
+          slot: number
+          subtitle?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          cta_label?: string | null
+          href?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          kind?: string
+          service_id?: string | null
+          slot?: number
+          subtitle?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "promotions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "promoted_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "promotions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_limits: {
         Row: {
           count: number
@@ -173,6 +240,20 @@ export type Database = {
             foreignKeyName: "service_versions_service_id_fkey"
             columns: ["service_id"]
             isOneToOne: false
+            referencedRelation: "promoted_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_versions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_cards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_versions_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
           },
@@ -184,6 +265,7 @@ export type Database = {
           category: string | null
           city_scope: string | null
           compliance: Json | null
+          cover_image: string | null
           created_at: string
           faq: Json | null
           featured: boolean | null
@@ -197,9 +279,12 @@ export type Database = {
           rating: number | null
           review_highlight: string | null
           reviews: number | null
+          roi_note: string | null
           service_areas: string[] | null
+          slug: string | null
           sort_order: number | null
           tagline: string | null
+          time_to_value: string | null
           updated_at: string
           vendor_id: string
         }
@@ -208,6 +293,7 @@ export type Database = {
           category?: string | null
           city_scope?: string | null
           compliance?: Json | null
+          cover_image?: string | null
           created_at?: string
           faq?: Json | null
           featured?: boolean | null
@@ -221,9 +307,12 @@ export type Database = {
           rating?: number | null
           review_highlight?: string | null
           reviews?: number | null
+          roi_note?: string | null
           service_areas?: string[] | null
+          slug?: string | null
           sort_order?: number | null
           tagline?: string | null
+          time_to_value?: string | null
           updated_at?: string
           vendor_id: string
         }
@@ -232,6 +321,7 @@ export type Database = {
           category?: string | null
           city_scope?: string | null
           compliance?: Json | null
+          cover_image?: string | null
           created_at?: string
           faq?: Json | null
           featured?: boolean | null
@@ -245,9 +335,12 @@ export type Database = {
           rating?: number | null
           review_highlight?: string | null
           reviews?: number | null
+          roi_note?: string | null
           service_areas?: string[] | null
+          slug?: string | null
           sort_order?: number | null
           tagline?: string | null
+          time_to_value?: string | null
           updated_at?: string
           vendor_id?: string
         }
@@ -381,13 +474,49 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      promoted_cards: {
+        Row: {
+          badges: string[] | null
+          category: string | null
+          cover_image: string | null
+          id: string | null
+          pricing: Json | null
+          rating: number | null
+          review_count: number | null
+          roi_note: string | null
+          slot: number | null
+          slug: string | null
+          subtitle: string | null
+          time_to_value: string | null
+          title: string | null
+          vendor_logo: string | null
+          vendor_name: string | null
+        }
+        Relationships: []
+      }
+      service_cards: {
+        Row: {
+          badges: string[] | null
+          category: string | null
+          cover_image: string | null
+          id: string | null
+          is_featured: boolean | null
+          pricing: Json | null
+          rating: number | null
+          review_count: number | null
+          roi_note: string | null
+          slug: string | null
+          subtitle: string | null
+          time_to_value: string | null
+          title: string | null
+          vendor_logo: string | null
+          vendor_name: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      cleanup_expired_rate_limits: {
-        Args: Record<PropertyKey, never>
-        Returns: number
-      }
+      cleanup_expired_rate_limits: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
