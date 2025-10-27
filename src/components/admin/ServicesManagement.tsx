@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Eye, Loader2 } from 'lucide-react';
 import { ServicesEditor } from './ServicesEditor';
-import { getServices } from '@/data/services';
+import { listServicesForAdmin } from '@/data/adminServices';
 import { isFeatureEnabled } from '@/lib/featureFlags';
 
 export function ServicesManagement() {
@@ -24,7 +24,7 @@ export function ServicesManagement() {
     queryFn: async () => {
       console.log('[ServicesManagement] Fetching services...');
       try {
-        const result = await getServices();
+        const result = await listServicesForAdmin();
         console.log('[ServicesManagement] ✓ Loaded services:', result?.length);
         return result;
       } catch (err) {

@@ -1,6 +1,6 @@
 /**
- * MVASE: Minimum Viable Admin Services Editor
- * One draft per service, one Save button, no autosave
+ * Unified Service Editor - Direct-to-Live
+ * Edits marketplace cards AND funnel content in one place
  */
 
 import { useState, useEffect } from "react";
@@ -12,8 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { getServiceDraft, saveServiceDraft } from "@/data/adminServices";
-import type { TServiceDraft, TCard, TPricing, TFunnel } from "@/schemas/service";
+import { getServiceForEdit, updateService, type ServiceEditData } from "@/data/adminServices";
 
 interface ServicesEditorProps {
   serviceId: string;
@@ -21,97 +20,67 @@ interface ServicesEditorProps {
 }
 
 export function ServicesEditor({ serviceId, onClose }: ServicesEditorProps) {
-  const [serverDraft, setServerDraft] = useState<TServiceDraft | null>(null);
-  const [localDraft, setLocalDraft] = useState<TServiceDraft | null>(null);
+  const [originalData, setOriginalData] = useState<ServiceEditData | null>(null);
+  const [localData, setLocalData] = useState<ServiceEditData | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Load draft on mount
   useEffect(() => {
-    loadDraft();
+    loadService();
   }, [serviceId]);
 
-  async function loadDraft() {
+  async function loadService() {
     setLoading(true);
     try {
-      console.log('[ServicesEditor] Loading draft for service:', serviceId);
-      const response = await getServiceDraft(serviceId);
-      console.log('[ServicesEditor] Draft response:', response);
-      setServerDraft(response.draft);
-      setLocalDraft(response.draft);
+      const data = await getServiceForEdit(serviceId);
+      setOriginalData(data);
+      setLocalData(data);
       setIsDirty(false);
     } catch (error) {
       console.error('[ServicesEditor] Load error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to load draft');
+      toast.error(error instanceof Error ? error.message : 'Failed to load service');
     } finally {
       setLoading(false);
     }
   }
 
   async function handleSave() {
-    if (!localDraft) return;
+    if (!localData) return;
 
     setSaving(true);
     try {
-      const response = await saveServiceDraft(serviceId, localDraft);
-      setServerDraft(response.draft);
-      setLocalDraft(response.draft);
+      const updated = await updateService(serviceId, localData);
+      setOriginalData(updated);
+      setLocalData(updated);
       setIsDirty(false);
-      toast.success("Saved successfully");
-    } catch (error: any) {
+      toast.success("Service updated successfully - changes are live!");
+    } catch (error) {
       console.error('[ServicesEditor] Save error:', error);
-      
-      if (error.status === 409) {
-        toast.error("Version conflict detected. Reloading latest version...");
-        await loadDraft();
-      } else {
-        toast.error(error instanceof Error ? error.message : 'Failed to save');
-      }
+      toast.error(error instanceof Error ? error.message : 'Failed to save');
     } finally {
       setSaving(false);
     }
   }
 
-  function updateCard(updates: Partial<TCard>) {
-    if (!localDraft) return;
-    setLocalDraft({
-      ...localDraft,
-      card: { ...localDraft.card, ...updates },
-    });
-    setIsDirty(true);
-  }
-
-  function updatePricing(updates: Partial<TPricing>) {
-    if (!localDraft) return;
-    setLocalDraft({
-      ...localDraft,
-      pricing: { ...localDraft.pricing, ...updates },
-    });
-    setIsDirty(true);
-  }
-
-  function updateFunnel(updates: Partial<TFunnel>) {
-    if (!localDraft) return;
-    setLocalDraft({
-      ...localDraft,
-      funnel: { ...localDraft.funnel, ...updates },
-    });
+  function updateData(updates: Partial<ServiceEditData>) {
+    if (!localData) return;
+    setLocalData({ ...localData, ...updates });
     setIsDirty(true);
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">Loading draft...</p>
+        <p className="text-muted-foreground">Loading service...</p>
       </div>
     );
   }
 
-  if (!localDraft) {
+  if (!localData) {
     return (
       <div className="flex items-center justify-center p-8">
-        <p className="text-destructive">Failed to load draft</p>
+        <p className="text-destructive">Failed to load service</p>
       </div>
     );
   }
@@ -121,8 +90,8 @@ export function ServicesEditor({ serviceId, onClose }: ServicesEditorProps) {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold">Edit Service</h2>
-          {isDirty && <span className="text-xs text-muted-foreground">(unsaved changes)</span>}
+          <h2 className="text-lg font-semibold">Edit Service: {localData.name}</h2>
+          {isDirty && <span className="text-xs text-amber-600 font-medium">(unsaved changes)</span>}
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -130,7 +99,7 @@ export function ServicesEditor({ serviceId, onClose }: ServicesEditorProps) {
             disabled={!isDirty || saving}
             variant="default"
           >
-            {saving ? "Saving..." : "Save"}
+            {saving ? "Saving..." : "Save & Publish"}
           </Button>
           <Button onClick={onClose} variant="outline">
             Close
@@ -142,21 +111,21 @@ export function ServicesEditor({ serviceId, onClose }: ServicesEditorProps) {
       <div className="flex-1 overflow-auto p-4">
         <Tabs defaultValue="card" className="w-full">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="card">Card</TabsTrigger>
+            <TabsTrigger value="card">Marketplace Card</TabsTrigger>
             <TabsTrigger value="pricing">Pricing</TabsTrigger>
-            <TabsTrigger value="funnel">Funnel</TabsTrigger>
+            <TabsTrigger value="funnel">Service Detail (Funnel)</TabsTrigger>
           </TabsList>
 
           <TabsContent value="card">
-            <CardEditor value={localDraft.card} onChange={updateCard} />
+            <MarketplaceCardEditor value={localData} onChange={updateData} />
           </TabsContent>
 
           <TabsContent value="pricing">
-            <PricingEditor value={localDraft.pricing} onChange={updatePricing} />
+            <PricingEditor value={localData} onChange={updateData} />
           </TabsContent>
 
           <TabsContent value="funnel">
-            <FunnelEditor value={localDraft.funnel} onChange={updateFunnel} />
+            <FunnelEditor value={localData} onChange={updateData} />
           </TabsContent>
         </Tabs>
       </div>
@@ -164,40 +133,59 @@ export function ServicesEditor({ serviceId, onClose }: ServicesEditorProps) {
   );
 }
 
-// Card Editor
-function CardEditor({ value, onChange }: { value: TCard; onChange: (v: Partial<TCard>) => void }) {
+// Marketplace Card Editor - all fields shown on /marketplace grid
+function MarketplaceCardEditor({ 
+  value, 
+  onChange 
+}: { 
+  value: ServiceEditData; 
+  onChange: (v: Partial<ServiceEditData>) => void 
+}) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Service Card</CardTitle>
+        <CardTitle>Marketplace Card Fields</CardTitle>
+        <p className="text-sm text-muted-foreground">These fields appear on the marketplace grid</p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="name">Service Name</Label>
           <Input
-            id="title"
-            value={value.title}
-            onChange={(e) => onChange({ title: e.target.value })}
+            id="name"
+            value={value.name}
+            onChange={(e) => onChange({ name: e.target.value })}
             maxLength={90}
           />
         </div>
 
         <div>
-          <Label htmlFor="subtitle">Subtitle</Label>
+          <Label htmlFor="tagline">Tagline / Subtitle</Label>
           <Input
-            id="subtitle"
-            value={value.subtitle || ""}
-            onChange={(e) => onChange({ subtitle: e.target.value })}
+            id="tagline"
+            value={value.tagline || ""}
+            onChange={(e) => onChange({ tagline: e.target.value })}
             maxLength={140}
           />
+        </div>
+
+        <div>
+          <Label htmlFor="slug">URL Slug</Label>
+          <Input
+            id="slug"
+            value={value.slug || ""}
+            onChange={(e) => onChange({ slug: e.target.value })}
+            placeholder="seo-friendly-url"
+          />
+          <p className="text-xs text-muted-foreground mt-1">Used in /services/:slug URLs</p>
         </div>
 
         <div>
           <Label htmlFor="category">Category</Label>
           <Input
             id="category"
-            value={value.category}
+            value={value.category || ""}
             onChange={(e) => onChange({ category: e.target.value })}
+            placeholder="Marketing, SEO, Design, etc."
           />
         </div>
 
@@ -207,61 +195,103 @@ function CardEditor({ value, onChange }: { value: TCard; onChange: (v: Partial<T
             id="badges"
             value={value.badges?.join(", ") || ""}
             onChange={(e) => onChange({ badges: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
+            placeholder="Top Rated, Verified, New"
           />
         </div>
 
         <div>
-          <Label htmlFor="tags">Tags (comma-separated)</Label>
+          <Label htmlFor="cover_image">Cover Image URL</Label>
           <Input
-            id="tags"
-            value={value.tags?.join(", ") || ""}
-            onChange={(e) => onChange({ tags: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="thumbnail">Thumbnail URL</Label>
-          <Input
-            id="thumbnail"
+            id="cover_image"
             type="url"
-            value={value.thumbnail || ""}
-            onChange={(e) => onChange({ thumbnail: e.target.value })}
+            value={value.cover_image || ""}
+            onChange={(e) => onChange({ cover_image: e.target.value })}
+            placeholder="https://..."
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="rating">Rating (0-5)</Label>
+            <Input
+              id="rating"
+              type="number"
+              min="0"
+              max="5"
+              step="0.1"
+              value={value.rating}
+              onChange={(e) => onChange({ rating: parseFloat(e.target.value) || 0 })}
+            />
+          </div>
+          <div>
+            <Label htmlFor="reviews">Review Count</Label>
+            <Input
+              id="reviews"
+              type="number"
+              min="0"
+              value={value.reviews}
+              onChange={(e) => onChange({ reviews: parseInt(e.target.value) || 0 })}
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="roi_note">ROI Note</Label>
+          <Input
+            id="roi_note"
+            value={value.roi_note || ""}
+            onChange={(e) => onChange({ roi_note: e.target.value })}
+            placeholder="3X ROI in 6 months"
+            maxLength={50}
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="time_to_value">Time to Value</Label>
+          <Input
+            id="time_to_value"
+            value={value.time_to_value || ""}
+            onChange={(e) => onChange({ time_to_value: e.target.value })}
+            placeholder="2-4 weeks"
+            maxLength={30}
+          />
+        </div>
+
+        <div className="space-y-2 pt-4 border-t">
           <Label>Flags</Label>
           <div className="flex items-center space-x-2">
             <Switch
-              checked={value.flags?.active ?? true}
-              onCheckedChange={(active) => onChange({ flags: { ...value.flags, active } })}
+              checked={value.is_active}
+              onCheckedChange={(is_active) => onChange({ is_active })}
             />
-            <Label>Active</Label>
+            <Label>Active (visible on marketplace)</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Switch
-              checked={value.flags?.verified ?? false}
-              onCheckedChange={(verified) => onChange({ flags: { ...value.flags, verified } })}
+              checked={value.featured}
+              onCheckedChange={(featured) => onChange({ featured })}
             />
-            <Label>Verified</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={value.flags?.booking ?? false}
-              onCheckedChange={(booking) => onChange({ flags: { ...value.flags, booking } })}
-            />
-            <Label>Booking Enabled</Label>
+            <Label>Featured (promoted placement)</Label>
           </div>
         </div>
 
         <div>
-          <Label htmlFor="complianceNotes">Compliance Notes</Label>
-          <Textarea
-            id="complianceNotes"
-            value={value.complianceNotes || ""}
-            onChange={(e) => onChange({ complianceNotes: e.target.value })}
-            maxLength={1000}
-            rows={3}
+          <Label htmlFor="service_areas">Service Areas (comma-separated)</Label>
+          <Input
+            id="service_areas"
+            value={value.service_areas?.join(", ") || ""}
+            onChange={(e) => onChange({ service_areas: e.target.value.split(",").map(s => s.trim()).filter(Boolean) })}
+            placeholder="New York, Los Angeles, nationwide"
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="sort_order">Sort Order (lower = first)</Label>
+          <Input
+            id="sort_order"
+            type="number"
+            value={value.sort_order}
+            onChange={(e) => onChange({ sort_order: parseInt(e.target.value) || 1000 })}
           />
         </div>
       </CardContent>
@@ -270,78 +300,182 @@ function CardEditor({ value, onChange }: { value: TCard; onChange: (v: Partial<T
 }
 
 // Pricing Editor
-function PricingEditor({ value, onChange }: { value: TPricing; onChange: (v: Partial<TPricing>) => void }) {
+function PricingEditor({ 
+  value, 
+  onChange 
+}: { 
+  value: ServiceEditData; 
+  onChange: (v: Partial<ServiceEditData>) => void 
+}) {
+  const [pricingJson, setPricingJson] = useState(JSON.stringify(value.pricing, null, 2));
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Pricing</CardTitle>
+        <CardTitle>Pricing Configuration</CardTitle>
+        <p className="text-sm text-muted-foreground">
+          Define retail, pro, and copay pricing tiers
+        </p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <Label htmlFor="currency">Currency</Label>
-          <Input
-            id="currency"
-            value={value.currency}
-            onChange={(e) => onChange({ currency: e.target.value })}
-            maxLength={3}
-          />
-        </div>
-
-        <div>
-          <Label>Tiers (JSON)</Label>
+          <Label>Pricing JSON</Label>
           <Textarea
-            value={JSON.stringify(value.tiers, null, 2)}
+            value={pricingJson}
             onChange={(e) => {
+              setPricingJson(e.target.value);
               try {
-                const tiers = JSON.parse(e.target.value);
-                onChange({ tiers });
+                const parsed = JSON.parse(e.target.value);
+                onChange({ pricing: parsed });
               } catch {
-                // Invalid JSON, ignore
+                // Invalid JSON, don't update
               }
             }}
-            rows={10}
+            rows={12}
             className="font-mono text-sm"
+            placeholder={`{
+  "retail": { "amount": 999, "currency": "USD" },
+  "pro": { "amount": 799, "currency": "USD" },
+  "proPctSavings": 20
+}`}
           />
-        </div>
-
-        <div>
-          <Label htmlFor="billingTerms">Billing Terms</Label>
-          <Textarea
-            id="billingTerms"
-            value={value.billing?.terms || ""}
-            onChange={(e) => onChange({ billing: { ...value.billing, terms: e.target.value } })}
-            maxLength={500}
-            rows={3}
-          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Format: retail, pro, proPctSavings, copayWithVendor, copayNonSettlement
+          </p>
         </div>
       </CardContent>
     </Card>
   );
 }
 
-// Funnel Editor
-function FunnelEditor({ value, onChange }: { value: TFunnel; onChange: (v: Partial<TFunnel>) => void }) {
+// Funnel Editor - packages, FAQ, media, compliance
+function FunnelEditor({ 
+  value, 
+  onChange 
+}: { 
+  value: ServiceEditData; 
+  onChange: (v: Partial<ServiceEditData>) => void 
+}) {
+  const [packagesJson, setPackagesJson] = useState(JSON.stringify(value.packages, null, 2));
+  const [faqJson, setFaqJson] = useState(JSON.stringify(value.faq, null, 2));
+  const [mediaJson, setMediaJson] = useState(JSON.stringify(value.media, null, 2));
+  const [complianceJson, setComplianceJson] = useState(JSON.stringify(value.compliance, null, 2));
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Funnel Steps</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Label>Steps (JSON)</Label>
-        <Textarea
-          value={JSON.stringify(value.steps, null, 2)}
-          onChange={(e) => {
-            try {
-              const steps = JSON.parse(e.target.value);
-              onChange({ steps });
-            } catch {
-              // Invalid JSON, ignore
-            }
-          }}
-          rows={15}
-          className="font-mono text-sm"
-        />
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Packages</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Service tiers/packages shown in detail modal
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            value={packagesJson}
+            onChange={(e) => {
+              setPackagesJson(e.target.value);
+              try {
+                const parsed = JSON.parse(e.target.value);
+                onChange({ packages: parsed });
+              } catch {}
+            }}
+            rows={10}
+            className="font-mono text-sm"
+            placeholder={`[
+  {
+    "id": "basic",
+    "name": "Basic Package",
+    "price": 999,
+    "description": "...",
+    "features": ["Feature 1", "Feature 2"]
+  }
+]`}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>FAQ</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Frequently asked questions
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            value={faqJson}
+            onChange={(e) => {
+              setFaqJson(e.target.value);
+              try {
+                const parsed = JSON.parse(e.target.value);
+                onChange({ faq: parsed });
+              } catch {}
+            }}
+            rows={8}
+            className="font-mono text-sm"
+            placeholder={`[
+  {
+    "question": "How long does it take?",
+    "answer": "Typically 2-4 weeks"
+  }
+]`}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Media</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Gallery images, videos, etc.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            value={mediaJson}
+            onChange={(e) => {
+              setMediaJson(e.target.value);
+              try {
+                const parsed = JSON.parse(e.target.value);
+                onChange({ media: parsed });
+              } catch {}
+            }}
+            rows={6}
+            className="font-mono text-sm"
+            placeholder={`{
+  "gallery": ["https://...", "https://..."],
+  "video": "https://youtube.com/..."
+}`}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Compliance</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Legal notices, disclaimers
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Textarea
+            value={complianceJson}
+            onChange={(e) => {
+              setComplianceJson(e.target.value);
+              try {
+                const parsed = JSON.parse(e.target.value);
+                onChange({ compliance: parsed });
+              } catch {}
+            }}
+            rows={5}
+            className="font-mono text-sm"
+            placeholder={`{
+  "notices": ["This is not financial advice", "..."]
+}`}
+          />
+        </CardContent>
+      </Card>
+    </div>
   );
 }

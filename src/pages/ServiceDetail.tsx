@@ -9,10 +9,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Star, Shield, Heart, Share2, ArrowLeft, ShoppingCart, MessageCircle, Phone, Check } from "lucide-react";
-import { getServiceById } from "@/data/services";
+import { supabase } from "@/integrations/supabase/client";
 import { getEligiblePartnersForService } from "@/data/vendors";
 import { getBalance } from "@/data/wallet";
-import { ServiceCard, ServiceFunnel } from "../../contracts/marketplace";
+import { ServiceCard } from "../../contracts/marketplace";
 import { AddToCartModal } from "@/components/commerce/AddToCartModal";
 import { ProUpsellBanner } from "@/components/commerce/ProUpsellBanner";
 import { useProMember } from "@/hooks/use-pro-member";
@@ -20,7 +20,6 @@ import { useLocation } from "@/hooks/use-location";
 import { useCart } from "@/state/cart/CartProvider";
 import { createShareLink } from "@/data/share";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import type { VendorPartner } from "../../contracts/affiliates/partner";
 import type { PointsBalance } from "@/data/wallet";
 
@@ -31,7 +30,7 @@ const ServiceDetail = () => {
   const { isPro, loading: proLoading } = useProMember();
   const { location: userLocation } = useLocation();
   const { add } = useCart();
-  const [service, setService] = useState<ServiceFunnel | null>(null);
+  const [service, setService] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPackage, setSelectedPackage] = useState<string | null>(null);
   const [shareButtonState, setShareButtonState] = useState<"idle" | "copied">("idle");
@@ -44,22 +43,62 @@ const ServiceDetail = () => {
 
       setLoading(true);
       try {
-        const result = await getServiceById(id);
-        setService(result);
-        if (result?.packages && result.packages.length > 0) {
-          setSelectedPackage(result.packages[0].id);
+        // Load from services table by slug or id
+        const { data, error } = await supabase
+          .from('services')
+          .select(`
+            *,
+            vendors (
+              id,
+              name,
+              logo,
+              calendar_link,
+              verified
+            )
+          `)
+          .or(`id.eq.${id},slug.eq.${id}`)
+          .maybeSingle();
+
+        if (error) throw error;
+        
+        if (data) {
+          // Transform vendor data to match expected structure
+          const pkgs = Array.isArray(data.packages) ? data.packages : [];
+          const transformedService = {
+            ...data,
+            vendor: {
+              id: data.vendors?.id,
+              name: data.vendors?.name || '',
+              logo: data.vendors?.logo || '',
+              verified: data.vendors?.verified || false,
+            },
+            badges: data.badges || [],
+            faq: data.faq || [],
+            media: data.media || { images: [] },
+            packages: pkgs,
+          };
+          setService(transformedService);
+          
+          if (pkgs.length > 0 && typeof pkgs[0] === 'object' && pkgs[0] !== null && 'id' in pkgs[0]) {
+            setSelectedPackage((pkgs[0] as any).id);
+          }
         }
       } catch (error) {
         if (import.meta.env.DEV) {
           console.error("Failed to load service:", error);
         }
+        toast({
+          title: "Error",
+          description: "Failed to load service details",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     loadService();
-  }, [id]);
+  }, [id, toast]);
 
   // Load eligible partners and wallet when service is loaded
   useEffect(() => {
