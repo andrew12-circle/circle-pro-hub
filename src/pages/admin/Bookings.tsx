@@ -56,9 +56,7 @@ const Bookings = () => {
       const data = await getBookings();
       setBookings(data);
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error("Failed to load bookings:", error);
-      }
+      console.error("Failed to load bookings:", error);
       toast({
         title: "Error",
         description: "Failed to load bookings",
@@ -75,9 +73,7 @@ const Bookings = () => {
       title: "Reassign (Coming Soon)",
       description: "Booking reassignment will be available soon",
     });
-    if (import.meta.env.DEV) {
-      console.info("[Admin] Reassign booking:", bookingId);
-    }
+    console.info("[Admin] Reassign booking:", bookingId);
   };
 
   const handleCancel = (bookingId: string) => {
@@ -86,9 +82,7 @@ const Bookings = () => {
       title: "Cancel (Coming Soon)",
       description: "Booking cancellation will be available soon",
     });
-    if (import.meta.env.DEV) {
-      console.info("[Admin] Cancel booking:", bookingId);
-    }
+    console.info("[Admin] Cancel booking:", bookingId);
   };
 
   const getStatusBadge = (status: Booking["status"]) => {

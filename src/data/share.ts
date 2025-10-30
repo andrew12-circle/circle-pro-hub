@@ -65,9 +65,7 @@ export function setReferralCookie(referralCode: string): void {
   expiryDate.setDate(expiryDate.getDate() + COOKIE_DAYS);
   
   document.cookie = `${REF_COOKIE_NAME}=${encodeURIComponent(referralCode)}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
-  if (import.meta.env.DEV) {
-    console.info(`[Share] Referral cookie set: ${referralCode} (expires in ${COOKIE_DAYS} days)`);
-  }
+  console.info(`[Share] Referral cookie set: ${referralCode} (expires in ${COOKIE_DAYS} days)`);
 }
 
 export function getReferralCookie(): string | null {

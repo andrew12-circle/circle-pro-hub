@@ -34,9 +34,7 @@ const Support = () => {
     // Simulate submission
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    if (import.meta.env.DEV) {
-      console.log("Support ticket submitted:", data);
-    }
+    console.log("Support ticket submitted:", data);
     
     toast({
       title: "Support ticket submitted",

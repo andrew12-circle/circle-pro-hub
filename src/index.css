@@ -44,11 +44,8 @@ All colors MUST be HSL.
 
     /* Circle-specific tokens */
     --success: 142 71% 45%;
-    --success-foreground: 0 0% 100%;
     --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
     --info: 199 89% 48%;
-    --info-foreground: 0 0% 100%;
     
     /* Shadows - soft and layered */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -61,11 +58,6 @@ All colors MUST be HSL.
     --badge-verified: 220 100% 50%;
     --badge-pro: 280 60% 60%;
     --badge-new: 142 71% 45%;
-    
-    /* Co-Pay specific tokens */
-    --copay: 142 71% 45%;
-    --copay-foreground: 0 0% 100%;
-    --copay-muted: 142 71% 95%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -106,19 +98,6 @@ All colors MUST be HSL.
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 220 100% 60%;
-
-    /* Circle-specific tokens - dark mode */
-    --success: 142 71% 50%;
-    --success-foreground: 222.2 47.4% 11.2%;
-    --warning: 38 92% 55%;
-    --warning-foreground: 222.2 47.4% 11.2%;
-    --info: 199 89% 55%;
-    --info-foreground: 222.2 47.4% 11.2%;
-    
-    /* Co-Pay specific tokens - dark mode */
-    --copay: 142 71% 50%;
-    --copay-foreground: 222.2 47.4% 11.2%;
-    --copay-muted: 142 71% 20%;
     
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;

@@ -4,11 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/lib/cartStore";
 import { RequireAuth, RequireAuthAndRole } from "@/lib/guard";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
 import DegradedBanner from "@/components/system/DegradedBanner";
-import { WalletErrorFallback } from "@/components/system/WalletErrorFallback";
-import { BookingErrorFallback } from "@/components/system/BookingErrorFallback";
-import { FeatureErrorFallback } from "@/components/system/FeatureErrorFallback";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import Marketplace from "./pages/Marketplace";
@@ -52,100 +48,21 @@ const App = () => {
             <Route path="/support" element={<Support />} />
             <Route path="/s/:id" element={<Share />} />
             
-            {/* Auth-Protected Routes with Error Boundaries */}
-            <Route 
-              path="/cart" 
-              element={
-                <ErrorBoundary fallback={<FeatureErrorFallback featureName="Shopping Cart" />}>
-                  <RequireAuth><Cart /></RequireAuth>
-                </ErrorBoundary>
-              } 
-            />
+            {/* Auth-Protected Routes */}
+            <Route path="/cart" element={<RequireAuth><Cart /></RequireAuth>} />
+            <Route path="/account/wallet" element={<RequireAuth><Wallet /></RequireAuth>} />
+            <Route path="/saved" element={<RequireAuth><Saved /></RequireAuth>} />
+            <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+            <Route path="/concierge/book" element={<RequireAuth><Book /></RequireAuth>} />
             
-            {/* Wallet - Optional feature with dedicated fallback */}
-            <Route 
-              path="/account/wallet" 
-              element={
-                <ErrorBoundary fallback={<WalletErrorFallback />}>
-                  <RequireAuth><Wallet /></RequireAuth>
-                </ErrorBoundary>
-              } 
-            />
+            {/* Partner Routes (Auth Required) */}
+            <Route path="/partners/start" element={<RequireAuth><Start /></RequireAuth>} />
+            <Route path="/partners/apply/service" element={<RequireAuth><ApplyService /></RequireAuth>} />
+            <Route path="/partners/apply/copartner" element={<RequireAuth><ApplyCoPartner /></RequireAuth>} />
             
-            <Route 
-              path="/saved" 
-              element={
-                <ErrorBoundary fallback={<FeatureErrorFallback featureName="Saved Services" />}>
-                  <RequireAuth><Saved /></RequireAuth>
-                </ErrorBoundary>
-              } 
-            />
-            
-            <Route 
-              path="/profile" 
-              element={
-                <ErrorBoundary fallback={<FeatureErrorFallback featureName="Profile" />}>
-                  <RequireAuth><Profile /></RequireAuth>
-                </ErrorBoundary>
-              } 
-            />
-            
-            {/* Booking - Critical feature with dedicated fallback */}
-            <Route 
-              path="/concierge/book" 
-              element={
-                <ErrorBoundary fallback={<BookingErrorFallback />}>
-                  <RequireAuth><Book /></RequireAuth>
-                </ErrorBoundary>
-              } 
-            />
-            
-            {/* Partner Routes with Error Boundaries */}
-            <Route 
-              path="/partners/start" 
-              element={
-                <ErrorBoundary fallback={<FeatureErrorFallback featureName="Partner Program" />}>
-                  <RequireAuth><Start /></RequireAuth>
-                </ErrorBoundary>
-              } 
-            />
-            
-            <Route 
-              path="/partners/apply/service" 
-              element={
-                <ErrorBoundary fallback={<FeatureErrorFallback featureName="Service Application" />}>
-                  <RequireAuth><ApplyService /></RequireAuth>
-                </ErrorBoundary>
-              } 
-            />
-            
-            <Route 
-              path="/partners/apply/copartner" 
-              element={
-                <ErrorBoundary fallback={<FeatureErrorFallback featureName="Co-Partner Application" />}>
-                  <RequireAuth><ApplyCoPartner /></RequireAuth>
-                </ErrorBoundary>
-              } 
-            />
-            
-            {/* Admin Routes with Error Boundaries */}
-            <Route 
-              path="/admin" 
-              element={
-                <ErrorBoundary fallback={<FeatureErrorFallback featureName="Admin Panel" />}>
-                  <RequireAuthAndRole role="admin"><Admin /></RequireAuthAndRole>
-                </ErrorBoundary>
-              } 
-            />
-            
-            <Route 
-              path="/admin/bookings" 
-              element={
-                <ErrorBoundary fallback={<FeatureErrorFallback featureName="Admin Bookings" />}>
-                  <RequireAuthAndRole role="admin"><AdminBookings /></RequireAuthAndRole>
-                </ErrorBoundary>
-              } 
-            />
+            {/* Admin Routes (Auth + Admin Role Required) */}
+            <Route path="/admin" element={<RequireAuthAndRole role="admin"><Admin /></RequireAuthAndRole>} />
+            <Route path="/admin/bookings" element={<RequireAuthAndRole role="admin"><AdminBookings /></RequireAuthAndRole>} />
             
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

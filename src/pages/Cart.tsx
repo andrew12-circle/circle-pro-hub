@@ -27,11 +27,11 @@ const Cart = () => {
   const getModeIcon = (mode: PricingMode) => {
     switch (mode) {
       case "pro":
-        return <Crown className="h-4 w-4 text-warning" />;
+        return <Crown className="h-4 w-4 text-yellow-600" />;
       case "copay":
-        return <Users className="h-4 w-4 text-info" />;
+        return <Users className="h-4 w-4 text-blue-600" />;
       case "points":
-        return <Coins className="h-4 w-4 text-warning" />;
+        return <Coins className="h-4 w-4 text-yellow-600" />;
       default:
         return null;
     }
@@ -143,20 +143,20 @@ const Cart = () => {
                     </div>
 
                     {item.mode === "copay" && item.copayPartnerShare && (
-                      <div className="mt-3 p-3 bg-info/10 rounded-lg border border-info/30 space-y-1">
+                      <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-900 space-y-1">
                         <div className="flex justify-between text-sm">
-                          <span className="text-info">
+                          <span className="text-blue-700 dark:text-blue-400">
                             Your share:
                           </span>
-                          <span className="font-semibold text-info">
+                          <span className="font-semibold text-blue-700 dark:text-blue-400">
                             {formatPrice(item.userShare?.amount || 0, item.userShare?.currency)}
                           </span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span className="text-info/80">
+                          <span className="text-blue-600 dark:text-blue-500">
                             Partner covers:
                           </span>
-                          <span className="font-semibold text-info/80">
+                          <span className="font-semibold text-blue-600 dark:text-blue-500">
                             {formatPrice(
                               item.copayPartnerShare.amount,
                               item.copayPartnerShare.currency

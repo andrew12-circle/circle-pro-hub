@@ -42,9 +42,7 @@ const Wallet = () => {
         setBalance(balanceData);
         setTransactions(transactionsData);
       } catch (error) {
-        if (import.meta.env.DEV) {
-          console.error("Error loading wallet:", error);
-        }
+        console.error("Error loading wallet:", error);
         toast({
           title: "Error",
           description: "Failed to load wallet data",

@@ -33,9 +33,7 @@ const Share = () => {
         navigate(`/services/${serviceId}`, { replace: true });
       } else {
         // Link not found, redirect to home
-        if (import.meta.env.DEV) {
-          console.warn(`[Share] Short link not found: ${id}`);
-        }
+        console.warn(`[Share] Short link not found: ${id}`);
         navigate("/", { replace: true });
       }
     };

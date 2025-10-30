@@ -1,159 +1,107 @@
-import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Eye, Loader2 } from 'lucide-react';
-import { ServicesEditor } from './ServicesEditor';
-import { listServicesForAdmin } from '@/data/adminServices';
-import { isFeatureEnabled } from '@/lib/featureFlags';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Save, FileJson } from "lucide-react";
 
 export function ServicesManagement() {
-  const queryClient = useQueryClient();
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
+  const { toast } = useToast();
+  const [draftJson, setDraftJson] = useState("");
+  const [publishedJson, setPublishedJson] = useState("");
 
-  // Check feature flag
-  if (!isFeatureEnabled('admin_services_v2')) {
-    return <LegacyServicesEditor />;
-  }
+  useEffect(() => {
+    fetch('/fixtures/services.json')
+      .then(res => res.json())
+      .then(data => {
+        const json = JSON.stringify(data, null, 2);
+        setDraftJson(json);
+        setPublishedJson(json);
+      })
+      .catch(console.error);
+  }, []);
 
-  // Fetch services list
-  const { data: services, isLoading, error: servicesError } = useQuery({
-    queryKey: ['admin', 'services', 'list'],
-    queryFn: async () => {
-      console.log('[ServicesManagement] Fetching services...');
-      try {
-        const result = await listServicesForAdmin();
-        console.log('[ServicesManagement] ✓ Loaded services:', result?.length);
-        return result;
-      } catch (err) {
-        console.error('[ServicesManagement] ✗ Failed to load services:', err);
-        throw err;
-      }
+  const handleSaveDraft = () => {
+    try {
+      JSON.parse(draftJson); // Validate JSON
+      toast({
+        title: "Draft Saved",
+        description: "Service draft has been saved",
+      });
+    } catch (error) {
+      toast({
+        title: "Invalid JSON",
+        description: "Please check your JSON syntax",
+        variant: "destructive",
+      });
     }
-  });
-  
-  // Show error state if services failed to load
-  if (servicesError) {
-    console.error('[ServicesManagement] Error state:', servicesError);
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Services</CardTitle>
-          <CardDescription>Unable to load services</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-destructive mb-4">
-            Error: {servicesError instanceof Error ? servicesError.message : 'Failed to load services'}
-          </p>
-          <div className="text-xs text-muted-foreground mb-4">
-            Check the browser console for more details (F12 → Console tab)
-          </div>
-          <Button 
-            onClick={() => {
-              console.log('[ServicesManagement] Retrying...');
-              queryClient.invalidateQueries({ queryKey: ['admin', 'services', 'list'] });
-            }}
-            className="mt-4"
-          >
-            Retry
-          </Button>
-        </CardContent>
-      </Card>
-    );
-  }
+  };
 
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Services</CardTitle>
-          <CardDescription>Manage service cards, pricing, and funnels</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading && (
-            <div className="text-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto" />
-            </div>
-          )}
-          
-          {!isLoading && services && (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {services.map((service: any) => (
-                <Card 
-                  key={service.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow"
-                  onClick={() => setSelectedServiceId(service.id)}
-                >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-base">{service.name}</CardTitle>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {service.category || 'No category'}
-                        </p>
-                      </div>
-                      <Button variant="ghost" size="sm" onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedServiceId(service.id);
-                      }}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex gap-2 flex-wrap">
-                      {service.featured && <Badge>Featured</Badge>}
-                      {service.is_active ? (
-                        <Badge variant="default">Active</Badge>
-                      ) : (
-                        <Badge variant="secondary">Inactive</Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+  const handlePublish = () => {
+    try {
+      const parsed = JSON.parse(draftJson);
+      setPublishedJson(JSON.stringify(parsed, null, 2));
+      toast({
+        title: "Published",
+        description: "Draft has been published to live services",
+      });
+    } catch (error) {
+      toast({
+        title: "Invalid JSON",
+        description: "Cannot publish invalid JSON",
+        variant: "destructive",
+      });
+    }
+  };
 
-      {/* Service Editor Sheet */}
-      <Sheet open={!!selectedServiceId} onOpenChange={(open) => !open && setSelectedServiceId(null)}>
-        <SheetContent side="right" className="w-full sm:max-w-4xl overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Edit Service</SheetTitle>
-          </SheetHeader>
-          
-          {selectedServiceId && (
-            <div className="mt-6">
-              <ServicesEditor 
-                serviceId={selectedServiceId} 
-                onClose={() => setSelectedServiceId(null)}
-              />
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
-    </div>
-  );
-}
-
-// Legacy fallback when feature flag is disabled
-function LegacyServicesEditor() {
   return (
     <Card>
       <CardHeader>
         <CardTitle>Services Management</CardTitle>
-        <CardDescription>
-          The new services editor is disabled. Enable the <code>admin_services_v2</code> feature flag to use the improved editor.
-        </CardDescription>
+        <CardDescription>Edit service cards, pricing, and funnel data</CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground">
-          To enable, go to <code>src/lib/featureFlags.ts</code> and set <code>admin_services_v2: true</code>
-        </p>
+        <Tabs defaultValue="draft">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="draft">Draft</TabsTrigger>
+            <TabsTrigger value="published">Published</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="draft" className="space-y-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <FileJson className="h-4 w-4" />
+              <span>Edit service data in JSON format</span>
+            </div>
+            <Textarea
+              value={draftJson}
+              onChange={(e) => setDraftJson(e.target.value)}
+              className="font-mono text-xs min-h-[400px]"
+              placeholder="Service JSON data..."
+            />
+            <div className="flex gap-2">
+              <Button onClick={handleSaveDraft}>
+                <Save className="h-4 w-4 mr-2" />
+                Save Draft
+              </Button>
+              <Button onClick={handlePublish} variant="default">
+                Publish to Live
+              </Button>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="published" className="space-y-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <FileJson className="h-4 w-4" />
+              <span>Currently published service data (read-only)</span>
+            </div>
+            <Textarea
+              value={publishedJson}
+              readOnly
+              className="font-mono text-xs min-h-[400px] bg-muted"
+            />
+          </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );

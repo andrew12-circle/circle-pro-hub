@@ -72,68 +72,25 @@ if (checkIfNotModified(request.headers, data)) {
 
 ### Implementation
 
-Circle Pro Hub implements rate limiting at two levels:
-
-#### Client-Side Rate Limiting (In-Memory)
-
 ```typescript
-import { rateLimit, getRateLimitHeaders } from "@/lib/rateLimit";
+import { checkRateLimit } from "@/lib/apiHelpers";
 
-// In your UI-side API handler
+// In your API handler
 const clientKey = `api:${userId || ip}`;
-const result = rateLimit(clientKey, {
-  windowMs: 60000,  // 1 minute window
-  maxRequests: 100, // 100 requests per window
+const { allowed, headers } = checkRateLimit(clientKey, {
+  windowMs: 60000,  // 1 minute
+  maxRequests: 100,
 });
 
-if (!result.allowed) {
-  return new Response("Too many requests", { 
-    status: 429,
-    headers: getRateLimitHeaders(result)
-  });
+if (!allowed) {
+  return createRateLimitedResponse();
 }
 
-// Attach rate limit headers to successful response
-const headers = getRateLimitHeaders(result);
+// Attach rate limit headers to response
+Object.entries(headers).forEach(([key, value]) => {
+  response.headers.set(key, value);
+});
 ```
-
-**Default Limits (Client-Side):**
-- **General API calls**: 100 requests/minute per user/IP
-- **Window**: 60 seconds (rolling)
-- **Storage**: In-memory Map (single instance)
-
-#### Edge Function Rate Limiting (Distributed)
-
-For deployed Lovable Cloud edge functions, use the distributed rate limiter:
-
-```typescript
-// In supabase/functions/*/index.ts
-import { checkRateLimit, getRateLimitHeaders } from "../_shared/rateLimit.ts";
-
-const result = await checkRateLimit(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
-  `func:${functionName}:${userId || ip}`,
-  60000,  // 60s window
-  100     // 100 requests
-);
-
-if (!result.allowed) {
-  return new Response("Rate limit exceeded", {
-    status: 429,
-    headers: { ...corsHeaders, ...getRateLimitHeaders(result) }
-  });
-}
-```
-
-**Edge Function Limits:**
-- **Services List**: 100 requests/minute per user
-- **Share Link Creation**: 20 requests/minute per user
-- **Booking Creation**: 10 requests/minute per user
-- **GHL Webhook**: 50 requests/minute (global)
-- **Stripe Webhook**: 100 requests/minute (global)
-
-**Storage**: Postgres-backed (`rate_limits` table with TTL-based expiry)
 
 ### Rate Limit Headers
 
@@ -141,27 +98,16 @@ All responses include:
 
 ```
 X-RateLimit-Remaining: 42
-X-RateLimit-Reset: 2025-10-12T10:30:00.000Z
+X-RateLimit-Reset: 2025-10-12T10:30:00Z
 ```
 
 ### Upgrade Path
 
-**Current Implementation:**
-- Client-side: In-memory Map (single process)
-- Edge functions: Postgres table with RPC function
+The current implementation uses in-memory storage. For production at scale:
 
-**Production Scale Upgrades:**
-
-1. **Replace in-memory with Redis/Valkey** for client-side rate limiting
-2. **Use sliding window counters** instead of fixed windows
-3. **Add per-endpoint granular limits**:
-   - Lists: 100/min
-   - Detail views: 200/min
-   - Writes (bookings, intakes): 10/min
-   - Share link creation: 20/min
-4. **Implement distributed token buckets** for burst handling
-5. **Add IP-based rate limiting** in addition to user-based
-6. **Configure CDN rate limiting** (Cloudflare) as first line of defense
+1. Replace `Map` in `lib/rateLimit.ts` with Redis
+2. Use sliding window counters
+3. Add per-endpoint limits (e.g., 100/min for lists, 10/min for writes)
 
 ## Feature Flags & Degraded Mode
 

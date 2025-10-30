@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShoppingCart, User as UserIcon, Heart, Crown, Home, Menu, Shield, CreditCard, Settings, LogOut } from "lucide-react";
+import { Search, ShoppingCart, User as UserIcon, Heart, Crown, Home, Menu, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 import circleNetworkLogo from "@/assets/circle-network-logo.png";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,14 +10,6 @@ import type { User } from "@supabase/supabase-js";
 import { LocationSelector } from "./LocationSelector";
 import { useCart } from "@/lib/cartStore";
 import { useAdminRole } from "@/hooks/use-admin-role";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 
 interface UserProfile {
   full_name: string | null;
@@ -176,63 +168,19 @@ export const Navbar = () => {
                 </div>
 
                 {/* User Avatar with Pro Badge */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="relative focus:outline-none">
-                      <Avatar className={`h-10 w-10 cursor-pointer ${isPro ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
-                        <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
-                        <AvatarFallback>
-                          <UserIcon className="h-5 w-5" />
-                        </AvatarFallback>
-                      </Avatar>
-                      {isPro && (
-                        <Badge className="absolute -bottom-1 -right-1 px-1.5 py-0 text-[10px] font-bold bg-primary">
-                          PRO
-                        </Badge>
-                      )}
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium">{profile?.full_name || 'User'}</p>
-                        <p className="text-xs text-muted-foreground">{user?.email}</p>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link to="/profile" className="cursor-pointer">
-                        <Settings className="mr-2 h-4 w-4" />
-                        Profile Settings
-                      </Link>
-                    </DropdownMenuItem>
-                    {isAdmin && (
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin" className="cursor-pointer">
-                          <Shield className="mr-2 h-4 w-4" />
-                          Admin Dashboard
-                        </Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem asChild>
-                      <Link to="/wallet" className="cursor-pointer">
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        Billing & Points
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={async () => {
-                        await supabase.auth.signOut();
-                        navigate("/");
-                      }}
-                      className="cursor-pointer text-destructive focus:text-destructive"
-                    >
-                      <LogOut className="mr-2 h-4 w-4" />
-                      Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Link to="/profile" className="relative">
+                  <Avatar className={`h-10 w-10 ${isPro ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+                    <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
+                    <AvatarFallback>
+                      <UserIcon className="h-5 w-5" />
+                    </AvatarFallback>
+                  </Avatar>
+                  {isPro && (
+                    <Badge className="absolute -bottom-1 -right-1 px-1.5 py-0 text-[10px] font-bold bg-primary">
+                      PRO
+                    </Badge>
+                  )}
+                </Link>
               </>
             ) : (
               <>

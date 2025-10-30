@@ -86,7 +86,7 @@ export function PartnerPreviewSheet({
             <ul className="space-y-2">
               {partner.benefits.map((benefit, idx) => (
                 <li key={idx} className="flex items-start gap-2 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-success mt-0.5 flex-shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 flex-shrink-0" />
                   <span>{benefit}</span>
                 </li>
               ))}
@@ -100,13 +100,13 @@ export function PartnerPreviewSheet({
             <h3 className="font-semibold mb-3">Eligibility Requirements</h3>
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-success" />
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <span>
                   Minimum {partner.copayEligibility.minAgentDealsPerYear} deals per year
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-success" />
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <span>Active in eligible markets</span>
               </div>
             </div>

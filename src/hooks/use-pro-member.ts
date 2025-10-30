@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
-import { isProMember as checkProMember } from "@/data/roles";
-import { getCurrentUser } from "@/data/auth";
-import { onAuthStateChange } from "@/data/auth";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useProMember() {
   const [isPro, setIsPro] = useState(false);
@@ -12,23 +10,30 @@ export function useProMember() {
     const checkProStatus = async () => {
       setLoading(true);
       try {
-        const user = await getCurrentUser();
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (!user) {
+        if (!session?.user) {
           setIsPro(false);
           setUserId(null);
           setLoading(false);
           return;
         }
 
-        setUserId(user.id);
+        setUserId(session.user.id);
 
-        const proStatus = await checkProMember();
-        setIsPro(proStatus);
-      } catch (error) {
-        if (import.meta.env.DEV) {
-          console.error("Error in useProMember:", error);
+        const { data, error } = await supabase.rpc('has_role', {
+          _user_id: session.user.id,
+          _role: 'pro'
+        });
+
+        if (error) {
+          console.error("Error checking Pro status:", error);
+          setIsPro(false);
+        } else {
+          setIsPro(!!data);
         }
+      } catch (error) {
+        console.error("Error in useProMember:", error);
         setIsPro(false);
       } finally {
         setLoading(false);
@@ -37,11 +42,13 @@ export function useProMember() {
 
     checkProStatus();
 
-    const unsubscribe = onAuthStateChange(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       checkProStatus();
     });
 
-    return unsubscribe;
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   return { isPro, loading, userId };

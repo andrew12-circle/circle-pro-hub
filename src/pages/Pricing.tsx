@@ -29,9 +29,7 @@ const Pricing = () => {
         const data = await response.json();
         setConfig(data);
       } catch (error) {
-        if (import.meta.env.DEV) {
-          console.error("Failed to load pricing config:", error);
-        }
+        console.error("Failed to load pricing config:", error);
       } finally {
         setLoading(false);
       }

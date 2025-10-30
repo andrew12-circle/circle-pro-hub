@@ -17,9 +17,7 @@ export interface QueueAdapter {
 
 class NoOpQueueAdapter implements QueueAdapter {
   async enqueue(job: QueueJob): Promise<void> {
-    if (import.meta.env.DEV) {
-      console.warn("[Queue] Disabled - job executed synchronously:", job.type);
-    }
+    console.warn("[Queue] Disabled - job executed synchronously:", job.type);
   }
 }
 
@@ -28,9 +26,7 @@ class InMemoryQueueAdapter implements QueueAdapter {
 
   async enqueue(job: QueueJob): Promise<void> {
     this.queue.push({ ...job, id: crypto.randomUUID() });
-    if (import.meta.env.DEV) {
-      console.info("[Queue] Job enqueued:", job.type);
-    }
+    console.info("[Queue] Job enqueued:", job.type);
   }
 }
 

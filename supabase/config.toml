@@ -5,6 +5,3 @@ verify_jwt = false
 
 [functions.stripe-create-portal-session]
 verify_jwt = true
-
-[functions.services-list]
-verify_jwt = false

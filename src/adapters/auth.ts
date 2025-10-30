@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Session, User, Provider } from "@supabase/supabase-js";
 
 export interface AuthAdapter {
-  getCurrentUser(): Promise<User | null>;
+  getCurrentUser(): Promise<{ id: string; email: string } | null>;
   signOut(): Promise<void>;
   signUp(credentials: { email: string; password: string; fullName: string }): Promise<{
     user: User | null;
@@ -21,13 +21,17 @@ export interface AuthAdapter {
   signInWithOAuth(provider: Provider): Promise<void>;
   getCurrentSession(): Promise<Session | null>;
   refreshSession(): Promise<Session | null>;
-  onAuthStateChange(callback: (session: Session | null) => void): () => void;
+  onAuthStateChange(callback: (session: Session | null) => void): { unsubscribe: () => void };
 }
 
 class SupabaseAuthAdapter implements AuthAdapter {
-  async getCurrentUser(): Promise<User | null> {
+  async getCurrentUser() {
     const { data: { session } } = await supabase.auth.getSession();
-    return session?.user || null;
+    if (!session?.user) return null;
+    return {
+      id: session.user.id,
+      email: session.user.email || "",
+    };
   }
 
   async signOut() {
@@ -89,12 +93,14 @@ class SupabaseAuthAdapter implements AuthAdapter {
     return session;
   }
 
-  onAuthStateChange(callback: (session: Session | null) => void): () => void {
+  onAuthStateChange(callback: (session: Session | null) => void) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       callback(session);
     });
 
-    return () => subscription.unsubscribe();
+    return {
+      unsubscribe: () => subscription.unsubscribe(),
+    };
   }
 }
 

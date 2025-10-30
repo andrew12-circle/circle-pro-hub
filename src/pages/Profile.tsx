@@ -114,9 +114,7 @@ const Profile = () => {
           }
         } catch (err) {
           // Ignore delete errors (file might not exist)
-          if (import.meta.env.DEV) {
-            console.warn('Failed to delete old avatar:', err);
-          }
+          console.warn('Failed to delete old avatar:', err);
         }
       }
 

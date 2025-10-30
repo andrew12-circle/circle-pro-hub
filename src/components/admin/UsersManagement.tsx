@@ -35,9 +35,7 @@ export function UsersManagement() {
       if (error) throw error;
       setUsers(data || []);
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error("Error loading users:", error);
-      }
+      console.error("Error loading users:", error);
       toast({
         title: "Error",
         description: "Failed to load users",
@@ -68,9 +66,7 @@ export function UsersManagement() {
       });
       loadUsers();
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error("Error toggling pro:", error);
-      }
+      console.error("Error toggling pro:", error);
       toast({
         title: "Error",
         description: "Failed to toggle Pro status",
@@ -84,9 +80,7 @@ export function UsersManagement() {
       title: "Reset Link (Coming Soon)",
       description: "Password reset functionality will be available soon",
     });
-    if (import.meta.env.DEV) {
-      console.info("[Admin] Send reset link for:", userId);
-    }
+    console.info("[Admin] Send reset link for:", userId);
   };
 
   const filteredUsers = searchEmail

@@ -4,8 +4,6 @@ type Flags = {
   affiliate: boolean;
   share: boolean;
   degraded_mode: boolean;
-  admin_services_v2: boolean;
-  vendor_portal: boolean;
 };
 
 const defaults: Flags = {
@@ -14,8 +12,6 @@ const defaults: Flags = {
   affiliate: true,
   share: true,
   degraded_mode: false,
-  admin_services_v2: true,
-  vendor_portal: false,
 };
 
 function parseEnv(): Partial<Flags> {

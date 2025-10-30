@@ -15,8 +15,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { getServiceById } from "@/data/services";
 import { createBooking, getMinimumBookableDate } from "@/data/bookings";
-import { getCurrentUser } from "@/data/auth";
 import { ServiceFunnel } from "../../../contracts/marketplace";
+import { supabase } from "@/integrations/supabase/client";
 
 const Book = () => {
   const navigate = useNavigate();
@@ -38,7 +38,7 @@ const Book = () => {
 
   useEffect(() => {
     const loadUser = async () => {
-      const user = await getCurrentUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
           title: "Authentication Required",
@@ -148,9 +148,7 @@ const Book = () => {
 
       navigate("/profile");
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error("Booking failed:", error);
-      }
+      console.error("Booking failed:", error);
       toast({
         title: "Booking Failed",
         description: "Failed to create booking. Please try again.",

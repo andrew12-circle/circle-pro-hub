@@ -14,11 +14,7 @@ export function LegalManagement() {
     fetch('/fixtures/legal.json')
       .then(res => res.json())
       .then(data => setLegalJson(JSON.stringify(data, null, 2)))
-      .catch((error) => {
-        if (import.meta.env.DEV) {
-          console.error(error);
-        }
-      });
+      .catch(console.error);
   }, []);
 
   const handleSave = () => {
